@@ -11,7 +11,7 @@ namespace DefenceGame.Core
         GameOver
     }
     
-    public class GameManager : MonoBehaviour, IService
+    public class GameManager : MonoBehaviour, IService, IGameManagerService
     {
         public static GameManager Instance { get; private set; }
         
