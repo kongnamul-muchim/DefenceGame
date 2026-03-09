@@ -15,7 +15,7 @@ namespace DefenceGame.Data.Editor
         {
             GameDataSO gameData = ScriptableObject.CreateInstance<GameDataSO>();
             
-            using (var stream = File.Open(excelPath, FileMode.Open, FileAccess.Read))
+            using (var stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
