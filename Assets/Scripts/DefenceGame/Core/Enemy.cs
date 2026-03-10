@@ -17,8 +17,18 @@ namespace DefenceGame.Core
         public SpriteRenderer spriteRenderer;
         private PathAgent pathAgent;
         
+        [Header("Random Movement")]
+        public bool useRandomMovement = false;
+        public float directionChangeInterval = 2f;
+        public float directionRandomness = 0.5f;
+        public float wallCheckDistance = 0.5f;
+        public LayerMask obstacleLayer;
+        
         private bool isInitialized = false;
         private bool hasReachedCastle = false;
+        private Vector3 targetPosition;
+        private Vector3 currentDirection;
+        private float directionChangeTimer;
         
         // Events
         public System.Action<Enemy> OnEnemyDefeated;
@@ -54,7 +64,7 @@ namespace DefenceGame.Core
             }
         }
         
-        public void Initialize(EnemyData data, float healthMultiplier, Vector3 targetPosition)
+        public void Initialize(EnemyData data, float healthMultiplier, Vector3 targetPos)
         {
             id = data.Id;
             enemyName = data.Name;
@@ -62,6 +72,7 @@ namespace DefenceGame.Core
             currentHealth = maxHealth;
             speed = data.Speed;
             rewardGold = data.RewardGold;
+            targetPosition = targetPos;
             
             // Set sprite
             SetEnemySprite(data.Name);
@@ -72,13 +83,149 @@ namespace DefenceGame.Core
                 pathAgent.speed = speed;
             }
             
-            // Find path to castle
-            FindPathToTarget(targetPosition);
+            // Initialize movement
+            if (useRandomMovement)
+            {
+                InitializeRandomMovement();
+            }
+            else
+            {
+                // Use pathfinding
+                FindPathToTarget(targetPosition);
+            }
             
             isInitialized = true;
             hasReachedCastle = false;
             
             Debug.Log($"Enemy initialized: {enemyName}, HP: {currentHealth}, Speed: {speed}");
+        }
+        
+        private void InitializeRandomMovement()
+        {
+            // Start with direction towards castle
+            currentDirection = (targetPosition - transform.position).normalized;
+            directionChangeTimer = directionChangeInterval;
+        }
+        
+        private void Update()
+        {
+            if (!isInitialized) return;
+            
+            if (useRandomMovement)
+            {
+                UpdateRandomMovement();
+            }
+            
+            // Check if reached castle bounds (3x3 area around castle center)
+            if (!hasReachedCastle && GameManager.Instance != null)
+            {
+                if (GameManager.Instance.IsInCastleBounds(transform.position))
+                {
+                    ReachCastle();
+                }
+            }
+        }
+        
+        private void UpdateRandomMovement()
+        {
+            // Check for wall/barrier ahead
+            CheckAndAvoidObstacles();
+            
+            // Change direction periodically with randomness
+            directionChangeTimer -= Time.deltaTime;
+            if (directionChangeTimer <= 0)
+            {
+                ChangeDirectionWithRandomness();
+                directionChangeTimer = directionChangeInterval;
+            }
+            
+            // Move in current direction
+            transform.position += currentDirection * speed * Time.deltaTime;
+            
+            // Flip sprite based on movement direction
+            UpdateSpriteDirection(currentDirection);
+        }
+        
+        private void CheckAndAvoidObstacles()
+        {
+            // Check ahead for obstacles using raycast
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, currentDirection, wallCheckDistance, obstacleLayer);
+            
+            if (hit.collider != null)
+            {
+                // Hit wall/barrier, change direction immediately
+                Debug.Log($"{enemyName} hit {hit.collider.name}, changing direction");
+                
+                // Try to find a new direction that's not blocked
+                Vector3 newDirection = FindClearDirection();
+                currentDirection = newDirection;
+            }
+            
+            // Also check using GridSystem
+            Vector3 nextPosition = transform.position + currentDirection * wallCheckDistance;
+            if (GridSystem.Instance != null)
+            {
+                GridSystem.Node nextNode = GridSystem.Instance.GetNodeFromWorldPosition(nextPosition);
+                if (nextNode == null || !nextNode.isWalkable)
+                {
+                    // Next position is wall or out of bounds
+                    currentDirection = FindClearDirection();
+                }
+            }
+        }
+        
+        private Vector3 FindClearDirection()
+        {
+            // Try several random directions to find one that's clear
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = Random.Range(0f, 360f);
+                Vector3 testDirection = Quaternion.Euler(0, 0, angle) * Vector3.right;
+                
+                Vector3 nextPos = transform.position + testDirection * wallCheckDistance;
+                
+                // Check with raycast
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, testDirection, wallCheckDistance, obstacleLayer);
+                if (hit.collider != null) continue;
+                
+                // Check with GridSystem
+                if (GridSystem.Instance != null)
+                {
+                    GridSystem.Node node = GridSystem.Instance.GetNodeFromWorldPosition(nextPos);
+                    if (node == null || !node.isWalkable) continue;
+                }
+                
+                // Found clear direction
+                return testDirection;
+            }
+            
+            // If no clear direction found, move towards castle
+            return (targetPosition - transform.position).normalized;
+        }
+        
+        private void ChangeDirectionWithRandomness()
+        {
+            // Get direction to castle
+            Vector3 toCastle = (targetPosition - transform.position).normalized;
+            
+            // Add random offset
+            float randomAngle = Random.Range(-directionRandomness * 90f, directionRandomness * 90f);
+            currentDirection = Quaternion.Euler(0, 0, randomAngle) * toCastle;
+        }
+        
+        private void UpdateSpriteDirection(Vector3 direction)
+        {
+            if (spriteRenderer == null) return;
+            
+            // Flip based on horizontal movement
+            if (direction.x > 0.01f)
+            {
+                spriteRenderer.flipX = true;  // Face right
+            }
+            else if (direction.x < -0.01f)
+            {
+                spriteRenderer.flipX = false; // Face left
+            }
         }
         
         private void SetEnemySprite(string enemyName)
@@ -105,20 +252,6 @@ namespace DefenceGame.Core
             if (pathAgent != null && Pathfinder.Instance != null)
             {
                 pathAgent.SetDestination(targetPosition);
-            }
-        }
-        
-        private void Update()
-        {
-            if (!isInitialized) return;
-            
-            // Check if reached castle bounds (3x3 area around castle center)
-            if (!hasReachedCastle && GameManager.Instance != null)
-            {
-                if (GameManager.Instance.IsInCastleBounds(transform.position))
-                {
-                    ReachCastle();
-                }
             }
         }
         
