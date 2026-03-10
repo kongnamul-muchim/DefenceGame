@@ -19,12 +19,14 @@ namespace DefenceGame.Core
         
         [Header("No Backtracking")]
         public bool enableVisitedTracking = true;
+        public int maxVisitedNodes = 20; // Limit to prevent blocking all paths
         
         private List<Vector3> path;
         private int currentWaypointIndex = 0;
         private bool isMoving = false;
         private Vector3 targetPosition;
         private HashSet<GridSystem.Node> visitedNodes = new HashSet<GridSystem.Node>();
+        private GridSystem.Node lastNode = null; // Track last node to prevent immediate backtracking
         
         public System.Action OnPathComplete;
         public System.Action<Vector3> OnWaypointReached;
@@ -62,7 +64,7 @@ namespace DefenceGame.Core
                 return;
             }
             
-            List<Vector3> newPath = Pathfinder.Instance.FindPath(transform.position, destination, visitedNodes);
+            List<Vector3> newPath = Pathfinder.Instance.FindPath(transform.position, destination, visitedNodes, lastNode);
             SetPath(newPath);
         }
         
@@ -122,8 +124,28 @@ namespace DefenceGame.Core
             GridSystem.Node node = GridSystem.Instance.GetNodeFromWorldPosition(position);
             if (node != null)
             {
+                // Store as last node
+                lastNode = node;
+                
+                // Add to visited nodes
                 visitedNodes.Add(node);
+                
+                // Limit visited nodes count to prevent blocking all paths
+                if (visitedNodes.Count > maxVisitedNodes)
+                {
+                    // Remove oldest (this is a simplified approach - in practice we might want a queue)
+                    // For now, just clear half of them when limit reached
+                    ClearHalfVisitedNodes();
+                }
             }
+        }
+        
+        private void ClearHalfVisitedNodes()
+        {
+            // Simple approach: clear all and start fresh when limit reached
+            // This allows the enemy to explore new areas
+            visitedNodes.Clear();
+            Debug.Log("Visited nodes cleared (limit reached)");
         }
         
         public void ClearVisitedNodes()

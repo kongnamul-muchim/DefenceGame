@@ -43,7 +43,7 @@ namespace DefenceGame.Core
             }
         }
         
-        public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null)
+        public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null, GridSystem.Node immediateLastNode = null)
         {
             if (gridSystem == null)
             {
@@ -65,7 +65,7 @@ namespace DefenceGame.Core
                 Vector3 randomWaypoint = waypoints[Random.Range(0, waypoints.Count)];
                 
                 // Path: Start → Waypoint
-                List<Vector3> pathToWaypoint = FindPathInternal(currentPos, randomWaypoint, excludeNodes);
+                List<Vector3> pathToWaypoint = FindPathInternal(currentPos, randomWaypoint, excludeNodes, immediateLastNode);
                 if (pathToWaypoint.Count > 0)
                 {
                     finalPath.AddRange(pathToWaypoint);
@@ -74,7 +74,7 @@ namespace DefenceGame.Core
             }
             
             // Path: CurrentPos (or Start) → Target
-            List<Vector3> pathToTarget = FindPathInternal(currentPos, targetPos, excludeNodes);
+            List<Vector3> pathToTarget = FindPathInternal(currentPos, targetPos, excludeNodes, immediateLastNode);
             if (pathToTarget.Count > 0)
             {
                 finalPath.AddRange(pathToTarget);
@@ -83,7 +83,7 @@ namespace DefenceGame.Core
             return finalPath;
         }
         
-        private List<Vector3> FindPathInternal(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null)
+        private List<Vector3> FindPathInternal(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null, GridSystem.Node immediateLastNode = null)
         {
             if (gridSystem == null)
             {
@@ -143,14 +143,20 @@ namespace DefenceGame.Core
                     if (excludeNodes != null && excludeNodes.Contains(neighbor))
                         continue;
                     
+                    // Skip immediate last node to prevent going back immediately
+                    if (immediateLastNode != null && neighbor == immediateLastNode)
+                        continue;
+                    
                     // Forward-only: Skip if moving backward (away from target)
+                    // Relaxed check: allow sideways movement, only block clear backward movement
                     float neighborDistToTarget = Vector3.Distance(neighbor.worldPosition, targetPos);
                     float currentDistToTarget = Vector3.Distance(currentNode.worldPosition, targetPos);
                     
-                    // Allow some tolerance but generally prevent moving backward
-                    if (neighborDistToTarget > currentDistToTarget + 0.5f)
+                    // Only skip if clearly moving away (more than 1.5 units farther)
+                    // This allows sideways movement and slight variations
+                    if (neighborDistToTarget > currentDistToTarget + 1.5f)
                     {
-                        continue; // Skip this neighbor as it moves away from target
+                        continue; // Skip this neighbor as it moves clearly away from target
                     }
                     
                     int newCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
