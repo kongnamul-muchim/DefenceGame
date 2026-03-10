@@ -2,7 +2,7 @@
 
 ## 📅 마지막 업데이트
 - **날짜**: 2026-03-10
-- **Git Commit**: `6f9bb63` - Setup Unity UI for DefenceGame
+- **Git Commit**: `61b473d` - Fix pathfinding: Improve no-backtracking and forward-only logic
 
 ---
 
@@ -136,3 +136,4 @@ Data/
 - **공격 방식**: 자동 타겟팅, 근접/원거리(Bullet) 지원
 - **Bullet 개선** (2026-03-10): 유도 미사일 방식으로 개선, rotationOffset 지원으로 Arrow 등 다양한 스프라이트 방향 처리
 - **Pathfinding 개선** (2026-03-10): 방문한 노드 추적(visitedNodes)으로 재방문 금지, 뒤로가기 방지(타겟과의 거리 증가 시 해당 방향 제외)
+- **Pathfinding 버그 수정** (2026-03-10): visitedNodes 누적 문제 해결 (최대 20개 제한), immediateLastNode 추가로 즉시 되돌아가기 방지, forward-only 체크 완화 (tolerance 1.5f)
