@@ -26,12 +26,14 @@ namespace DefenceGame.Core
         [SerializeField] private float survivalTime;
         [SerializeField] private int enemiesDefeated;
         [SerializeField] private int totalScore;
+        [SerializeField] private int currentGold;
         
         // Events
         public event Action<GameState> OnGameStateChanged;
         public event Action<int> OnCastleHPChanged;
         public event Action<int> OnScoreChanged;
         public event Action<float> OnSurvivalTimeChanged;
+        public event Action<int> OnGoldChanged;
         public event Action OnGameOver;
         
         // Properties
@@ -40,6 +42,7 @@ namespace DefenceGame.Core
         public float SurvivalTime => survivalTime;
         public int EnemiesDefeated => enemiesDefeated;
         public int TotalScore => totalScore;
+        public int CurrentGold => currentGold;
         public bool IsGameOver => currentState == GameState.GameOver;
         
         private void Awake()
@@ -88,13 +91,34 @@ namespace DefenceGame.Core
             survivalTime = 0f;
             enemiesDefeated = 0;
             totalScore = 0;
+            currentGold = 0;
             currentState = GameState.Playing;
             
             OnCastleHPChanged?.Invoke(currentCastleHP);
             OnScoreChanged?.Invoke(totalScore);
             OnSurvivalTimeChanged?.Invoke(survivalTime);
+            OnGoldChanged?.Invoke(currentGold);
             
             Debug.Log("Game initialized!");
+        }
+        
+        public void AddGold(int amount)
+        {
+            currentGold += amount;
+            OnGoldChanged?.Invoke(currentGold);
+            Debug.Log($"Gold added: {amount}, Total: {currentGold}");
+        }
+        
+        public bool SpendGold(int amount)
+        {
+            if (currentGold >= amount)
+            {
+                currentGold -= amount;
+                OnGoldChanged?.Invoke(currentGold);
+                Debug.Log($"Gold spent: {amount}, Remaining: {currentGold}");
+                return true;
+            }
+            return false;
         }
         
         public void DamageCastle(int damage = 1)
@@ -112,14 +136,15 @@ namespace DefenceGame.Core
             }
         }
         
-        public void EnemyDefeated(int rewardScore = 10)
+        public void EnemyDefeated(int rewardScore = 10, int rewardGold = 10)
         {
             if (currentState != GameState.Playing) return;
             
             enemiesDefeated++;
+            AddGold(rewardGold);
             CalculateScore();
             
-            Debug.Log($"Enemy defeated! Total: {enemiesDefeated}");
+            Debug.Log($"Enemy defeated! Total: {enemiesDefeated}, Gold: +{rewardGold}");
         }
         
         private void CalculateScore()
@@ -185,8 +210,9 @@ namespace DefenceGame.Core
         int CurrentCastleHP { get; }
         float SurvivalTime { get; }
         int TotalScore { get; }
+        int CurrentGold { get; }
         void DamageCastle(int damage = 1);
-        void EnemyDefeated(int rewardScore = 10);
+        void EnemyDefeated(int rewardScore = 10, int rewardGold = 10);
         void GameOver();
         void RestartGame();
         bool IsInCastleBounds(Vector3 position);
