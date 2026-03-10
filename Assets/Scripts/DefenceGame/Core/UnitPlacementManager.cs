@@ -174,14 +174,21 @@ namespace DefenceGame.Core
                 InitializeTowerPrefabDict();
             }
             
-            if (towerPrefabDict.ContainsKey(towerId))
+            // ID 1~20을 1~4로 변환 (5단계 등급 시스템 지원)
+            // 1,5,9,13,17 → 1 (archer)
+            // 2,6,10,14,18 → 2 (wizard)
+            // 3,7,11,15,19 → 3 (wizardTower)
+            // 4,8,12,16,20 → 4 (Laser)
+            int normalizedId = ((towerId - 1) % 4) + 1;
+            
+            if (towerPrefabDict.ContainsKey(normalizedId))
             {
-                GameObject prefab = towerPrefabDict[towerId];
-                Debug.Log($"[UnitPlacement] Found prefab for Tower ID {towerId}: {prefab.name}");
+                GameObject prefab = towerPrefabDict[normalizedId];
+                Debug.Log($"[UnitPlacement] Tower ID {towerId} normalized to {normalizedId}, using prefab: {prefab.name}");
                 return prefab;
             }
             
-            Debug.Log($"[UnitPlacement] No specific prefab for Tower ID {towerId}, using default");
+            Debug.Log($"[UnitPlacement] No prefab for normalized ID {normalizedId} (original ID {towerId}), using default");
             return defaultUnitPrefab;
         }
         
