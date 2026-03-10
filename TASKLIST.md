@@ -2,7 +2,7 @@
 
 ## 📅 마지막 업데이트
 - **날짜**: 2026-03-10
-- **Git Commit**: `15cc4e4` - Improve Bullet system: Add homing and rotation offset for arrow sprites
+- **Git Commit**: `b54078d` - Implement pathfinding improvements: No backtracking and forward-only movement
 
 ---
 
@@ -14,7 +14,7 @@
 | 1 | **Framework DI/EventBus** | BallShotGame 프레임워크 통합 | ✅ 완료 |
 | 2 | **Excel 데이터 시스템** | ExcelDataReader, 데이터 클래스, 자동 변환 | ✅ 완료 |
 | 3 | **GridSystem** | Tilemap 연결, Wall/Barrier 감지 | ✅ 완료 |
-| 4 | **A* Pathfinder** | 랜덤 경로, 웨이포인트 시스템 | ✅ 완료 |
+| 4 | **A* Pathfinder** | 랜덤 경로, 웨이포인트 시스템, 방문한 곳 재방문 금지, 뒤로가기 방지 | ✅ 완료 |
 | 5 | **PathAgent** | 경로 따라 이동, 스프라이트 방향 전환 | ✅ 완료 |
 | 6 | **GameManager** | Castle HP, 생존 시간, 점수, 골드 시스템 | ✅ 완료 |
 | 7 | **WaveManager** | Excel 기반 웨이브, 다양한 Enemy 스폰 | ✅ 완료 |
@@ -144,3 +144,4 @@ Data/
 - **가챠 방식**: SpaceBar 누름 → 50골드 소모 → Wall 타일에 유닛 배치
 - **공격 방식**: 자동 타겟팅, 근접/원거리(Bullet) 지원
 - **Bullet 개선** (2026-03-10): 유도 미사일 방식으로 개선, rotationOffset 지원으로 Arrow 등 다양한 스프라이트 방향 처리
+- **Pathfinding 개선** (2026-03-10): 방문한 노드 추적(visitedNodes)으로 재방문 금지, 뒤로가기 방지(타겟과의 거리 증가 시 해당 방향 제외)
