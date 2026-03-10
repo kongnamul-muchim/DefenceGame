@@ -4616,6 +4616,9 @@ MonoBehaviour:
   validDropColor: {r: 1, g: 1, b: 1, a: 0.7}
   invalidDropColor: {r: 1, g: 0.3, b: 0.3, a: 0.7}
   mergeableColor: {r: 0.3, g: 1, b: 0.3, a: 0.7}
+  unitLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1414334481
 GameObject:
   m_ObjectHideFlags: 0
@@ -14091,7 +14094,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.Pathfinder
   useRandomPath: 1
-  randomness: 0.3
+  randomness: 0.1
   useRandomWaypoints: 1
   waypointCount: 5
   minWaypointDistance: 5

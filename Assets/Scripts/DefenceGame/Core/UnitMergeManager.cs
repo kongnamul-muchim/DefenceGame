@@ -32,18 +32,30 @@ namespace DefenceGame.Core
         {
             if (draggedUnit == null || targetUnit == null) return false;
             
+            Debug.Log($"[Merge Check] Dragged: {draggedUnit.unitName} ({draggedUnit.grade}) vs Target: {targetUnit.unitName} ({targetUnit.grade})");
+            
             // 1. 같은 등급인가?
             if (draggedUnit.grade != targetUnit.grade)
+            {
+                Debug.Log($"[Merge Check] FAILED - Different grades: {draggedUnit.grade} vs {targetUnit.grade}");
                 return false;
+            }
             
             // 2. 같은 이름인가?
             if (draggedUnit.unitName != targetUnit.unitName)
+            {
+                Debug.Log($"[Merge Check] FAILED - Different names: {draggedUnit.unitName} vs {targetUnit.unitName}");
                 return false;
+            }
             
             // 3. Legendary는 합성 불가
             if (draggedUnit.grade == GradeType.Legendary)
+            {
+                Debug.Log($"[Merge Check] FAILED - Legendary cannot be merged");
                 return false;
+            }
             
+            Debug.Log($"[Merge Check] SUCCESS - Can merge {draggedUnit.grade} {draggedUnit.unitName}");
             return true;
         }
         
@@ -52,12 +64,13 @@ namespace DefenceGame.Core
         {
             if (!CanMerge(draggedUnit, targetUnit))
             {
-                Debug.LogWarning("Cannot merge these units!");
+                Debug.LogWarning("[Merge] Cannot merge these units!");
                 return;
             }
             
             // 1. 다음 등급 계산
             GradeType nextGrade = GetNextGrade(draggedUnit.grade);
+            Debug.Log($"[Merge] Next grade calculated: {draggedUnit.grade} -> {nextGrade}");
             
             // 2. 위치 저장 (타겟 유닛 위치 = 드래그하지 않은 유닛 위치)
             Vector3 mergePosition = targetUnit.transform.position;
@@ -66,11 +79,27 @@ namespace DefenceGame.Core
             string unitName = draggedUnit.unitName;
             GradeType originalGrade = draggedUnit.grade;
             
-            // 4. 이펙트 재생 (유닛 제거 전)
+            // 4. 새 유닛 먼저 찾기 (유닛 제거 전에)
+            TowerData newTower = GetUpgradedTower(unitName, nextGrade);
+            if (newTower == null)
+            {
+                Debug.LogWarning($"[Merge] No upgraded tower found for {unitName} at grade {nextGrade}, trying random tower...");
+                newTower = GetRandomTowerByGrade(nextGrade);
+            }
+            
+            // 새 유닛 데이터가 없으면 합성 취소
+            if (newTower == null)
+            {
+                Debug.LogError($"[Merge] FAILED - No tower found for grade {nextGrade}. Merge cancelled.");
+                return;
+            }
+            
+            Debug.Log($"[Merge] New tower selected: {newTower.Name} ({newTower.Grade})");
+            
+            // 5. 이펙트 재생
             PlayMergeEffect(mergePosition);
             
-            // 5. 기존 유닛들 제거
-            // PlacementManager에서 제거
+            // 6. 기존 유닛들 제거 (새 유닛이 확실히 있을 때만)
             if (UnitPlacementManager.Instance != null)
             {
                 UnitPlacementManager.Instance.RemoveUnit(draggedUnit);
@@ -80,27 +109,9 @@ namespace DefenceGame.Core
             Destroy(draggedUnit.gameObject);
             Destroy(targetUnit.gameObject);
             
-            // 6. 새 유닛 생성 (같은 이름의 상위 등급 유닛)
-            TowerData newTower = GetUpgradedTower(unitName, nextGrade);
-            if (newTower != null)
-            {
-                UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
-                Debug.Log($"Merge successful! {originalGrade} {unitName} x{mergeCount} → {nextGrade} {newTower.Name}");
-            }
-            else
-            {
-                // 같은 이름의 상위 등급 유닛이 없으면 해당 등급의 랜덤 유닛 생성
-                newTower = GetRandomTowerByGrade(nextGrade);
-                if (newTower != null)
-                {
-                    UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
-                    Debug.Log($"Merge successful! {originalGrade} {unitName} x{mergeCount} → {nextGrade} {newTower.Name} (random)");
-                }
-                else
-                {
-                    Debug.LogError($"Failed to get tower for grade: {nextGrade}");
-                }
-            }
+            // 7. 새 유닛 생성
+            UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
+            Debug.Log($"[Merge] SUCCESS! {originalGrade} {unitName} x{mergeCount} → {nextGrade} {newTower.Name}");
         }
         
         // 다음 등급 계산
@@ -126,28 +137,37 @@ namespace DefenceGame.Core
         {
             if (GameDataSO.Instance == null)
             {
-                Debug.LogError("GameDataSO.Instance is null!");
+                Debug.LogError("[Merge] GameDataSO.Instance is null!");
                 return null;
             }
             
+            Debug.Log($"[Merge] Looking for random tower of grade: {targetGrade}");
+            int towerCount = GameDataSO.Instance.Towers?.Count ?? 0;
+            Debug.Log($"[Merge] Total towers in GameData: {towerCount}");
+            
             // 해당 등급의 모든 타워 가져오기
             List<TowerData> towersOfGrade = new List<TowerData>();
-            foreach (var tower in GameDataSO.Instance.Towers)
+            if (GameDataSO.Instance.Towers != null)
             {
-                if (tower.Grade == targetGrade)
+                foreach (var tower in GameDataSO.Instance.Towers)
                 {
-                    towersOfGrade.Add(tower);
+                    if (tower.Grade == targetGrade)
+                    {
+                        towersOfGrade.Add(tower);
+                        Debug.Log($"[Merge] Found tower: {tower.Name} ({tower.Grade})");
+                    }
                 }
             }
             
             if (towersOfGrade.Count == 0)
             {
-                Debug.LogWarning($"No towers found for grade: {targetGrade}");
+                Debug.LogWarning($"[Merge] No towers found for grade: {targetGrade}");
                 return null;
             }
             
             // 랜덤 선택
             int randomIndex = Random.Range(0, towersOfGrade.Count);
+            Debug.Log($"[Merge] Selected random tower: {towersOfGrade[randomIndex].Name} (index {randomIndex}/{towersOfGrade.Count})");
             return towersOfGrade[randomIndex];
         }
         
@@ -156,20 +176,27 @@ namespace DefenceGame.Core
         {
             if (GameDataSO.Instance == null)
             {
-                Debug.LogError("GameDataSO.Instance is null!");
+                Debug.LogError("[Merge] GameDataSO.Instance is null!");
                 return null;
             }
             
+            Debug.Log($"[Merge] Looking for upgraded tower: {unitName} at grade {targetGrade}");
+            
             // 같은 이름의 상위 등급 타워 찾기
-            foreach (var tower in GameDataSO.Instance.Towers)
+            if (GameDataSO.Instance.Towers != null)
             {
-                if (tower.Name == unitName && tower.Grade == targetGrade)
+                foreach (var tower in GameDataSO.Instance.Towers)
                 {
-                    return tower;
+                    Debug.Log($"[Merge] Checking tower: {tower.Name} ({tower.Grade})");
+                    if (tower.Name == unitName && tower.Grade == targetGrade)
+                    {
+                        Debug.Log($"[Merge] Found upgraded tower: {tower.Name} ({tower.Grade})");
+                        return tower;
+                    }
                 }
             }
             
-            Debug.LogWarning($"No upgraded tower found for {unitName} at grade {targetGrade}");
+            Debug.LogWarning($"[Merge] No upgraded tower found for {unitName} at grade {targetGrade}");
             return null;
         }
         
