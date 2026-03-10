@@ -4,13 +4,24 @@ using DefenceGame.Data;
 
 namespace DefenceGame.Core
 {
+    [System.Serializable]
+    public class TowerPrefabMapping
+    {
+        public int towerId;
+        public GameObject prefab;
+    }
+    
     public class UnitPlacementManager : MonoBehaviour
     {
         public static UnitPlacementManager Instance { get; private set; }
         
         [Header("References")]
-        public GameObject unitPrefab;
+        public GameObject defaultUnitPrefab;
         public GridSystem gridSystem;
+        
+        [Header("Tower Prefabs")]
+        // Map tower ID to specific prefab
+        public List<TowerPrefabMapping> towerPrefabs = new List<TowerPrefabMapping>();
         
         [Header("Placement Settings")]
         public int maxPlacementAttempts = 50;
@@ -19,16 +30,30 @@ namespace DefenceGame.Core
         
         private List<Vector3> placedPositions = new List<Vector3>();
         private float minDistanceBetweenUnits = 1.0f;
+        private Dictionary<int, GameObject> towerPrefabDict;
         
         private void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
+                InitializeTowerPrefabDict();
             }
             else
             {
                 Destroy(gameObject);
+            }
+        }
+        
+        private void InitializeTowerPrefabDict()
+        {
+            towerPrefabDict = new Dictionary<int, GameObject>();
+            foreach (var mapping in towerPrefabs)
+            {
+                if (mapping.prefab != null)
+                {
+                    towerPrefabDict[mapping.towerId] = mapping.prefab;
+                }
             }
         }
         
@@ -100,13 +125,22 @@ namespace DefenceGame.Core
         
         private void SpawnUnit(TowerData towerData, Vector3 position)
         {
-            if (unitPrefab == null)
+            // Get prefab for this tower ID
+            GameObject prefabToUse = GetTowerPrefab(towerData.Id);
+            
+            // If no specific prefab, use default (create generic unit)
+            if (prefabToUse == null)
             {
-                Debug.LogError("Unit prefab not assigned!");
+                prefabToUse = defaultUnitPrefab;
+            }
+            
+            if (prefabToUse == null)
+            {
+                Debug.LogError($"No prefab available for tower ID: {towerData.Id}! Please assign prefabs in UnitPlacementManager inspector.");
                 return;
             }
             
-            GameObject unit = Instantiate(unitPrefab, position, Quaternion.identity);
+            GameObject unit = Instantiate(prefabToUse, position, Quaternion.identity);
             unit.name = $"Unit_{towerData.Name}";
             
             // Initialize unit with tower data
@@ -115,8 +149,27 @@ namespace DefenceGame.Core
             {
                 unitComponent.Initialize(towerData);
             }
+            else
+            {
+                Debug.LogWarning($"Unit component not found on prefab for {towerData.Name}");
+            }
             
-            Debug.Log($"Placed [{towerData.Grade}] {towerData.Name} at {position}");
+            Debug.Log($"Placed [{towerData.Grade}] {towerData.Name} (ID: {towerData.Id}) at {position}");
+        }
+        
+        private GameObject GetTowerPrefab(int towerId)
+        {
+            if (towerPrefabDict == null)
+            {
+                InitializeTowerPrefabDict();
+            }
+            
+            if (towerPrefabDict.ContainsKey(towerId))
+            {
+                return towerPrefabDict[towerId];
+            }
+            
+            return defaultUnitPrefab;
         }
         
         /// <summary>

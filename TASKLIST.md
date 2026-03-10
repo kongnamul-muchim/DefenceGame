@@ -2,7 +2,7 @@
 
 ## 📅 마지막 업데이트
 - **날짜**: 2026-03-10
-- **Git Commit**: `4a3a6f5` - Add randomized pathfinding and enemy movement improvements
+- **Git Commit**: `1c139cf` - Add SpaceBar gacha system with auto unit placement on walls
 
 ---
 
@@ -20,36 +20,29 @@
 | 7 | **WaveManager** | Excel 기반 웨이브, 다양한 Enemy 스폰 | ✅ 완료 |
 | 8 | **Enemy 시스템** | 랜덤 경로 이동, Castle 도달, 처치 보상 | ✅ 완료 |
 | 9 | **GachaManager** | 50골드 가챠, Excel 확률 연동 | ✅ 완료 |
+| 10 | **UnitPlacementManager** | SpaceBar → 자동 Wall 타일 배치 | ✅ 완료 |
+| 11 | **Unit 기본 구조** | Unit 클래스, 데이터 연동 | ✅ 완료 |
+| 12 | **Unit 공격 시스템** | 타겟 찾기, 근접/원거리 공격 | ✅ 완료 |
+| 13 | **Bullet 시스템** | 투사체 발사, 적 추적 | ✅ 완료 |
+| 14 | **UI 시스템** | GameUI 스크립트 구현 | ✅ 완료 |
 
 ---
 
 ## 📋 남은 작업 (Pending)
 
-### Phase 2: Enemy 시스템 마무리
+### Phase A: UI 연동 및 마무리
 | # | 작업 | 설명 | 예상 시간 |
 |---|------|------|-----------|
-| 10 | Enemy 체력바 UI | HP 바 표시 | 20분 |
+| 15 | **Unity UI 설정** | Canvas, Text, Panel 배치 (수동 작업) | 20분 |
+| 16 | **UI 테스트** | HP, Gold, Wave, Score 표시 확인 | 10분 |
+| 17 | **게임 오버 연동** | UI 버튼과 Restart 연결 | 10분 |
 
-### Phase 3: Unit(타워) 시스템
+### Phase B: 최종 테스트
 | # | 작업 | 설명 | 예상 시간 |
 |---|------|------|-----------|
-| 11 | **Unit 배치 시스템** | SpaceBar 가챠 → 바로 배치 | 30분 |
-| 12 | **Unit 데이터 연동** | TowerData Excel 연동 | 20분 |
-| 13 | **Unit 공격 - 근접** | 근접 공격, 애니메이션 | 30분 |
-| 14 | **Unit 공격 - 원거리** | 투사체 발사, 적 타겟팅 | 40분 |
-| 15 | **Unit Placement** | Ground Tilemap에만 배치 가능 | 20분 |
-
-### Phase 4: UI 및 게임 완성
-| # | 작업 | 설명 | 예상 시간 |
-|---|------|------|-----------|
-| 16 | **UI 시스템** | HP바, Score, Wave, Gold 표시 | 40분 |
-| 17 | **Game Over UI** | 패배 화면, 재시작 버튼 | 20분 |
-
-### Phase 5: 테스트 및 밸런스
-| # | 작업 | 설명 | 예상 시간 |
-|---|------|------|-----------|
-| 18 | 통합 테스트 | 전체 시스템 테스트 | 30분 |
-| 19 | Excel 밸런스 조정 | 데이터 튜닝 | 20분 |
+| 18 | **통합 테스트** | 전체 게임 플레이 테스트 | 20분 |
+| 19 | **엑셀 밸런스** | 데미지/체력/골드 수치 조정 | 15분 |
+| 20 | **버그 수정** | 발견된 문제 해결 | 20분 |
 
 ---
 
@@ -57,36 +50,89 @@
 
 | 키 | 기능 |
 |----|------|
-| **SpaceBar** | 가챠 실행 (50골드 소모) → 유닛 자동 배치 |
+| **SpaceBar** | 가챠 실행 (50골드 소모) → 유닛 Wall 타일에 자동 배치 |
 
 ---
 
-## 📊 엑셀 데이터 구조
+## 📁 파일 구조
 
-### GachaProbabilities 시트
-| Grade | Probability | Cost |
-|-------|-------------|------|
-| Common | 0.60 | 50 |
-| Rare | 0.25 | 50 |
-| Epic | 0.10 | 50 |
-| Legendary | 0.05 | 50 |
+### 핵심 시스템 (Scripts/DefenceGame/Core/)
+```
+Core/
+├── GridSystem.cs           # Grid, Wall/Barrier 감지
+├── Pathfinder.cs           # A* 경로 탐색, 랜덤 웨이포인트
+├── PathAgent.cs            # 경로 따라 이동
+├── GameManager.cs          # Castle HP, Score, Gold, 게임 상태
+├── WaveManager.cs          # 웨이브 관리, 적 스폰
+├── Enemy.cs                # 적 이동, 체력, 데미지
+├── GachaManager.cs         # 50골드 가챠 시스템
+├── UnitPlacementManager.cs # 유닛 자동 배치
+├── Unit.cs                 # 유닛 공격, 타겟팅
+└── Bullet.cs               # 투사체 시스템
+```
 
-### Towers 시트
-| Id | Name | AttackPower | AttackSpeed | Range | Grade |
-|----|------|-------------|-------------|-------|-------|
-| 1 | Archer | 10 | 1.0 | 5.0 | Common |
-| 2 | Mage | 25 | 0.8 | 6.0 | Rare |
-| 3 | Cannon | 50 | 0.5 | 4.0 | Epic |
-| 4 | Laser | 100 | 2.0 | 8.0 | Legendary |
+### UI (Scripts/DefenceGame/UI/)
+```
+UI/
+└── GameUI.cs               # UI 업데이트, 게임 오버 화면
+```
+
+### 데이터 (Scripts/DefenceGame/Data/)
+```
+Data/
+├── GameDataSO.cs           # ScriptableObject 정의
+├── EnemyData.cs            # 적 데이터 구조
+├── TowerData.cs            # 타워 데이터 구조
+├── WaveData.cs             # 웨이브 데이터 구조
+├── GachaData.cs            # 가챠 확률 데이터
+├── GradeType.cs            # 등급 Enum
+└── Editor/
+    ├── ExcelConverter.cs       # Excel → ScriptableObject 변환
+    ├── ExcelSampleGenerator.cs # 샘플 엑셀 생성
+    ├── GameDataEditorMenu.cs   # Unity 메뉴
+    └── GameDataSettingsWindow.cs # 설정 창
+```
+
+---
+
+## 🎯 핵심 기능 요약
+
+### 1. 적 시스템
+- **스폰**: WaveManager가 Excel 데이터 기반으로 적 스폰
+- **이동**: Pathfinder가 랜덤 웨이포인트를 통해 Castle로 이동
+- **공격**: Castle 도달 시 HP 감소
+- **보상**: 처치 시 골드 획득
+
+### 2. 유닛(타워) 시스템
+- **가챠**: SpaceBar 누르면 50골드 소모 후 랜덤 유닛 획득
+- **배치**: Wall 타일 위에 자동 배치
+- **공격**: 범위 내 적 자동 공격 (근접/원거리)
+- **투사체**: 원거리 유닛은 Bullet 발사
+
+### 3. 게임 상태
+- **Castle HP**: 20 → 0 되면 게임 오버
+- **골드**: 적 처치 시 획득, 가챠에 사용
+- **점수**: 생존 시간 × 10 + 처치 수 × 100
+- **웨이브**: 일정 시간마다 다음 웨이브 진행
 
 ---
 
 ## 🚀 다음 작업 순서
 
-1. **SpaceBar 가챠 시스템** - SpaceBar 누르면 50골드 소모 후 랜덤 위치에 유닛 배치
-2. **Unit 공격 시스템** - 근접/원거리 공격 구현
-3. **UI 시스템** - 게임 상태 표시
-4. **테스트 및 밸런스**
+1. **Unity Editor에서 UI 배치** (수동 작업)
+   - Canvas 생성
+   - TextMeshPro 텍스트 6개 배치
+   - Game Over Panel 생성
+   - GameUI 스크립트 연결
+
+2. **테스트**
+   - 모든 UI 값이 실시간으로 업데이트되는지 확인
+   - 게임 오버 시 패널 표시 확인
+   - 재시작 버튼 작동 확인
+
+3. **밸런스 조정**
+   - Excel 데이터 튜닝
+   - 골드 획득량, 가챠 비용, 유닛 공격력 조정
 
 ---
 
@@ -95,3 +141,5 @@
 - **의존성**: ExcelDataReader, DocumentFormat.OpenXml
 - **디자인 패턴**: DI (Service Locator), Event Bus (Pub/Sub)
 - **경로 탐색**: A* 알고리즘, 랜덤 웨이포인트
+- **가챠 방식**: SpaceBar 누름 → 50골드 소모 → Wall 타일에 유닛 배치
+- **공격 방식**: 자동 타겟팅, 근접/원거리(Bullet) 지원

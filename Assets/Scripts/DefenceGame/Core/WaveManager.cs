@@ -5,6 +5,13 @@ using DefenceGame.Data;
 
 namespace DefenceGame.Core
 {
+    [System.Serializable]
+    public class EnemyPrefabMapping
+    {
+        public int enemyId;
+        public GameObject prefab;
+    }
+    
     public class WaveManager : MonoBehaviour
     {
         public static WaveManager Instance { get; private set; }
@@ -12,7 +19,11 @@ namespace DefenceGame.Core
         [Header("Spawn Settings")]
         public Transform enemySpawnPoint;
         public Transform castleTarget;
-        public GameObject enemyPrefab;
+        
+        [Header("Enemy Prefabs")]
+        // Map enemy ID to prefab (set in Inspector)
+        public List<EnemyPrefabMapping> enemyPrefabs = new List<EnemyPrefabMapping>();
+        private Dictionary<int, GameObject> enemyPrefabDict;
         
         [Header("Wave Data")]
         public GameDataSO gameData;
@@ -179,9 +190,11 @@ namespace DefenceGame.Core
         
         private void SpawnEnemy(EnemyData enemyData, float healthMultiplier)
         {
-            if (enemyPrefab == null)
+            // Get prefab for this enemy ID
+            GameObject prefabToSpawn = GetEnemyPrefab(enemyData.Id);
+            if (prefabToSpawn == null)
             {
-                Debug.LogError("Enemy prefab not assigned!");
+                Debug.LogError($"No prefab found for enemy ID: {enemyData.Id} ({enemyData.Name})");
                 return;
             }
             
@@ -192,7 +205,7 @@ namespace DefenceGame.Core
             }
             
             Vector3 spawnPosition = GetNonOverlappingSpawnPosition();
-            GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+            GameObject enemy = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
             
             // Initialize enemy with random target position around castle
             Enemy enemyComponent = enemy.GetComponent<Enemy>();
@@ -202,7 +215,34 @@ namespace DefenceGame.Core
                 enemyComponent.Initialize(enemyData, healthMultiplier, randomTargetPos);
             }
             
-            Debug.Log($"Spawned enemy: {enemyData.Name} at {spawnPosition}");
+            Debug.Log($"Spawned enemy: {enemyData.Name} (ID: {enemyData.Id}) at {spawnPosition}");
+        }
+        
+        private GameObject GetEnemyPrefab(int enemyId)
+        {
+            if (enemyPrefabDict == null)
+            {
+                InitializeEnemyPrefabDict();
+            }
+            
+            if (enemyPrefabDict.TryGetValue(enemyId, out GameObject prefab))
+            {
+                return prefab;
+            }
+            
+            return null;
+        }
+        
+        private void InitializeEnemyPrefabDict()
+        {
+            enemyPrefabDict = new Dictionary<int, GameObject>();
+            foreach (var mapping in enemyPrefabs)
+            {
+                if (mapping.prefab != null)
+                {
+                    enemyPrefabDict[mapping.enemyId] = mapping.prefab;
+                }
+            }
         }
         
         private Vector3 GetNonOverlappingSpawnPosition()

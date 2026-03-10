@@ -308,12 +308,12 @@ namespace DefenceGame.Core
             // Give reward
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.EnemyDefeated(rewardGold);
+                GameManager.Instance.EnemyDefeated(rewardGold, rewardGold);
             }
             
             OnEnemyDefeated?.Invoke(this);
             
-            Debug.Log($"Enemy {enemyName} defeated! Reward: {rewardGold}");
+            Debug.Log($"Enemy {enemyName} defeated! Reward: {rewardGold} gold");
             
             // Destroy enemy
             Destroy(gameObject);

@@ -8,6 +8,10 @@ namespace DefenceGame.Core
         [Header("Movement")]
         public float speed = 2f;
         public float stoppingDistance = 0.1f;
+        public bool flipSprite = true;
+        
+        [Header("References")]
+        public SpriteRenderer spriteRenderer;
         
         [Header("Path")]
         public bool drawGizmos = true;
@@ -77,6 +81,12 @@ namespace DefenceGame.Core
             Vector3 target = path[currentWaypointIndex];
             Vector3 direction = (target - transform.position).normalized;
             
+            // Flip sprite based on movement direction
+            if (flipSprite)
+            {
+                UpdateSpriteDirection(direction);
+            }
+            
             // Move towards target
             transform.position += direction * speed * Time.deltaTime;
             
@@ -99,6 +109,27 @@ namespace DefenceGame.Core
             isMoving = false;
             OnPathComplete?.Invoke();
             Debug.Log("Path completed!");
+        }
+        
+        private void UpdateSpriteDirection(Vector3 direction)
+        {
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+                if (spriteRenderer == null) return;
+            }
+            
+            // Flip based on horizontal movement
+            // If moving right (direction.x > 0), flip sprite
+            // If moving left (direction.x < 0), keep original
+            if (direction.x > 0.01f)
+            {
+                spriteRenderer.flipX = true;  // Face right
+            }
+            else if (direction.x < -0.01f)
+            {
+                spriteRenderer.flipX = false; // Face left (default)
+            }
         }
         
         public void Stop()
