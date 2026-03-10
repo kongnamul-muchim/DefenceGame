@@ -2,7 +2,7 @@
 
 ## 📅 마지막 업데이트
 - **날짜**: 2026-03-10
-- **Git Commit**: `1c139cf` - Add SpaceBar gacha system with auto unit placement on walls
+- **Git Commit**: `15cc4e4` - Improve Bullet system: Add homing and rotation offset for arrow sprites
 
 ---
 
@@ -23,7 +23,7 @@
 | 10 | **UnitPlacementManager** | SpaceBar → 자동 Wall 타일 배치 | ✅ 완료 |
 | 11 | **Unit 기본 구조** | Unit 클래스, 데이터 연동 | ✅ 완료 |
 | 12 | **Unit 공격 시스템** | 타겟 찾기, 근접/원거리 공격 | ✅ 완료 |
-| 13 | **Bullet 시스템** | 투사체 발사, 적 추적 | ✅ 완료 |
+| 13 | **Bullet 시스템** | 투사체 발사, 적 추적(유도), 스프라이트 방향 보정 | ✅ 완료 |
 | 14 | **UI 시스템** | GameUI 스크립트 구현 | ✅ 완료 |
 
 ---
@@ -143,3 +143,4 @@ Data/
 - **경로 탐색**: A* 알고리즘, 랜덤 웨이포인트
 - **가챠 방식**: SpaceBar 누름 → 50골드 소모 → Wall 타일에 유닛 배치
 - **공격 방식**: 자동 타겟팅, 근접/원거리(Bullet) 지원
+- **Bullet 개선** (2026-03-10): 유도 미사일 방식으로 개선, rotationOffset 지원으로 Arrow 등 다양한 스프라이트 방향 처리
