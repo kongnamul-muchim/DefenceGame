@@ -2,7 +2,7 @@
 
 ## 📅 마지막 업데이트
 - **날짜**: 2026-03-10
-- **Git Commit**: `b54078d` - Implement pathfinding improvements: No backtracking and forward-only movement
+- **Git Commit**: `6f9bb63` - Setup Unity UI for DefenceGame
 
 ---
 
@@ -24,20 +24,11 @@
 | 11 | **Unit 기본 구조** | Unit 클래스, 데이터 연동 | ✅ 완료 |
 | 12 | **Unit 공격 시스템** | 타겟 찾기, 근접/원거리 공격 | ✅ 완료 |
 | 13 | **Bullet 시스템** | 투사체 발사, 적 추적(유도), 스프라이트 방향 보정 | ✅ 완료 |
-| 14 | **UI 시스템** | GameUI 스크립트 구현 | ✅ 완료 |
+| 14 | **UI 시스템** | GameUI 스크립트 구현, Unity UI 설정 (Canvas, Text, Panel), 게임 오버 연동 | ✅ 완료 |
 
 ---
 
-## 📋 남은 작업 (Pending)
-
-### Phase A: UI 연동 및 마무리
-| # | 작업 | 설명 | 예상 시간 |
-|---|------|------|-----------|
-| 15 | **Unity UI 설정** | Canvas, Text, Panel 배치 (수동 작업) | 20분 |
-| 16 | **UI 테스트** | HP, Gold, Wave, Score 표시 확인 | 10분 |
-| 17 | **게임 오버 연동** | UI 버튼과 Restart 연결 | 10분 |
-
-### Phase B: 최종 테스트
+## ✅ Phase A 완료 (UI 연동 및 마무리)
 | # | 작업 | 설명 | 예상 시간 |
 |---|------|------|-----------|
 | 18 | **통합 테스트** | 전체 게임 플레이 테스트 | 20분 |
