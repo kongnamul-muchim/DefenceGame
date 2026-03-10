@@ -62,13 +62,14 @@ namespace DefenceGame.Core
             // 2. 위치 저장 (타겟 유닛 위치 = 드래그하지 않은 유닛 위치)
             Vector3 mergePosition = targetUnit.transform.position;
             
-            // 3. 이펙트 재생 (유닛 제거 전)
-            PlayMergeEffect(mergePosition);
-            
-            // 4. 기존 유닛들 제거
+            // 3. 원래 유닛 이름 저장 (같은 이름의 상위 등급 유닛을 찾기 위해)
             string unitName = draggedUnit.unitName;
             GradeType originalGrade = draggedUnit.grade;
             
+            // 4. 이펙트 재생 (유닛 제거 전)
+            PlayMergeEffect(mergePosition);
+            
+            // 5. 기존 유닛들 제거
             // PlacementManager에서 제거
             if (UnitPlacementManager.Instance != null)
             {
@@ -79,8 +80,8 @@ namespace DefenceGame.Core
             Destroy(draggedUnit.gameObject);
             Destroy(targetUnit.gameObject);
             
-            // 5. 새 유닛 생성
-            TowerData newTower = GetRandomTowerByGrade(nextGrade);
+            // 6. 새 유닛 생성 (같은 이름의 상위 등급 유닛)
+            TowerData newTower = GetUpgradedTower(unitName, nextGrade);
             if (newTower != null)
             {
                 UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
@@ -88,7 +89,17 @@ namespace DefenceGame.Core
             }
             else
             {
-                Debug.LogError($"Failed to get random tower for grade: {nextGrade}");
+                // 같은 이름의 상위 등급 유닛이 없으면 해당 등급의 랜덤 유닛 생성
+                newTower = GetRandomTowerByGrade(nextGrade);
+                if (newTower != null)
+                {
+                    UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
+                    Debug.Log($"Merge successful! {originalGrade} {unitName} x{mergeCount} → {nextGrade} {newTower.Name} (random)");
+                }
+                else
+                {
+                    Debug.LogError($"Failed to get tower for grade: {nextGrade}");
+                }
             }
         }
         
@@ -138,6 +149,28 @@ namespace DefenceGame.Core
             // 랜덤 선택
             int randomIndex = Random.Range(0, towersOfGrade.Count);
             return towersOfGrade[randomIndex];
+        }
+        
+        // 같은 이름의 상위 등급 타워 찾기
+        private TowerData GetUpgradedTower(string unitName, GradeType targetGrade)
+        {
+            if (GameDataSO.Instance == null)
+            {
+                Debug.LogError("GameDataSO.Instance is null!");
+                return null;
+            }
+            
+            // 같은 이름의 상위 등급 타워 찾기
+            foreach (var tower in GameDataSO.Instance.Towers)
+            {
+                if (tower.Name == unitName && tower.Grade == targetGrade)
+                {
+                    return tower;
+                }
+            }
+            
+            Debug.LogWarning($"No upgraded tower found for {unitName} at grade {targetGrade}");
+            return null;
         }
         
         // 합성 이펙트 재생

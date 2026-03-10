@@ -7,10 +7,10 @@ namespace DefenceGame.Core
         public static UnitDragSystem Instance { get; private set; }
         
         [Header("Drag Settings")]
-        public float dragScale = 1.1f; // 드래그 중 크기
-        public Color validDropColor = new Color(1f, 1f, 1f, 0.7f); // 유효한 드롭 위치
-        public Color invalidDropColor = new Color(1f, 0.3f, 0.3f, 0.7f); // 무효한 드롭 위치
-        public Color mergeableColor = new Color(0.3f, 1f, 0.3f, 0.7f); // 합성 가능
+        public float dragScale = 1.3f; // 드래그 중 크기 증가
+        public Color validDropColor = new Color(1f, 1f, 1f, 0.5f); // 유효한 드롭 위치 (반투명 흰색)
+        public Color invalidDropColor = new Color(1f, 0.2f, 0.2f, 0.6f); // 무효한 드롭 위치 (반투명 빨간색)
+        public Color mergeableColor = new Color(0.2f, 1f, 0.2f, 0.6f); // 합성 가능 (반투명 녹색)
         
         private Unit currentlyDraggedUnit;
         private Vector3 originalPosition;
@@ -18,6 +18,7 @@ namespace DefenceGame.Core
         private SpriteRenderer unitSpriteRenderer;
         private Color originalColor;
         private bool isDragging = false;
+        private Camera mainCamera;
         
         public bool IsDragging => isDragging;
         public Unit CurrentlyDraggedUnit => currentlyDraggedUnit;
@@ -27,6 +28,7 @@ namespace DefenceGame.Core
             if (Instance == null)
             {
                 Instance = this;
+                mainCamera = Camera.main;
             }
             else
             {
@@ -34,9 +36,29 @@ namespace DefenceGame.Core
             }
         }
         
+        private void Update()
+        {
+            // 드래그 중일 때 마우스 위치 추적 (안전장치)
+            if (isDragging && currentlyDraggedUnit != null)
+            {
+                if (Input.GetMouseButton(0))
+                {
+                    Vector3 mousePos = Input.mousePosition;
+                    mousePos.z = -mainCamera.transform.position.z;
+                    Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
+                    worldPos.z = originalPosition.z;
+                    UpdateDragPosition(worldPos);
+                }
+                else if (Input.GetMouseButtonUp(0))
+                {
+                    EndDrag(currentlyDraggedUnit);
+                }
+            }
+        }
+        
         public void StartDrag(Unit unit)
         {
-            if (unit == null) return;
+            if (unit == null || isDragging) return;
             
             currentlyDraggedUnit = unit;
             originalPosition = unit.transform.position;
@@ -45,15 +67,32 @@ namespace DefenceGame.Core
             unitSpriteRenderer = unit.GetComponent<SpriteRenderer>();
             if (unitSpriteRenderer != null)
             {
-                originalColor = unitSpriteRenderer.color;
+                // Unit 클래스에서 저장한 등급별 색상을 가져옴
+                originalColor = unit.GetGradeColor();
             }
             
             // 드래그 중 크기 조정
             unit.transform.localScale = originalScale * dragScale;
             
+            // 드래그 중 반투명 효과 적용
+            if (unitSpriteRenderer != null)
+            {
+                Color dragColor = originalColor;
+                dragColor.a = 0.7f; // 반투명
+                unitSpriteRenderer.color = dragColor;
+            }
+            
+            // RareColor도 반투명하게 변경
+            if (unit.rareColorRenderer != null)
+            {
+                Color rareDragColor = unit.GetGradeColor();
+                rareDragColor.a = 0.5f;
+                unit.SetRareColor(rareDragColor);
+            }
+            
             isDragging = true;
             
-            Debug.Log($"Started dragging unit: {unit.unitName}");
+            Debug.Log($"Started dragging unit: {unit.unitName} at {originalPosition}");
         }
         
         public void UpdateDragPosition(Vector3 worldPosition)
@@ -69,14 +108,16 @@ namespace DefenceGame.Core
         
         private void UpdateVisualFeedback()
         {
-            if (unitSpriteRenderer == null) return;
+            if (unitSpriteRenderer == null || currentlyDraggedUnit == null) return;
             
             Vector3 currentPos = currentlyDraggedUnit.transform.position;
             
             // 1. Wall 타일 확인
             if (!IsWallTile(currentPos))
             {
+                // Wall 타일이 아님 - 빨간색
                 unitSpriteRenderer.color = invalidDropColor;
+                currentlyDraggedUnit.SetRareColor(invalidDropColor);
                 return;
             }
             
@@ -89,17 +130,22 @@ namespace DefenceGame.Core
                 if (UnitMergeManager.Instance != null && 
                     UnitMergeManager.Instance.CanMerge(currentlyDraggedUnit, targetUnit))
                 {
+                    // 합성 가능 - 녹색
                     unitSpriteRenderer.color = mergeableColor;
+                    currentlyDraggedUnit.SetRareColor(mergeableColor);
                 }
                 else
                 {
+                    // 합성 불가능 - 빨간색
                     unitSpriteRenderer.color = invalidDropColor;
+                    currentlyDraggedUnit.SetRareColor(invalidDropColor);
                 }
             }
             else if (targetUnit == null)
             {
-                // 빈 공간 - 이동 가능
+                // 빈 공간 - 이동 가능 (흰색 반투명)
                 unitSpriteRenderer.color = validDropColor;
+                currentlyDraggedUnit.SetRareColor(validDropColor);
             }
         }
         
@@ -112,10 +158,17 @@ namespace DefenceGame.Core
             
             Vector3 dropPosition = unit.transform.position;
             
+            // 색상 복귀 (드래그 종료 전에 원래 색상으로)
+            if (currentlyDraggedUnit != null)
+            {
+                currentlyDraggedUnit.RestoreGradeColor();
+            }
+            
             // 1. Wall 타일 확인
             if (!IsWallTile(dropPosition))
             {
                 ReturnToOriginalPosition();
+                ResetDragState();
                 return;
             }
             
@@ -128,12 +181,22 @@ namespace DefenceGame.Core
                 if (UnitMergeManager.Instance != null && 
                     UnitMergeManager.Instance.CanMerge(unit, targetUnit))
                 {
+                    // 합성 전에 드래그 상태 초기화 (유닛이 파괴되기 전에)
+                    Unit draggedUnitRef = currentlyDraggedUnit;
+                    currentlyDraggedUnit = null;
+                    isDragging = false;
+                    unitSpriteRenderer = null;
+                    
+                    // 합성 실행
                     UnitMergeManager.Instance.MergeUnits(unit, targetUnit);
+                    return;
                 }
                 else
                 {
                     // 합성 불가능 → 원위치 복귀
                     ReturnToOriginalPosition();
+                    ResetDragState();
+                    return;
                 }
             }
             else if (targetUnit == null)
@@ -141,7 +204,14 @@ namespace DefenceGame.Core
                 // 4. 이동
                 if (UnitPlacementManager.Instance != null)
                 {
-                    if (!UnitPlacementManager.Instance.MoveUnitToPosition(unit, dropPosition))
+                    // 정확한 위치로 스냅
+                    Vector3 snappedPosition = GetSnappedPosition(dropPosition);
+                    if (UnitPlacementManager.Instance.MoveUnitToPosition(unit, snappedPosition))
+                    {
+                        // 이동 성공 - 색상 복귀
+                        unit.RestoreGradeColor();
+                    }
+                    else
                     {
                         // 이동 실패 → 원위치 복귀
                         ReturnToOriginalPosition();
@@ -154,6 +224,19 @@ namespace DefenceGame.Core
             }
             
             ResetDragState();
+        }
+        
+        private Vector3 GetSnappedPosition(Vector3 position)
+        {
+            if (GridSystem.Instance == null || GridSystem.Instance.wallTilemap == null)
+                return position;
+            
+            // 타일 중심으로 스냅
+            Vector3Int cellPos = GridSystem.Instance.wallTilemap.WorldToCell(position);
+            Vector3 worldPos = GridSystem.Instance.wallTilemap.CellToWorld(cellPos);
+            worldPos += new Vector3(0.5f, 0.5f, 0.5f); // 타일 중심
+            
+            return worldPos;
         }
         
         private bool IsWallTile(Vector3 position)
@@ -173,20 +256,17 @@ namespace DefenceGame.Core
             {
                 currentlyDraggedUnit.transform.position = originalPosition;
                 
-                // 색상 복귀
-                if (unitSpriteRenderer != null)
-                {
-                    unitSpriteRenderer.color = originalColor;
-                }
+                // 색상 복귀 - Unit의 등급 색상으로 복귀
+                currentlyDraggedUnit.RestoreGradeColor();
             }
         }
         
         private void ResetDragState()
         {
-            // 색상 복귀
-            if (unitSpriteRenderer != null)
+            // 색상 복귀 (혹시 모르게 한 번 더) - 단 유닛이 파괴되지 않은 경우에만
+            if (currentlyDraggedUnit != null && currentlyDraggedUnit.gameObject != null)
             {
-                unitSpriteRenderer.color = originalColor;
+                currentlyDraggedUnit.RestoreGradeColor();
             }
             
             currentlyDraggedUnit = null;

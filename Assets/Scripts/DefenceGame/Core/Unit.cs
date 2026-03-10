@@ -26,6 +26,7 @@ namespace DefenceGame.Core
         public bool showAttackRange = true;
         public Color rangeColor = Color.green;
         public Color attackColor = Color.red;
+        public SpriteRenderer rareColorRenderer; // 그림자 색상용 (Inspector에서 RareColor 연결)
         
         private float lastAttackTime;
         private Enemy targetEnemy;
@@ -35,11 +36,25 @@ namespace DefenceGame.Core
         private bool isDragging = false;
         private Camera mainCamera;
         
+        // 원래 등급 색상 저장
+        private Color gradeColor;
+        private Color rareOriginalColor; // RareColor 원래 색상 저장
+        
         private void Awake()
         {
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+            
+            // RareColorRenderer 자동 찾기 (자식 오브젝트에서)
+            if (rareColorRenderer == null)
+            {
+                Transform rareColorTransform = transform.Find("RareColor");
+                if (rareColorTransform != null)
+                {
+                    rareColorRenderer = rareColorTransform.GetComponent<SpriteRenderer>();
+                }
             }
             
             mainCamera = Camera.main;
@@ -116,26 +131,70 @@ namespace DefenceGame.Core
         
         private void SetGradeColor()
         {
-            if (spriteRenderer == null) return;
-            
             switch (grade)
             {
                 case GradeType.Common:
-                    spriteRenderer.color = Color.white;
+                    gradeColor = Color.white;
                     break;
                 case GradeType.Uncommon:
-                    spriteRenderer.color = new Color(0.3f, 1f, 0.3f); // 연한 초록색
+                    gradeColor = new Color(0.3f, 1f, 0.3f); // 연한 초록색
                     break;
                 case GradeType.Rare:
-                    spriteRenderer.color = Color.blue;
+                    gradeColor = Color.blue;
                     break;
                 case GradeType.Epic:
-                    spriteRenderer.color = Color.magenta;
+                    gradeColor = Color.magenta;
                     break;
                 case GradeType.Legendary:
-                    spriteRenderer.color = Color.yellow;
+                    gradeColor = Color.yellow;
                     break;
             }
+            
+            // Unit 본체 색상 설정
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = gradeColor;
+            }
+            
+            // RareColor(그림자) 색상도 동일하게 설정
+            if (rareColorRenderer != null)
+            {
+                rareColorRenderer.color = gradeColor;
+                rareOriginalColor = gradeColor; // 원래 색상 저장
+            }
+        }
+        
+        // 드래그 시 RareColor 색상 변경
+        public void SetRareColor(Color color)
+        {
+            if (rareColorRenderer != null)
+            {
+                rareColorRenderer.color = color;
+            }
+        }
+        
+        // RareColor 원래 색상으로 복귀
+        public void RestoreRareColor()
+        {
+            if (rareColorRenderer != null)
+            {
+                rareColorRenderer.color = rareOriginalColor;
+            }
+        }
+        
+        // 외부에서 색상 복귀 시 사용
+        public void RestoreGradeColor()
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = gradeColor;
+            }
+            RestoreRareColor();
+        }
+        
+        public Color GetGradeColor()
+        {
+            return gradeColor;
         }
         
         // Mouse Drag Methods
@@ -144,6 +203,9 @@ namespace DefenceGame.Core
             // 게임 오버 상태 체크
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
                 return;
+            
+            // 이미 드래그 중이면 무시
+            if (isDragging) return;
             
             isDragging = true;
             UnitDragSystem.Instance?.StartDrag(this);
@@ -169,6 +231,11 @@ namespace DefenceGame.Core
             
             isDragging = false;
             UnitDragSystem.Instance?.EndDrag(this);
+        }
+        
+        private void OnMouseExit()
+        {
+            // 마우스가 유닛 영역을 벗어났을 때 처리 (선택사항)
         }
         
         private void OnDisable()
