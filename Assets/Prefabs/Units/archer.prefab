@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5099323197744471432}
   - component: {fileID: 8766215368955804073}
   - component: {fileID: 8645156678587173567}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: archer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -62,6 +62,7 @@ MonoBehaviour:
   showAttackRange: 1
   rangeColor: {r: 0, g: 1, b: 0, a: 1}
   attackColor: {r: 1, g: 0, b: 0, a: 1}
+  rareColorRenderer: {fileID: 0}
 --- !u!61 &8645156678587173567
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -119,7 +120,7 @@ GameObject:
   - component: {fileID: 5429770891062944515}
   - component: {fileID: 8578180062122502816}
   - component: {fileID: 2790782665572646371}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: bow_animation(1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -233,7 +234,7 @@ GameObject:
   - component: {fileID: 2163288846135238251}
   - component: {fileID: 4186386471401419059}
   - component: {fileID: 759918643346441478}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: avatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -346,7 +347,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8175053413113967613}
   - component: {fileID: 9073227153995525365}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RareColor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -415,7 +416,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -436,7 +437,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 974424068304143209}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

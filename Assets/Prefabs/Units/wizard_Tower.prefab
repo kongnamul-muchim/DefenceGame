@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1866316487440331798}
   - component: {fileID: 8926167530878846945}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: wizard_level_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3071375251084379215}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 9147458880159713638}
   - component: {fileID: -2055069997315147780}
   - component: {fileID: 6891814405086590992}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: wizard_Tower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,6 +183,7 @@ MonoBehaviour:
   showAttackRange: 1
   rangeColor: {r: 0, g: 1, b: 0, a: 1}
   attackColor: {r: 1, g: 0, b: 0, a: 1}
+  rareColorRenderer: {fileID: 0}
 --- !u!61 &6891814405086590992
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -239,7 +240,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6863138280632670857}
   - component: {fileID: 1006887001902840922}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RareColor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -308,7 +309,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

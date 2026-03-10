@@ -197,45 +197,16 @@ namespace DefenceGame.Core
             return gradeColor;
         }
         
-        // Mouse Drag Methods
-        private void OnMouseDown()
+        // 드래그 시작 (UnitDragSystem에서 호출)
+        public void OnDragStart()
         {
-            // 게임 오버 상태 체크
-            if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
-                return;
-            
-            // 이미 드래그 중이면 무시
-            if (isDragging) return;
-            
             isDragging = true;
-            UnitDragSystem.Instance?.StartDrag(this);
         }
         
-        private void OnMouseDrag()
+        // 드래그 종료 (UnitDragSystem에서 호출)
+        public void OnDragEnd()
         {
-            if (!isDragging) return;
-            
-            // 마우스 위치를 월드 좌표로 변환
-            Vector3 mousePos = Input.mousePosition;
-            mousePos.z = -mainCamera.transform.position.z;
-            Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
-            worldPos.z = transform.position.z;
-            
-            // 드래그 시스템에 위치 업데이트
-            UnitDragSystem.Instance?.UpdateDragPosition(worldPos);
-        }
-        
-        private void OnMouseUp()
-        {
-            if (!isDragging) return;
-            
             isDragging = false;
-            UnitDragSystem.Instance?.EndDrag(this);
-        }
-        
-        private void OnMouseExit()
-        {
-            // 마우스가 유닛 영역을 벗어났을 때 처리 (선택사항)
         }
         
         private void OnDisable()

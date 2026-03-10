@@ -12,6 +12,9 @@ namespace DefenceGame.Core
         public Color invalidDropColor = new Color(1f, 0.2f, 0.2f, 0.6f); // 무효한 드롭 위치 (반투명 빨간색)
         public Color mergeableColor = new Color(0.2f, 1f, 0.2f, 0.6f); // 합성 가능 (반투명 녹색)
         
+        [Header("Raycast Settings")]
+        public LayerMask unitLayer; // Unit 레이어 마스크
+        
         private Unit currentlyDraggedUnit;
         private Vector3 originalPosition;
         private Vector3 originalScale;
@@ -19,6 +22,7 @@ namespace DefenceGame.Core
         private Color originalColor;
         private bool isDragging = false;
         private Camera mainCamera;
+        private bool wasMouseDown = false;
         
         public bool IsDragging => isDragging;
         public Unit CurrentlyDraggedUnit => currentlyDraggedUnit;
@@ -29,6 +33,9 @@ namespace DefenceGame.Core
             {
                 Instance = this;
                 mainCamera = Camera.main;
+                
+                // Unit 레이어 마스크 설정 (Layer 6 = Unit)
+                unitLayer = LayerMask.GetMask("Unit");
             }
             else
             {
@@ -38,7 +45,9 @@ namespace DefenceGame.Core
         
         private void Update()
         {
-            // 드래그 중일 때 마우스 위치 추적 (안전장치)
+            HandleMouseInput();
+            
+            // 드래그 중일 때 마우스 위치 추적
             if (isDragging && currentlyDraggedUnit != null)
             {
                 if (Input.GetMouseButton(0))
@@ -52,6 +61,38 @@ namespace DefenceGame.Core
                 else if (Input.GetMouseButtonUp(0))
                 {
                     EndDrag(currentlyDraggedUnit);
+                }
+            }
+        }
+        
+        private void HandleMouseInput()
+        {
+            // 마우스 클릭 시작
+            if (Input.GetMouseButtonDown(0) && !isDragging)
+            {
+                TryStartDrag();
+            }
+        }
+        
+        private void TryStartDrag()
+        {
+            // Raycast로 Unit 감지
+            Vector3 mousePos = Input.mousePosition;
+            mousePos.z = -mainCamera.transform.position.z;
+            Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
+            
+            RaycastHit2D hit = Physics2D.Raycast(worldPos, Vector2.zero, Mathf.Infinity, unitLayer);
+            
+            if (hit.collider != null)
+            {
+                Unit unit = hit.collider.GetComponent<Unit>();
+                if (unit != null)
+                {
+                    // 게임 오버 체크
+                    if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+                        return;
+                    
+                    StartDrag(unit);
                 }
             }
         }
@@ -89,6 +130,9 @@ namespace DefenceGame.Core
                 rareDragColor.a = 0.5f;
                 unit.SetRareColor(rareDragColor);
             }
+            
+            // Unit에 드래그 상태 설정
+            unit.OnDragStart();
             
             isDragging = true;
             
@@ -263,6 +307,12 @@ namespace DefenceGame.Core
         
         private void ResetDragState()
         {
+            // Unit에 드래그 종료 알림
+            if (currentlyDraggedUnit != null && currentlyDraggedUnit.gameObject != null)
+            {
+                currentlyDraggedUnit.OnDragEnd();
+            }
+            
             // 색상 복귀 (혹시 모르게 한 번 더) - 단 유닛이 파괴되지 않은 경우에만
             if (currentlyDraggedUnit != null && currentlyDraggedUnit.gameObject != null)
             {
