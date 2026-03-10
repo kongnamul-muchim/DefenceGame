@@ -13,7 +13,27 @@ namespace DefenceGame.Data.Editor
     {
         public static GameDataSO ConvertExcelToScriptableObject(string excelPath, string outputPath)
         {
-            GameDataSO gameData = ScriptableObject.CreateInstance<GameDataSO>();
+            if (!Directory.Exists(outputPath))
+            {
+                Directory.CreateDirectory(outputPath);
+            }
+            
+            string assetPath = Path.Combine(outputPath, "GameData.asset");
+            string unityAssetPath = "Assets/" + assetPath.Substring(assetPath.IndexOf("Assets/") + 7).Replace("\\", "/");
+            
+            // Check if asset already exists
+            GameDataSO gameData = UnityEditor.AssetDatabase.LoadAssetAtPath<GameDataSO>(unityAssetPath);
+            
+            if (gameData == null)
+            {
+                // Create new instance if doesn't exist
+                gameData = ScriptableObject.CreateInstance<GameDataSO>();
+                Debug.Log("Creating new GameData.asset");
+            }
+            else
+            {
+                Debug.Log("Updating existing GameData.asset");
+            }
             
             using (var stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -57,17 +77,22 @@ namespace DefenceGame.Data.Editor
                 }
             }
             
-            // ScriptableObject 저장
-            if (!Directory.Exists(outputPath))
+            // Save asset
+            if (UnityEditor.AssetDatabase.Contains(gameData))
             {
-                Directory.CreateDirectory(outputPath);
+                // Asset already exists, just mark as dirty
+                UnityEditor.EditorUtility.SetDirty(gameData);
+                UnityEditor.AssetDatabase.SaveAssets();
+                Debug.Log($"GameData updated at: {unityAssetPath}");
+            }
+            else
+            {
+                // Create new asset
+                UnityEditor.AssetDatabase.CreateAsset(gameData, unityAssetPath);
+                UnityEditor.AssetDatabase.SaveAssets();
+                Debug.Log($"GameData saved to: {unityAssetPath}");
             }
             
-            string assetPath = Path.Combine(outputPath, "GameData.asset");
-            UnityEditor.AssetDatabase.CreateAsset(gameData, assetPath);
-            UnityEditor.AssetDatabase.SaveAssets();
-            
-            Debug.Log($"GameData saved to: {assetPath}");
             return gameData;
         }
         
