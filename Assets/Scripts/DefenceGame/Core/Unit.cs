@@ -31,12 +31,18 @@ namespace DefenceGame.Core
         private Enemy targetEnemy;
         private LineRenderer rangeLineRenderer;
         
+        // Drag variables
+        private bool isDragging = false;
+        private Camera mainCamera;
+        
         private void Awake()
         {
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponent<SpriteRenderer>();
             }
+            
+            mainCamera = Camera.main;
             
             // Find attack point if not assigned
             if (attackPoint == null)
@@ -50,6 +56,12 @@ namespace DefenceGame.Core
             
             // Setup range visualization
             SetupRangeVisualization();
+            
+            // Add collider for mouse detection if not present
+            if (GetComponent<Collider2D>() == null)
+            {
+                gameObject.AddComponent<BoxCollider2D>();
+            }
         }
         
         private void SetupRangeVisualization()
@@ -111,6 +123,9 @@ namespace DefenceGame.Core
                 case GradeType.Common:
                     spriteRenderer.color = Color.white;
                     break;
+                case GradeType.Uncommon:
+                    spriteRenderer.color = new Color(0.3f, 1f, 0.3f); // 연한 초록색
+                    break;
                 case GradeType.Rare:
                     spriteRenderer.color = Color.blue;
                     break;
@@ -120,6 +135,49 @@ namespace DefenceGame.Core
                 case GradeType.Legendary:
                     spriteRenderer.color = Color.yellow;
                     break;
+            }
+        }
+        
+        // Mouse Drag Methods
+        private void OnMouseDown()
+        {
+            // 게임 오버 상태 체크
+            if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+                return;
+            
+            isDragging = true;
+            UnitDragSystem.Instance?.StartDrag(this);
+        }
+        
+        private void OnMouseDrag()
+        {
+            if (!isDragging) return;
+            
+            // 마우스 위치를 월드 좌표로 변환
+            Vector3 mousePos = Input.mousePosition;
+            mousePos.z = -mainCamera.transform.position.z;
+            Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
+            worldPos.z = transform.position.z;
+            
+            // 드래그 시스템에 위치 업데이트
+            UnitDragSystem.Instance?.UpdateDragPosition(worldPos);
+        }
+        
+        private void OnMouseUp()
+        {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            UnitDragSystem.Instance?.EndDrag(this);
+        }
+        
+        private void OnDisable()
+        {
+            // 드래그 중에 비활성화되면 취소
+            if (isDragging)
+            {
+                UnitDragSystem.Instance?.CancelDrag();
+                isDragging = false;
             }
         }
         

@@ -15,34 +15,34 @@ MonoBehaviour:
   Enemies:
   - Id: 1
     Name: BlackSlime
-    Health: 100
+    Health: 30
     Speed: 1.5
     RewardGold: 10
   - Id: 2
     Name: BlackWorm
-    Health: 200
+    Health: 50
     Speed: 2
     RewardGold: 20
   - Id: 3
     Name: BlackRat
-    Health: 100
+    Health: 20
     Speed: 5
-    RewardGold: 20
+    RewardGold: 10
   - Id: 4
     Name: BlackScorpion
-    Health: 300
+    Health: 100
     Speed: 2
     RewardGold: 50
   - Id: 5
     Name: BlackCerberus
-    Health: 5000
+    Health: 1000
     Speed: 1
     RewardGold: 500
   Towers:
   - Id: 1
     Name: Archer
     AttackPower: 10
-    AttackSpeed: 1
+    AttackSpeed: 2
     Range: 3
     Grade: 0
   - Id: 2
@@ -50,19 +50,19 @@ MonoBehaviour:
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
-    Grade: 1
+    Grade: 0
   - Id: 3
     Name: MageTower
     AttackPower: 50
-    AttackSpeed: 0.5
+    AttackSpeed: 0.8
     Range: 3
-    Grade: 2
+    Grade: 0
   - Id: 4
     Name: Laser
     AttackPower: 100
-    AttackSpeed: 2
+    AttackSpeed: 1
     Range: 3
-    Grade: 3
+    Grade: 0
   Waves:
   - WaveNumber: 1
     EnemyId: 1
@@ -76,7 +76,7 @@ MonoBehaviour:
     HealthMultiplier: 1
   - WaveNumber: 3
     EnemyId: 2
-    Count: 20
+    Count: 30
     SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 4
@@ -106,7 +106,7 @@ MonoBehaviour:
     HealthMultiplier: 1.2
   - WaveNumber: 9
     EnemyId: 2
-    Count: 30
+    Count: 45
     SpawnInterval: 1
     HealthMultiplier: 1.2
   - WaveNumber: 10
@@ -136,7 +136,7 @@ MonoBehaviour:
     HealthMultiplier: 1.5
   - WaveNumber: 15
     EnemyId: 2
-    Count: 45
+    Count: 67
     SpawnInterval: 1
     HealthMultiplier: 1.5
   - WaveNumber: 16
@@ -156,16 +156,16 @@ MonoBehaviour:
     HealthMultiplier: 1.5
   GachaProbabilities:
   - Grade: 0
-    Probability: 25
+    Probability: 67
     Cost: 0
   - Grade: 1
-    Probability: 25
+    Probability: 20
     Cost: 0
   - Grade: 2
-    Probability: 25
+    Probability: 10
     Cost: 0
   - Grade: 3
-    Probability: 25
+    Probability: 3
     Cost: 0
   UnitGrades:
   - Grade: 0

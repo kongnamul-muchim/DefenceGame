@@ -28,7 +28,7 @@ namespace DefenceGame.Core
         public float placementHeight = 0.5f;
         public Vector2 placementOffset = new Vector2(0.5f, 0.5f);
         
-        private List<Vector3> placedPositions = new List<Vector3>();
+        private Dictionary<Vector3, Unit> placedUnits = new Dictionary<Vector3, Unit>(); // 위치별 유닛 추적
         private float minDistanceBetweenUnits = 1.0f;
         private Dictionary<int, GameObject> towerPrefabDict;
         
@@ -103,9 +103,9 @@ namespace DefenceGame.Core
                 
                 // Check distance from other units
                 bool tooClose = false;
-                foreach (Vector3 placedPos in placedPositions)
+                foreach (var kvp in placedUnits)
                 {
-                    if (Vector3.Distance(worldPos, placedPos) < minDistanceBetweenUnits)
+                    if (Vector3.Distance(worldPos, kvp.Key) < minDistanceBetweenUnits)
                     {
                         tooClose = true;
                         break;
@@ -114,7 +114,6 @@ namespace DefenceGame.Core
                 
                 if (!tooClose)
                 {
-                    placedPositions.Add(worldPos);
                     return worldPos;
                 }
             }
@@ -148,6 +147,8 @@ namespace DefenceGame.Core
             if (unitComponent != null)
             {
                 unitComponent.Initialize(towerData);
+                // 위치 추적 추가
+                placedUnits[position] = unitComponent;
             }
             else
             {
@@ -177,7 +178,137 @@ namespace DefenceGame.Core
         /// </summary>
         public void ClearAllUnits()
         {
-            placedPositions.Clear();
+            placedUnits.Clear();
+        }
+        
+        /// <summary>
+        /// Get unit at specific position
+        /// </summary>
+        public Unit GetUnitAtPosition(Vector3 position)
+        {
+            // 위치 허용 오차 내에서 검색
+            float tolerance = 0.5f;
+            foreach (var kvp in placedUnits)
+            {
+                if (Vector3.Distance(kvp.Key, position) < tolerance)
+                {
+                    return kvp.Value;
+                }
+            }
+            return null;
+        }
+        
+        /// <summary>
+        /// Move unit to new position
+        /// </summary>
+        public bool MoveUnitToPosition(Unit unit, Vector3 newPosition)
+        {
+            if (unit == null) return false;
+            
+            // 1. 새 위치가 Wall 타일인지 확인
+            if (gridSystem == null) return false;
+            Vector3Int cellPos = gridSystem.wallTilemap.WorldToCell(newPosition);
+            if (!gridSystem.wallTilemap.HasTile(cellPos)) return false;
+            
+            // 2. 기존 위치 찾기 및 제거
+            Vector3? oldPosition = null;
+            foreach (var kvp in placedUnits)
+            {
+                if (kvp.Value == unit)
+                {
+                    oldPosition = kvp.Key;
+                    break;
+                }
+            }
+            
+            if (oldPosition.HasValue)
+            {
+                placedUnits.Remove(oldPosition.Value);
+            }
+            
+            // 3. 새 위치에 추가
+            placedUnits[newPosition] = unit;
+            
+            // 4. 유닛 위치 업데이트
+            unit.transform.position = newPosition;
+            
+            Debug.Log($"Unit moved from {oldPosition} to {newPosition}");
+            return true;
+        }
+        
+        /// <summary>
+        /// Remove unit from placement manager
+        /// </summary>
+        public void RemoveUnit(Unit unit)
+        {
+            if (unit == null) return;
+            
+            // placedUnits에서 해당 유닛 찾아 제거
+            Vector3? positionToRemove = null;
+            foreach (var kvp in placedUnits)
+            {
+                if (kvp.Value == unit)
+                {
+                    positionToRemove = kvp.Key;
+                    break;
+                }
+            }
+            
+            if (positionToRemove.HasValue)
+            {
+                placedUnits.Remove(positionToRemove.Value);
+                Debug.Log($"Unit removed from position: {positionToRemove.Value}");
+            }
+        }
+        
+        /// <summary>
+        /// Place unit at specific position (for merge)
+        /// </summary>
+        public void PlaceUnitAtPosition(TowerData towerData, Vector3 position)
+        {
+            // Get prefab for this tower ID
+            GameObject prefabToUse = GetTowerPrefab(towerData.Id);
+            
+            // If no specific prefab, use default
+            if (prefabToUse == null)
+            {
+                prefabToUse = defaultUnitPrefab;
+            }
+            
+            if (prefabToUse == null)
+            {
+                Debug.LogError($"No prefab available for tower ID: {towerData.Id}!");
+                return;
+            }
+            
+            GameObject unit = Instantiate(prefabToUse, position, Quaternion.identity);
+            unit.name = $"Unit_{towerData.Name}";
+            
+            // Initialize unit with tower data
+            Unit unitComponent = unit.GetComponent<Unit>();
+            if (unitComponent != null)
+            {
+                unitComponent.Initialize(towerData);
+                placedUnits[position] = unitComponent;
+            }
+            else
+            {
+                Debug.LogWarning($"Unit component not found on prefab for {towerData.Name}");
+            }
+            
+            Debug.Log($"Placed [{towerData.Grade}] {towerData.Name} (ID: {towerData.Id}) at {position}");
+        }
+        
+        /// <summary>
+        /// Update unit position tracking (called when unit moves)
+        /// </summary>
+        public void UpdateUnitPosition(Unit unit, Vector3 oldPosition, Vector3 newPosition)
+        {
+            if (placedUnits.ContainsKey(oldPosition) && placedUnits[oldPosition] == unit)
+            {
+                placedUnits.Remove(oldPosition);
+                placedUnits[newPosition] = unit;
+            }
         }
     }
 }

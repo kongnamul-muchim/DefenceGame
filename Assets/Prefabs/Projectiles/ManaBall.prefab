@@ -105,8 +105,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d41b6fdbbd930246994331f463829ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.Bullet
-  speed: 5
+  speed: 10
   lifetime: 5
+  rotationOffset: 0
 --- !u!58 &6563068133018904003
 CircleCollider2D:
   m_ObjectHideFlags: 0
