@@ -11,7 +11,7 @@ namespace DefenceGame.Core
         [Header("Merge Settings")]
         public int mergeCount = 2; // 합성에 필요한 유닛 수 (2개)
         [Range(0f, 1f)]
-        public float sameUnitChance = 0.5f; // 같은 유닛이 나올 확률 (50%)
+        public float sameUnitChance = 0.25f; // 같은 유닛이 나올 확률 (25%), 나머지 75%는 다른 3개 유닛 중 랜덤
         
         [Header("Effects")]
         public ParticleSystem mergeEffectPrefab; // Inspector에서 연결
@@ -107,7 +107,13 @@ namespace DefenceGame.Core
             // 같은 유닛이 없거나 랜덤 유닛을 선택한 경우
             if (newTower == null)
             {
-                newTower = GetRandomTowerByGrade(nextGrade);
+                // 현재 유닛을 제외한 다른 유닛 중에서 랜덤 선택
+                newTower = GetRandomTowerByGradeExcept(nextGrade, unitName);
+                if (newTower == null)
+                {
+                    // 다른 유닛이 없으면 현재 유닛이라도 반환
+                    newTower = GetUpgradedTower(unitName, nextGrade);
+                }
                 Debug.Log($"[Merge] Random tower selected: {newTower?.Name ?? "NULL"}");
             }
             
@@ -154,6 +160,43 @@ namespace DefenceGame.Core
                 default:
                     return GradeType.Legendary; // 최고 등급 유지
             }
+        }
+        
+        // 특정 등급의 랜덤 타워 선택 (현재 유닛 제외)
+        private TowerData GetRandomTowerByGradeExcept(GradeType targetGrade, string excludeUnitName)
+        {
+            if (GameDataSO.Instance == null)
+            {
+                Debug.LogError("[Merge] GameDataSO.Instance is null!");
+                return null;
+            }
+            
+            Debug.Log($"[Merge] Looking for random tower of grade {targetGrade}, excluding: {excludeUnitName}");
+            
+            // 해당 등급의 모든 타워 가져오기 (현재 유닛 제외)
+            List<TowerData> towersOfGrade = new List<TowerData>();
+            if (GameDataSO.Instance.Towers != null)
+            {
+                foreach (var tower in GameDataSO.Instance.Towers)
+                {
+                    if (tower.Grade == targetGrade && tower.Name != excludeUnitName)
+                    {
+                        towersOfGrade.Add(tower);
+                        Debug.Log($"[Merge] Found other tower: {tower.Name}");
+                    }
+                }
+            }
+            
+            if (towersOfGrade.Count == 0)
+            {
+                Debug.LogWarning($"[Merge] No other towers found for grade {targetGrade}");
+                return null;
+            }
+            
+            // 랜덤 선택 (남은 3개 중 하나)
+            int randomIndex = Random.Range(0, towersOfGrade.Count);
+            Debug.Log($"[Merge] Selected other tower: {towersOfGrade[randomIndex].Name} ({randomIndex + 1}/{towersOfGrade.Count})");
+            return towersOfGrade[randomIndex];
         }
         
         // 특정 등급의 랜덤 타워 선택 (가챠 확률 적용)
