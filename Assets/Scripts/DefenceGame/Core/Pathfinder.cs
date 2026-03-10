@@ -43,7 +43,7 @@ namespace DefenceGame.Core
             }
         }
         
-        public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos)
+        public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null)
         {
             if (gridSystem == null)
             {
@@ -65,7 +65,7 @@ namespace DefenceGame.Core
                 Vector3 randomWaypoint = waypoints[Random.Range(0, waypoints.Count)];
                 
                 // Path: Start → Waypoint
-                List<Vector3> pathToWaypoint = FindPathInternal(currentPos, randomWaypoint);
+                List<Vector3> pathToWaypoint = FindPathInternal(currentPos, randomWaypoint, excludeNodes);
                 if (pathToWaypoint.Count > 0)
                 {
                     finalPath.AddRange(pathToWaypoint);
@@ -74,7 +74,7 @@ namespace DefenceGame.Core
             }
             
             // Path: CurrentPos (or Start) → Target
-            List<Vector3> pathToTarget = FindPathInternal(currentPos, targetPos);
+            List<Vector3> pathToTarget = FindPathInternal(currentPos, targetPos, excludeNodes);
             if (pathToTarget.Count > 0)
             {
                 finalPath.AddRange(pathToTarget);
@@ -83,7 +83,7 @@ namespace DefenceGame.Core
             return finalPath;
         }
         
-        private List<Vector3> FindPathInternal(Vector3 startPos, Vector3 targetPos)
+        private List<Vector3> FindPathInternal(Vector3 startPos, Vector3 targetPos, HashSet<GridSystem.Node> excludeNodes = null)
         {
             if (gridSystem == null)
             {
@@ -110,6 +110,9 @@ namespace DefenceGame.Core
             
             openSet.Add(startNode);
             
+            // Calculate initial distance to target for backward prevention
+            float initialDistanceToTarget = Vector3.Distance(startPos, targetPos);
+            
             while (openSet.Count > 0)
             {
                 GridSystem.Node currentNode = openSet[0];
@@ -135,6 +138,20 @@ namespace DefenceGame.Core
                 {
                     if (closedSet.Contains(neighbor))
                         continue;
+                    
+                    // Skip excluded nodes (already visited)
+                    if (excludeNodes != null && excludeNodes.Contains(neighbor))
+                        continue;
+                    
+                    // Forward-only: Skip if moving backward (away from target)
+                    float neighborDistToTarget = Vector3.Distance(neighbor.worldPosition, targetPos);
+                    float currentDistToTarget = Vector3.Distance(currentNode.worldPosition, targetPos);
+                    
+                    // Allow some tolerance but generally prevent moving backward
+                    if (neighborDistToTarget > currentDistToTarget + 0.5f)
+                    {
+                        continue; // Skip this neighbor as it moves away from target
+                    }
                     
                     int newCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
                     

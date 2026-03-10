@@ -17,10 +17,14 @@ namespace DefenceGame.Core
         public bool drawGizmos = true;
         public Color pathColor = Color.yellow;
         
+        [Header("No Backtracking")]
+        public bool enableVisitedTracking = true;
+        
         private List<Vector3> path;
         private int currentWaypointIndex = 0;
         private bool isMoving = false;
         private Vector3 targetPosition;
+        private HashSet<GridSystem.Node> visitedNodes = new HashSet<GridSystem.Node>();
         
         public System.Action OnPathComplete;
         public System.Action<Vector3> OnWaypointReached;
@@ -58,7 +62,7 @@ namespace DefenceGame.Core
                 return;
             }
             
-            List<Vector3> newPath = Pathfinder.Instance.FindPath(transform.position, destination);
+            List<Vector3> newPath = Pathfinder.Instance.FindPath(transform.position, destination, visitedNodes);
             SetPath(newPath);
         }
         
@@ -95,6 +99,13 @@ namespace DefenceGame.Core
             if (distanceToTarget <= stoppingDistance)
             {
                 OnWaypointReached?.Invoke(target);
+                
+                // Mark this node as visited
+                if (enableVisitedTracking)
+                {
+                    MarkNodeAsVisited(target);
+                }
+                
                 currentWaypointIndex++;
                 
                 if (currentWaypointIndex >= path.Count)
@@ -102,6 +113,23 @@ namespace DefenceGame.Core
                     CompletePath();
                 }
             }
+        }
+        
+        private void MarkNodeAsVisited(Vector3 position)
+        {
+            if (GridSystem.Instance == null) return;
+            
+            GridSystem.Node node = GridSystem.Instance.GetNodeFromWorldPosition(position);
+            if (node != null)
+            {
+                visitedNodes.Add(node);
+            }
+        }
+        
+        public void ClearVisitedNodes()
+        {
+            visitedNodes.Clear();
+            Debug.Log("Visited nodes cleared");
         }
         
         private void CompletePath()
@@ -170,6 +198,19 @@ namespace DefenceGame.Core
             {
                 Gizmos.color = Color.green;
                 Gizmos.DrawWireSphere(path[currentWaypointIndex], 0.3f);
+            }
+            
+            // Draw visited nodes
+            if (enableVisitedTracking && visitedNodes != null && visitedNodes.Count > 0)
+            {
+                Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f); // Orange
+                foreach (var node in visitedNodes)
+                {
+                    if (node != null)
+                    {
+                        Gizmos.DrawWireCube(node.worldPosition, Vector3.one * 0.4f);
+                    }
+                }
             }
         }
     }

@@ -140,6 +140,20 @@ namespace DefenceGame.Core
                 this.gridX = gridX;
                 this.gridY = gridY;
             }
+            
+            public override bool Equals(object obj)
+            {
+                if (obj is Node other)
+                {
+                    return gridX == other.gridX && gridY == other.gridY;
+                }
+                return false;
+            }
+            
+            public override int GetHashCode()
+            {
+                return gridX.GetHashCode() ^ gridY.GetHashCode();
+            }
         }
     }
 }
