@@ -53,6 +53,12 @@ namespace DefenceGame.Core
         private void Start()
         {
             InitializeWaves();
+            
+            // Auto-start game after initialization
+            if (wavesByNumber != null && wavesByNumber.Count > 0)
+            {
+                StartGame();
+            }
         }
         
         private void InitializeWaves()
@@ -188,11 +194,12 @@ namespace DefenceGame.Core
             Vector3 spawnPosition = GetNonOverlappingSpawnPosition();
             GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
             
-            // Initialize enemy
+            // Initialize enemy with random target position around castle
             Enemy enemyComponent = enemy.GetComponent<Enemy>();
             if (enemyComponent != null)
             {
-                enemyComponent.Initialize(enemyData, healthMultiplier, castleTarget.position);
+                Vector3 randomTargetPos = GetRandomCastleTargetPosition();
+                enemyComponent.Initialize(enemyData, healthMultiplier, randomTargetPos);
             }
             
             Debug.Log($"Spawned enemy: {enemyData.Name} at {spawnPosition}");
@@ -255,6 +262,18 @@ namespace DefenceGame.Core
             currentWave = 0;
             totalEnemiesSpawned = 0;
             enemiesRemainingInWave = 0;
+        }
+        
+        private Vector3 GetRandomCastleTargetPosition()
+        {
+            if (castleTarget == null)
+            {
+                return Vector3.zero;
+            }
+            
+            // Random offset around castle (within 2 units radius)
+            Vector2 randomOffset = Random.insideUnitCircle * 2f;
+            return castleTarget.position + new Vector3(randomOffset.x, randomOffset.y, 0);
         }
     }
 }

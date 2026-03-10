@@ -10,6 +10,7 @@ namespace DefenceGame.Core
         
         [Header("Tilemap References")]
         public Tilemap wallTilemap;
+        public Tilemap barrierTilemap;
         public Tilemap groundTilemap;
         
         [Header("Grid Settings")]
@@ -53,8 +54,15 @@ namespace DefenceGame.Core
         
         private bool IsWall(Vector3Int cellPos)
         {
-            if (wallTilemap == null) return false;
-            return wallTilemap.HasTile(cellPos);
+            // Check wall tilemap
+            if (wallTilemap != null && wallTilemap.HasTile(cellPos))
+                return true;
+            
+            // Check barrier tilemap
+            if (barrierTilemap != null && barrierTilemap.HasTile(cellPos))
+                return true;
+            
+            return false;
         }
         
         public Node GetNodeFromWorldPosition(Vector3 worldPosition)
