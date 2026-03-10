@@ -10,6 +10,8 @@ namespace DefenceGame.Core
         
         [Header("Merge Settings")]
         public int mergeCount = 2; // 합성에 필요한 유닛 수 (2개)
+        [Range(0f, 1f)]
+        public float sameUnitChance = 0.5f; // 같은 유닛이 나올 확률 (50%)
         
         [Header("Effects")]
         public ParticleSystem mergeEffectPrefab; // Inspector에서 연결
@@ -75,16 +77,38 @@ namespace DefenceGame.Core
             // 2. 위치 저장 (타겟 유닛 위치 = 드래그하지 않은 유닛 위치)
             Vector3 mergePosition = targetUnit.transform.position;
             
-            // 3. 원래 유닛 이름 저장 (같은 이름의 상위 등급 유닛을 찾기 위해)
+            // 3. 원래 유닛 이름 저장
             string unitName = draggedUnit.unitName;
             GradeType originalGrade = draggedUnit.grade;
             
-            // 4. 새 유닛 먼저 찾기 (유닛 제거 전에)
-            TowerData newTower = GetUpgradedTower(unitName, nextGrade);
+            // 4. 새 유닛 선택 (같은 유닛 확률 또는 랜덤 유닛)
+            TowerData newTower = null;
+            
+            // 같은 유닛이 나올지 랜덤 유닛이 나올지 결정
+            float randomValue = Random.value;
+            bool shouldGetSameUnit = randomValue <= sameUnitChance;
+            
+            Debug.Log($"[Merge] Random roll: {randomValue:F2}, Same unit chance: {sameUnitChance:F2}, Will get same unit: {shouldGetSameUnit}");
+            
+            if (shouldGetSameUnit)
+            {
+                // 같은 이름의 상위 등급 유닛 찾기 시도
+                newTower = GetUpgradedTower(unitName, nextGrade);
+                if (newTower != null)
+                {
+                    Debug.Log($"[Merge] Same unit selected: {newTower.Name}");
+                }
+                else
+                {
+                    Debug.Log($"[Merge] No same unit found, falling back to random");
+                }
+            }
+            
+            // 같은 유닛이 없거나 랜덤 유닛을 선택한 경우
             if (newTower == null)
             {
-                Debug.LogWarning($"[Merge] No upgraded tower found for {unitName} at grade {nextGrade}, trying random tower...");
                 newTower = GetRandomTowerByGrade(nextGrade);
+                Debug.Log($"[Merge] Random tower selected: {newTower?.Name ?? "NULL"}");
             }
             
             // 새 유닛 데이터가 없으면 합성 취소

@@ -48,13 +48,22 @@ namespace DefenceGame.Core
         private void InitializeTowerPrefabDict()
         {
             towerPrefabDict = new Dictionary<int, GameObject>();
+            Debug.Log("[UnitPlacement] Initializing Tower Prefab Dictionary...");
+            
             foreach (var mapping in towerPrefabs)
             {
                 if (mapping.prefab != null)
                 {
                     towerPrefabDict[mapping.towerId] = mapping.prefab;
+                    Debug.Log($"[UnitPlacement] Registered Tower ID {mapping.towerId} -> {mapping.prefab.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[UnitPlacement] Tower ID {mapping.towerId} has null prefab!");
                 }
             }
+            
+            Debug.Log($"[UnitPlacement] Total prefabs registered: {towerPrefabDict.Count}");
         }
         
         private void Start()
@@ -167,9 +176,12 @@ namespace DefenceGame.Core
             
             if (towerPrefabDict.ContainsKey(towerId))
             {
-                return towerPrefabDict[towerId];
+                GameObject prefab = towerPrefabDict[towerId];
+                Debug.Log($"[UnitPlacement] Found prefab for Tower ID {towerId}: {prefab.name}");
+                return prefab;
             }
             
+            Debug.Log($"[UnitPlacement] No specific prefab for Tower ID {towerId}, using default");
             return defaultUnitPrefab;
         }
         
