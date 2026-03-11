@@ -159,7 +159,7 @@ Data/
 | **Step 1** | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | ✅ 완료 | `1cac56c` |
 | **Step 2** | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | ✅ 완료 | `950e165` |
 | **Step 3** | **타워 레벨/경험치 시스템** | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | ✅ 완료 | `43cbff1` |
-| Step 4 | 타워 레벨 UI | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | 📝 예정 | - |
+| **Step 4** | **타워 레벨 UI** | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | ✅ 완료 | `0baac48` |
 | Step 5 | 특수 능력 해금 시스템 | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 예정 | - |
 
 ### 📋 상세 진행 내용
@@ -228,10 +228,30 @@ Data/
 
 **Git Commit:** `43cbff1` - Phase B Step 3: Add tower level and experience system
 
-#### **Step 4: 타워 레벨 UI**
-- [ ] TowerLevelUI.cs 신규 생성
-- [ ] 화면 우측 상단에 4개 타워 슬롯 배치 (Archer/Wizard/WizardTower/Laser)
-- [ ] 각 슬롯에 Slider 추가 (흰색 BG, 녹색 Fill)
+#### **Step 4: 타워 레벨 UI** ✅ 완료 (2025-03-11)
+- [x] TowerLevelUI.cs 신규 생성
+- [x] 화면 우측 상단에 4개 타워 슬롯 배치 (Archer/Wizard/WizardTower/Laser)
+  - 각 슬롯에 Slider 추가 (흰색 BG, 녹색 Fill)
+  - 레벨 텍스트 표시 (Lv.0~)
+  - **Panel 색상 변경 기능 추가** (레벨별로 색상 변경)
+- [x] 레벨별 Panel/슬롯 색상 변경:
+  - Lv.0-2: 회색
+  - Lv.3-4: 하얀색
+  - Lv.5-6: 연두색
+  - Lv.7+: 노란색
+- [x] TowerLevelManager 이벤트 연결
+  - `OnTowerExpChanged` → 경험치 슬라이더 업데이트
+  - `OnTowerLevelUp` → 레벨 텍스트 및 색상 업데이트
+
+**Unity 설정:**
+- Hierarchy → TowerLevelCanvas 선택
+- Inspector → `TowerLevelUI` 컴포넌트 추가
+- Tower Slots 배열에 4개 슬롯 연결 (Archer, Wizard, WizardTower, Laser)
+- 각 슬롯의 UI 요소 연결 (LevelText, ExpSlider, PanelImage)
+
+**Git Commit:** `0baac48` - Phase B Step 4: Add tower level UI with panel color change
+
+#### **Step 5: 특수 능력 해금 시스템**
 - [ ] 레벨 텍스트 표시 (Lv.0~)
 - [ ] 레벨별 박스 색상 변경:
   - Lv.0-2: 회색
