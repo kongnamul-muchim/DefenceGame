@@ -99,7 +99,7 @@ namespace DefenceGame.Core
         
         private void ExecuteRangedAttack(Enemy enemy)
         {
-            string towerType = unit != null ? unit.GetTowerType() : "";
+            string towerType = unit != null ? unit.TowerType : "";
             
             // Archer: MultiShot
             if (towerType == "Archer" && ability != null && ability.multiShotCount > 1)
@@ -109,7 +109,8 @@ namespace DefenceGame.Core
             // Laser: ChainAttack
             else if (towerType == "Laser" && ability != null && ability.chainAttackCount > 0)
             {
-                SpawnChainBullet(enemy, ability.chainAttackCount);
+                float damageMultiplier = ability.GetChainDamageMultiplier();
+                SpawnChainBullet(enemy, ability.chainAttackCount, damageMultiplier);
             }
             // Wizard: GroundEffect (10% chance)
             else if (towerType == "Wizard" && ability != null && ability.ShouldTriggerGroundEffect())
@@ -161,7 +162,7 @@ namespace DefenceGame.Core
             }
         }
         
-        private void SpawnChainBullet(Enemy target, int chainCount)
+        private void SpawnChainBullet(Enemy target, int chainCount, float damageMultiplier = 1.0f)
         {
             if (bulletPrefab == null || target == null) return;
             
@@ -169,7 +170,7 @@ namespace DefenceGame.Core
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                bulletComponent.InitializeChain(target, attackPower, chainCount);
+                bulletComponent.InitializeChain(target, attackPower, chainCount, damageMultiplier);
             }
         }
         

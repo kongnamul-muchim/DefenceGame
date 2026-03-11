@@ -9,18 +9,14 @@
 
 | 타워 | 기존 능력 | 새로운 능력 | 설명 |
 |------|----------|------------|------|
-| **Archer** | 관통 (Pierce) | **투사체 개수증가 (MultiShot)** | 레벨 3: 2개, 5: 3개, 7: 4개 발사 |
-| **Mage** | 광역 (AreaDamage) | **지속피해 바닥 (GroundEffect)** | 레벨 3: 3초, 5: 5초, 7: 7초 지속 |
-| **MageTower** | 버프/디버프 | **사거리증가 + 공격력증가** | 레벨 3: 사거리+1, 5: 공격력30%, 7: 사거리+2 |
+| **Archer** | 관통 (Pierce) | **투사체 개수증가 (MultiShot)** | 레벨 3: 2개, 5: 3개, 7: 공격속도 50% 증가 |
+| **Wizard** | 광역 (AreaDamage) | **지속피해 바닥 (GroundEffect)** | 10% 확률로 1.3초 지속 피해 바닥 생성 |
+| **WizardTower** | 버프/디버프 | **사거리증가 + 공격력증가** | 레벨 3: 사거리+0.5, 5: 공격력30%, 7: 사거리+1 |
 | **Laser** | 사거리/관통 | **연계공격 (ChainAttack)** | 레벨 3: 1회, 5: 2회, 7: 3회 주변 전이 |
 
 #### 수정된 파일
 - `Assets/Scripts/DefenceGame/Data/SpecialAbilityData.cs` - 새로운 능력 타입 enum 추가
 - `Assets/Scripts/DefenceGame/Core/SpecialAbilityManager.cs` - 능력 데이터 재설정
-- `Assets/Scripts/DefenceGame/Core/Unit.cs` - 새로운 능력 로직 구현
-  - MultiShot: 주변 적에게 다중 발사
-  - GroundEffect: 공격 시 지속 데미지 바닥 생성
-  - ChainAttack: 적중 시 주변 적에게 피해 전이
 - `Assets/Scripts/DefenceGame/Core/Enemy.cs` - 둔화 효과 버그 수정 (고정값 -> 실제 값 저장)
 
 #### 새로 생성된 파일
@@ -30,7 +26,105 @@
 - Hash: `44317b1`
 - Message: `feat: redesign special abilities system`
 
+---
+
+## 2024-03-12: 코드 리팩토링 - 컴포넌트 분리
+
+### 변경 사항
+Unit.cs가 너무 무거워져 (~1000줄) 유지보수가 어려워져 컴포넌트로 분리했습니다.
+
+#### 분리된 컴포넌트
+
+| 파일 | 설명 | 라인 수 |
+|------|------|---------|
+| **Unit.cs** | 핵심 데이터와 컴포넌트 조율 | ~100줄 |
+| **UnitAttack.cs** | 공격 로직 (타겟 찾기, 투사체 발사) | ~150줄 |
+| **UnitUI.cs** | UI/시각화 (범위 표시, 호버 효과) | ~120줄 |
+| **UnitDrag.cs** | 드래그 기능 | ~30줄 |
+| **UnitAbility.cs** | 특수능력 관리 | ~100줄 |
+
+#### 삭제된 코드
+- `ApplyMageTowerEffects()` - 사용하지 않는 버프/디버프 로직
+- `SetupBuffRangeVisualization()` - 버프 범위 시각화
+- `ReceiveAttackBuff()` / `RemoveAttackBuff()` - 버프 관리 메서드
+- Deprecated 필드들: `attackBuffValue`, `speedBuffValue`, `slowEffectValue`, `buffRange`, `buffRangeRenderer`
+
+#### 개선사항
+- **단일 책임 원칙**: 각 컴포넌트가 하나의 역할만 담당
+- **코드 가독성**: 파일당 100~150줄로 관리 가능
+- **유지보수성**: 개별 기능 수정 시 다른 부분 영향 최소화
+- **성능**: 컴포넌트 캐싱으로 GetComponent 호출 감소
+
+### 커밋
+- Hash: `1a753e9`
+- Message: `refactor: Split Unit.cs into separate components`
+- Changes: 616 insertions(+), 5881 deletions(-)
+
 ### 다음 단계 작업 목록
-- [ ] GroundEffect 프리팹 생성 및 Unit에 연결
-- [ ] 새로운 능력 테스트
-- [ ] 밸런스 조정 (데미지, 지속시간 등)
+- [x] 컴포넌트 분리 및 리팩토링
+- [x] 불필요한 코드 제거
+- [x] 컴파일 에러 수정
+- [ ] Unity에서 컴포넌트 연결 확인
+- [ ] 기능 테스트 (공격, UI, 드래그, 특수능력)
+
+---
+
+## 2024-03-13: 컴파일 에러 수정
+
+### 변경 사항
+리팩토링 후 발생한 컴파일 에러들을 수정했습니다.
+
+#### 수정된 파일
+- `Assets/Scripts/DefenceGame/Core/Unit.cs` - 메서드 접근 제한자 변경 및 신규 메서드 추가
+- `Assets/Scripts/DefenceGame/Core/UnitUI.cs` - 색상 관리 메서드 추가
+- `Assets/Scripts/DefenceGame/Core/UnitAttack.cs` - 프로퍼티 접근 방식 수정
+- `Assets/Scripts/DefenceGame/Core/UnitDragSystem.cs` - 직접 필드 접근 제거
+
+#### 수정 내용
+1. **GetGradeColor**: `private` → `public`으로 변경
+2. **GetTowerType()**: 메서드 호출 → `TowerType` 프로퍼티 접근으로 변경
+3. **SetRareColor/RestoreGradeColor**: Unit.cs와 UnitUI.cs에 추가
+4. **rareColorRenderer 직접 접근**: UnitDragSystem.cs에서 메서드 호출로 변경
+
+---
+
+## 2024-03-13: 특수능력 등급 기반 강화 시스템 구현
+
+### 변경 사항
+특수능력이 타워의 등급에 따라 더 강력해지도록 시스템을 개선했습니다.
+
+#### 등급 배율표
+
+| 등급 | 배율 | 약한 배율 (Laser용) |
+|------|------|-------------------|
+| Common | 1.0x | 0.7x |
+| Uncommon | 1.2x | 0.85x |
+| Rare | 1.5x | 1.0x |
+| Epic | 2.0x | 1.3x |
+| Legendary | 3.0x | 1.8x |
+
+#### 타워별 등급 기반 강화 효과
+
+| 타워 | 능력 | 등급 효과 |
+|------|------|----------|
+| **Archer** | 공격속도 증가 | 레벨 7의 50% 증가가 등급에 비례 (Common=50%, Legendary=150%) |
+| **Wizard** | GroundEffect 확률 | 기본 10%가 등급에 비례 (Common=10%, Legendary=30%) |
+| **WizardTower** | 공격력 증가 | 레벨 5의 30% 증가가 등급에 비례 (Common=30%, Legendary=90%) |
+| **Laser** | 연계 피해량 | 첫 타는 정상, 연계 시 등급 배율 적용 (Common=70%, Legendary=180%) |
+
+#### 수정된 파일
+- `Assets/Scripts/DefenceGame/Data/GradeMultiplier.cs` - 등급별 배율 계산 유틸리티 (신규)
+- `Assets/Scripts/DefenceGame/Core/UnitAbility.cs` - 등급 기반 버프 계산 추가
+- `Assets/Scripts/DefenceGame/Core/Bullet.cs` - Laser 연계 공격 등급 기반 데미지 적용
+- `Assets/Scripts/DefenceGame/Core/UnitAttack.cs` - Laser 연계 공격 시 등급 배율 전달
+
+#### 주요 변경사항
+1. **GradeMultiplier 클래스**: 등급별 배율을 중앙에서 관리
+2. **UnitAbility.CalculateGradeBasedValues()**: 등급에 따른 최종 능력 값 계산
+3. **Bullet.chainDamageMultiplier**: Laser 연계 공격 시 등급 기반 데미지 감소/증가
+4. **디버그 로그**: 각 능력 적용 시 등급과 계산된 값 출력
+
+### 커밋
+- Hash: `TBD`
+- Message: `feat: Add grade-based special ability scaling`
+- Changes: 새 파일 1개, 수정 3개 파일

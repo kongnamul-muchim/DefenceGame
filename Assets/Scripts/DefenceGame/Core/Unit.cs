@@ -112,7 +112,7 @@ namespace DefenceGame.Core
             }
         }
         
-        private Color GetGradeColor(GradeType grade)
+        public Color GetGradeColor(GradeType grade)
         {
             switch (grade)
             {
@@ -123,6 +123,21 @@ namespace DefenceGame.Core
                 case GradeType.Legendary: return Color.yellow;
                 default: return Color.white;
             }
+        }
+        
+        public Color GetGradeColor()
+        {
+            return GetGradeColor(grade);
+        }
+        
+        public void SetRareColor(Color color)
+        {
+            if (unitUI != null) unitUI.SetRareColor(color);
+        }
+        
+        public void RestoreGradeColor()
+        {
+            if (unitUI != null) unitUI.RestoreGradeColor();
         }
         
         public void ShowAttackEffect()

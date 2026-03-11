@@ -89,13 +89,17 @@ namespace DefenceGame.Core
             }
         }
         
-        // Laser 연계 공격용 초기화
-        public void InitializeChain(Enemy targetEnemy, float damageAmount, int chainCount)
+        // Laser 연계 공격용
+        private float chainDamageMultiplier = 1.0f; // 등급 기반 데미지 배율
+        private int currentChainIndex = 0; // 현재 연계 단계 초기화
+        public void InitializeChain(Enemy targetEnemy, float damageAmount, int chainCount, float damageMultiplier = 1.0f)
         {
             target = targetEnemy;
-            damage = damageAmount;
+            damage = damageAmount * damageMultiplier; // 등급 기반 데미지 적용
             pierceCount = chainCount;
             pierceRemaining = chainCount;
+            chainDamageMultiplier = damageMultiplier;
+            currentChainIndex = 0;
             areaDamageRadius = 0;
             hitEnemies.Clear();
             spawnTime = Time.time;
@@ -226,12 +230,18 @@ namespace DefenceGame.Core
                 if (pierceRemaining > 0)
                 {
                     pierceRemaining--;
+                    currentChainIndex++;
                     // 다음 타겟 찾기
                     Enemy nextTarget = FindNextTarget();
                     if (nextTarget != null)
                     {
                         // 연계 공격 시각 효과
                         ShowChainEffect(target.transform.position, nextTarget.transform.position);
+                        
+                        // 연계 단계에 따른 추가 데미지 감소 (등급이 낮을수록 더 많이 감소)
+                        // 예: Common(0.7) -> 0.7, Uncommon(0.85) -> 0.85, Rare(1.0) -> 1.0 유지
+                        float chainDamageFactor = Mathf.Pow(chainDamageMultiplier, currentChainIndex);
+                        damage *= chainDamageFactor;
                         
                         target = nextTarget;
                         return; // 계속 진행

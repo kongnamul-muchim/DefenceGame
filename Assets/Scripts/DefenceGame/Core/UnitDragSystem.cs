@@ -124,12 +124,9 @@ namespace DefenceGame.Core
             }
             
             // RareColor도 반투명하게 변경
-            if (unit.rareColorRenderer != null)
-            {
-                Color rareDragColor = unit.GetGradeColor();
-                rareDragColor.a = 0.5f;
-                unit.SetRareColor(rareDragColor);
-            }
+            Color rareDragColor = unit.GetGradeColor();
+            rareDragColor.a = 0.5f;
+            unit.SetRareColor(rareDragColor);
             
             // Unit에 드래그 상태 설정
             unit.OnDragStart();

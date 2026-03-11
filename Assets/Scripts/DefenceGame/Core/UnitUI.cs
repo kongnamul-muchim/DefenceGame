@@ -151,6 +151,19 @@ namespace DefenceGame.Core
             if (rareColorRenderer != null) rareColorRenderer.color = color;
         }
         
+        public void SetRareColor(Color color)
+        {
+            if (rareColorRenderer != null) rareColorRenderer.color = color;
+        }
+        
+        public void RestoreGradeColor()
+        {
+            if (unit == null) return;
+            Color originalColor = unit.GetGradeColor();
+            if (spriteRenderer != null) spriteRenderer.color = originalColor;
+            if (rareColorRenderer != null) rareColorRenderer.color = originalColor;
+        }
+        
         public void FaceTarget(Vector3 targetPosition)
         {
             if (spriteRenderer != null)

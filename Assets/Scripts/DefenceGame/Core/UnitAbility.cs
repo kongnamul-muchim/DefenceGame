@@ -18,6 +18,12 @@ namespace DefenceGame.Core
         public float groundEffectProcChance = 0.1f;
         public GameObject groundEffectPrefab;
         
+        // 등급 기반 계산된 최종 값들
+        [Header("Grade-Based Final Values")]
+        [SerializeField] private float finalSpeedIncreaseValue = 0f;
+        [SerializeField] private float finalGroundEffectChance = 0f;
+        [SerializeField] private float finalAttackIncreaseValue = 0f;
+        
         private string towerType = "";
         private Unit unit;
         
@@ -83,7 +89,41 @@ namespace DefenceGame.Core
                 }
             }
             
+            // 등급 기반 최종 값 계산
+            CalculateGradeBasedValues();
+            
             ApplyBuffs();
+        }
+        
+        /// <summary>
+        /// 등급에 따라 능력 값 계산
+        /// </summary>
+        private void CalculateGradeBasedValues()
+        {
+            if (unit == null) return;
+            
+            GradeType grade = unit.grade;
+            
+            // Archer: 공격속도 증가폭 증가
+            if (towerType == "Archer" && speedIncreaseValue > 0)
+            {
+                finalSpeedIncreaseValue = GradeMultiplier.ApplyMultiplier(speedIncreaseValue, grade);
+                Debug.Log($"[UnitAbility] Archer Speed Increase: Base={speedIncreaseValue}, Grade={grade}, Final={finalSpeedIncreaseValue:F2}");
+            }
+            
+            // Wizard: GroundEffect 확률 증가
+            if (towerType == "Wizard")
+            {
+                finalGroundEffectChance = GradeMultiplier.ApplyMultiplier(groundEffectProcChance, grade);
+                Debug.Log($"[UnitAbility] Wizard GroundEffect Chance: Base={groundEffectProcChance}, Grade={grade}, Final={finalGroundEffectChance:F2}");
+            }
+            
+            // Tower: 공격력 상승치 증가
+            if (towerType == "WizardTower" && attackIncreaseValue > 0)
+            {
+                finalAttackIncreaseValue = GradeMultiplier.ApplyMultiplier(attackIncreaseValue, grade);
+                Debug.Log($"[UnitAbility] Tower Attack Increase: Base={attackIncreaseValue}, Grade={grade}, Final={finalAttackIncreaseValue:F2}");
+            }
         }
         
         private void ApplyBuffs()
@@ -91,14 +131,37 @@ namespace DefenceGame.Core
             if (unit != null)
             {
                 unit.range += rangeIncreaseValue;
-                unit.attackPower *= (1f + attackIncreaseValue);
-                unit.attackSpeed *= (1f + speedIncreaseValue);
+                
+                // Tower는 등급 기반 공격력 증가 적용
+                if (towerType == "WizardTower" && finalAttackIncreaseValue > 0)
+                {
+                    unit.attackPower *= (1f + finalAttackIncreaseValue);
+                }
+                else if (attackIncreaseValue > 0)
+                {
+                    unit.attackPower *= (1f + attackIncreaseValue);
+                }
+                
+                // Archer는 등급 기반 공격속도 증가 적용
+                if (towerType == "Archer" && finalSpeedIncreaseValue > 0)
+                {
+                    unit.attackSpeed *= (1f + finalSpeedIncreaseValue);
+                }
+                else if (speedIncreaseValue > 0)
+                {
+                    unit.attackSpeed *= (1f + speedIncreaseValue);
+                }
             }
         }
         
         public bool ShouldTriggerGroundEffect()
         {
-            return towerType == "Wizard" && groundEffectDuration > 0 && Random.value <= groundEffectProcChance;
+            // Wizard는 등급 기반 확률 적용
+            float chance = (towerType == "Wizard" && finalGroundEffectChance > 0) 
+                ? finalGroundEffectChance 
+                : groundEffectProcChance;
+            
+            return towerType == "Wizard" && groundEffectDuration > 0 && Random.value <= chance;
         }
         
         public void SpawnGroundEffect(Vector3 position)
@@ -112,6 +175,15 @@ namespace DefenceGame.Core
                 float damagePerSec = unit != null ? unit.attackPower * 0.5f : 10f;
                 groundEffect.Initialize(1.3f, damagePerSec, 1.5f);
             }
+        }
+        
+        /// <summary>
+        /// Laser 연계 공격용 등급 기반 데미지 계산
+        /// </summary>
+        public float GetChainDamageMultiplier()
+        {
+            if (unit == null) return 1.0f;
+            return GradeMultiplier.GetWeakMultiplier(unit.grade);
         }
     }
 }
