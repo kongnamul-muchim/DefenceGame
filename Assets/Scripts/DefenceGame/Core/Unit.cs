@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DefenceGame.Data;
 
@@ -50,14 +51,29 @@ namespace DefenceGame.Core
         private bool isHovered = false;
         
         // Special Abilities (특수 능력)
-        private int pierceCount = 0; // 관통 횟수
-        private int areaDamageRadius = 0; // 광역 데미지 반경 (0 = 없음)
-        private float attackBuffValue = 0f; // 공격력 버프 값
-        private float speedBuffValue = 0f; // 공격속도 버프 값
+        // Archer
+        private int multiShotCount = 1; // 투사체 발사 개수 (기본 1)
+        
+        // Mage
+        private float groundEffectDuration = 0f; // 지속 피해 바닥 지속 시간
+        private GameObject groundEffectPrefab; // 바닥 효과 프리팹
+        
+        // MageTower
         private float rangeIncreaseValue = 0f; // 사거리 증가 값
         private float attackIncreaseValue = 0f; // 공격력 증가 값
-        private float speedIncreaseValue = 0f; // 공격속도 증가 값
-        private float slowEffectValue = 0f; // 이동속도 감소 값 (MageTower)
+        
+        // Laser
+        private int chainAttackCount = 0; // 연계 공격 횟수 (주변 전이)
+        private float chainAttackRange = 3f; // 연계 공격 범위
+        
+        // Deprecated 능력들 (이전 코드와의 호환성)
+        private int pierceCount = 0; // [Deprecated] 관통 횟수
+        private int areaDamageRadius = 0; // [Deprecated] 광역 데미지 반경
+        private float attackBuffValue = 0f; // [Deprecated] 공격력 버프 값
+        private float speedBuffValue = 0f; // [Deprecated] 공격속도 버프 값
+        private float speedIncreaseValue = 0f; // [Deprecated] 공격속도 증가 값
+        private float slowEffectValue = 0f; // [Deprecated] 이동속도 감소 값
+        
         private string towerType = ""; // 타워 타입 (Archer, Mage, MageTower, Laser)
         
         // MageTower 버프/디버프 관련
@@ -111,47 +127,63 @@ namespace DefenceGame.Core
         
         private void SetupBuffRangeVisualization()
         {
-            // Debug.Log($"[SetupBuffRange] towerType={towerType}, isMageTower={towerType == "MageTower"}");
-            
             // MageTower만 버프 범위 시각화
             if (towerType != "MageTower") 
             {
-                // Debug.Log($"[SetupBuffRange] Skipping - not MageTower");
                 return;
             }
             
-            // 기존 LineRenderer 제거 (중복 방지) - null 체크 추가
-            LineRenderer[] existingRenderers = GetComponents<LineRenderer>();
-            foreach (var renderer in existingRenderers)
+            // 기존 LineRenderer 확인
+            if (buffRangeRenderer == null)
             {
-                if (renderer != rangeLineRenderer && renderer != buffRangeRenderer)
+                buffRangeRenderer = GetComponent<LineRenderer>();
+                // rangeLineRenderer와 같지 않은지 확인
+                if (buffRangeRenderer == rangeLineRenderer)
                 {
-                    Destroy(renderer);
+                    buffRangeRenderer = null;
                 }
             }
             
-            // 버프 범위 LineRenderer 설정
-            buffRangeRenderer = gameObject.AddComponent<LineRenderer>();
+            // 없으면 새로 추가
             if (buffRangeRenderer == null)
             {
-                Debug.LogError($"[{unitName}] Failed to add LineRenderer for buff range!");
+                buffRangeRenderer = gameObject.AddComponent<LineRenderer>();
+            }
+            
+            // 여전히 null이면 오류 로그하고 리턴
+            if (buffRangeRenderer == null)
+            {
+                Debug.LogError($"[{unitName}] Failed to create LineRenderer for buff range!");
                 return;
             }
             
-            buffRangeRenderer.startWidth = 0.1f; // 더 두껍게
+            // 다른 LineRenderer와 중복되지 않도록 확인
+            LineRenderer[] existingRenderers = GetComponents<LineRenderer>();
+            if (existingRenderers.Length > 2)
+            {
+                foreach (var renderer in existingRenderers)
+                {
+                    if (renderer != rangeLineRenderer && renderer != buffRangeRenderer)
+                    {
+                        Destroy(renderer);
+                    }
+                }
+            }
+            
+            buffRangeRenderer.startWidth = 0.1f;
             buffRangeRenderer.endWidth = 0.1f;
             buffRangeRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            buffRangeRenderer.startColor = new Color(1, 0.3f, 0, 1f); // 주황색 불투명
+            buffRangeRenderer.startColor = new Color(1, 0.3f, 0, 1f);
             buffRangeRenderer.endColor = new Color(1, 0.3f, 0, 1f);
             buffRangeRenderer.positionCount = 5;
             buffRangeRenderer.useWorldSpace = false;
             buffRangeRenderer.loop = true;
-            buffRangeRenderer.sortingOrder = 1000; // 매우 높은 sorting order
+            buffRangeRenderer.sortingOrder = 1000;
             buffRangeRenderer.sortingLayerName = "Default";
             
             DrawBuffRangeSquare();
             
-            // 초기에는 비활성화 (마우스 호버 시에만 표시)
+            // 초기에는 비활성화
             buffRangeRenderer.enabled = false;
             
             Debug.Log($"[{unitName}] Buff range visualization setup complete - buffRange={buffRange}");
@@ -174,7 +206,25 @@ namespace DefenceGame.Core
         {
             if (!showAttackRange) return;
             
-            rangeLineRenderer = gameObject.AddComponent<LineRenderer>();
+            // 기존 LineRenderer 확인
+            if (rangeLineRenderer == null)
+            {
+                rangeLineRenderer = GetComponent<LineRenderer>();
+            }
+            
+            // 없으면 새로 추가
+            if (rangeLineRenderer == null)
+            {
+                rangeLineRenderer = gameObject.AddComponent<LineRenderer>();
+            }
+            
+            // 여전히 null이면 오류 로그하고 리턴
+            if (rangeLineRenderer == null)
+            {
+                Debug.LogError($"[{unitName}] Failed to create LineRenderer for range visualization!");
+                return;
+            }
+            
             rangeLineRenderer.startWidth = 0.05f;
             rangeLineRenderer.endWidth = 0.05f;
             rangeLineRenderer.material = new Material(Shader.Find("Sprites/Default"));
@@ -472,13 +522,18 @@ namespace DefenceGame.Core
             int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
             Debug.Log($"[{unitName}] Current level for {towerType}: {currentLevel}");
             
-            // 능력 초기화
+            // 새로운 능력 초기화
+            multiShotCount = 1;
+            groundEffectDuration = 0f;
+            rangeIncreaseValue = 0f;
+            attackIncreaseValue = 0f;
+            chainAttackCount = 0;
+            
+            // Deprecated 능력 초기화 (하위호환)
             pierceCount = 0;
             areaDamageRadius = 0;
             attackBuffValue = 0f;
             speedBuffValue = 0f;
-            rangeIncreaseValue = 0f;
-            attackIncreaseValue = 0f;
             speedIncreaseValue = 0f;
             slowEffectValue = 0f;
             
@@ -493,6 +548,26 @@ namespace DefenceGame.Core
                 
                 switch (ability.abilityType)
                 {
+                    // 새로운 능력들
+                    case SpecialAbilityType.MultiShot:
+                        multiShotCount = Mathf.Max(multiShotCount, (int)ability.value);
+                        break;
+                    case SpecialAbilityType.GroundEffect:
+                        groundEffectDuration = Mathf.Max(groundEffectDuration, ability.value);
+                        break;
+                    case SpecialAbilityType.ChainAttack:
+                        chainAttackCount = Mathf.Max(chainAttackCount, (int)ability.value);
+                        break;
+                    
+                    // 공통 능력들
+                    case SpecialAbilityType.RangeIncrease:
+                        rangeIncreaseValue = Mathf.Max(rangeIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.AttackIncrease:
+                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
+                        break;
+                        
+                    // Deprecated 능력들 (하위호환)
                     case SpecialAbilityType.Pierce:
                         pierceCount = Mathf.Max(pierceCount, (int)ability.value);
                         break;
@@ -504,12 +579,6 @@ namespace DefenceGame.Core
                         break;
                     case SpecialAbilityType.SpeedBuff:
                         speedBuffValue = Mathf.Max(speedBuffValue, ability.value);
-                        break;
-                    case SpecialAbilityType.RangeIncrease:
-                        rangeIncreaseValue = Mathf.Max(rangeIncreaseValue, ability.value);
-                        break;
-                    case SpecialAbilityType.AttackIncrease:
-                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
                         break;
                     case SpecialAbilityType.SpeedIncrease:
                         speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
@@ -523,17 +592,8 @@ namespace DefenceGame.Core
             // 능력치 적용
             ApplyBuffs();
             
-            // 능력 해금 로그 (필요시 활성화)
-            // Debug.Log($"[{unitName}] towerType={towerType}, level={currentLevel}, unlocked={unlockedAbilities.Count}");
-            // Debug.Log($"[{unitName}] Abilities: pierce={pierceCount}, area={areaDamageRadius}, atkBuff={attackBuffValue}, slow={slowEffectValue}");
-            // 
-            // if (unlockedAbilities.Count > 0)
-            // {
-            //     foreach (var ability in unlockedAbilities)
-            //     {
-            //         Debug.Log($"[{unitName}] - {ability.abilityType} at Lv.{ability.unlockLevel}: {ability.value}");
-            //     }
-            // }
+            // 능력 해금 로그
+            Debug.Log($"[{unitName}] Abilities: MultiShot={multiShotCount}, GroundEffect={groundEffectDuration}s, Chain={chainAttackCount}, Range+={rangeIncreaseValue}, Atk+={attackIncreaseValue}");
         }
         
         private void ApplyBuffs()
@@ -739,13 +799,34 @@ namespace DefenceGame.Core
             
             if (isRanged && bulletPrefab != null)
             {
-                // Ranged attack - spawn bullet
-                SpawnBullet(enemy);
+                // Ranged attack - spawn bullet(s)
+                // Archer: MultiShot 처리
+                if (towerType == "Archer" && multiShotCount > 1)
+                {
+                    SpawnMultipleBullets(enemy, multiShotCount);
+                }
+                // Mage: GroundEffect 처리 (지속 피해 바닥 생성)
+                else if (towerType == "Mage" && groundEffectDuration > 0)
+                {
+                    SpawnGroundEffect(enemy.transform.position);
+                    // 일반 공격도 함께 수행
+                    SpawnBullet(enemy);
+                }
+                else
+                {
+                    SpawnBullet(enemy);
+                }
             }
             else
             {
                 // Melee attack - instant damage
                 enemy.TakeDamage(attackPower);
+                
+                // Laser: 연계 공격 처리
+                if (towerType == "Laser" && chainAttackCount > 0)
+                {
+                    PerformChainAttack(enemy);
+                }
             }
             
             // Visual feedback
@@ -783,6 +864,149 @@ namespace DefenceGame.Core
             else
             {
                 // Debug.LogError($"[{unitName}] Bullet component not found on prefab!");
+            }
+        }
+        
+        // Archer: 다중 발사 (MultiShot)
+        private void SpawnMultipleBullets(Enemy target, int count)
+        {
+            if (bulletPrefab == null || count <= 1) return;
+            
+            Debug.Log($"[{unitName}] MultiShot {count} bullets!");
+            
+            // 주변 적들 찾기
+            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            List<Enemy> validTargets = new List<Enemy>();
+            
+            foreach (Enemy enemy in allEnemies)
+            {
+                if (enemy == null || enemy.currentHealth <= 0) continue;
+                if (enemy == target) continue;
+                
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance <= range)
+                {
+                    validTargets.Add(enemy);
+                }
+            }
+            
+            // 첫 번째 투사체는 원래 타겟에게
+            GameObject bullet = Instantiate(bulletPrefab, attackPoint.position, Quaternion.identity);
+            Bullet bulletComponent = bullet.GetComponent<Bullet>();
+            if (bulletComponent != null)
+            {
+                bulletComponent.Initialize(target, attackPower, pierceCount, areaDamageRadius);
+            }
+            
+            // 나머지 투사체는 주변 적들에게 (없으면 원래 타겟에게)
+            for (int i = 1; i < count; i++)
+            {
+                Enemy bulletTarget = (i - 1 < validTargets.Count) ? validTargets[i - 1] : target;
+                
+                GameObject extraBullet = Instantiate(bulletPrefab, attackPoint.position, Quaternion.identity);
+                Bullet extraBulletComponent = extraBullet.GetComponent<Bullet>();
+                if (extraBulletComponent != null)
+                {
+                    extraBulletComponent.Initialize(bulletTarget, attackPower, pierceCount, areaDamageRadius);
+                }
+            }
+        }
+        
+        // Laser: 연계 공격 (ChainAttack)
+        private void PerformChainAttack(Enemy hitEnemy)
+        {
+            if (chainAttackCount <= 0 || hitEnemy == null) return;
+            
+            Debug.Log($"[{unitName}] Chain Attack starting from {hitEnemy.enemyName}!");
+            
+            Enemy currentTarget = hitEnemy;
+            HashSet<Enemy> hitEnemies = new HashSet<Enemy> { hitEnemy };
+            
+            for (int i = 0; i < chainAttackCount; i++)
+            {
+                // 현재 타겟 주변의 적 찾기
+                Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+                Enemy nextTarget = null;
+                float closestDistance = chainAttackRange;
+                
+                foreach (Enemy enemy in allEnemies)
+                {
+                    if (enemy == null || enemy.currentHealth <= 0) continue;
+                    if (hitEnemies.Contains(enemy)) continue;
+                    
+                    float distance = Vector3.Distance(currentTarget.transform.position, enemy.transform.position);
+                    if (distance <= chainAttackRange && distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        nextTarget = enemy;
+                    }
+                }
+                
+                if (nextTarget != null)
+                {
+                    // 연계 공격 피해 적용
+                    nextTarget.TakeDamage(attackPower * 0.8f); // 80% 피해
+                    hitEnemies.Add(nextTarget);
+                    
+                    // 시각적 효과 (라인 렌더러로 연결선 표시)
+                    ShowChainEffect(currentTarget.transform.position, nextTarget.transform.position);
+                    
+                    Debug.Log($"[{unitName}] Chain hit {nextTarget.enemyName}!");
+                    currentTarget = nextTarget;
+                }
+                else
+                {
+                    break; // 더 이상 연계할 적이 없음
+                }
+            }
+        }
+        
+        // 연계 공격 시각적 효과
+        private void ShowChainEffect(Vector3 from, Vector3 to)
+        {
+            // 간단한 라인 렌더러로 연결선 표시
+            GameObject lineObj = new GameObject("ChainEffect");
+            LineRenderer line = lineObj.AddComponent<LineRenderer>();
+            line.startWidth = 0.1f;
+            line.endWidth = 0.1f;
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.startColor = Color.cyan;
+            line.endColor = Color.cyan;
+            line.positionCount = 2;
+            line.SetPosition(0, from);
+            line.SetPosition(1, to);
+            line.sortingOrder = 100;
+            
+            // 0.2초 후 제거
+            Destroy(lineObj, 0.2f);
+        }
+        
+        // Mage: 지속 피해 바닥 생성 (GroundEffect)
+        private void SpawnGroundEffect(Vector3 position)
+        {
+            if (groundEffectPrefab == null)
+            {
+                // 프리팹이 없으면 기본 GroundEffect 생성
+                GameObject groundEffectObj = new GameObject("GroundEffect");
+                groundEffectObj.transform.position = position;
+                GroundEffect groundEffect = groundEffectObj.AddComponent<GroundEffect>();
+                
+                // 지속 시간과 데미지 설정
+                float damagePerSec = attackPower * 0.5f; // 공격력의 50%를 초당 데미지로
+                groundEffect.Initialize(groundEffectDuration, damagePerSec, 1.5f);
+                
+                Debug.Log($"[{unitName}] Spawned GroundEffect at {position} for {groundEffectDuration}s");
+            }
+            else
+            {
+                // 프리팹이 있으면 인스턴스화
+                GameObject groundEffectObj = Instantiate(groundEffectPrefab, position, Quaternion.identity);
+                GroundEffect groundEffect = groundEffectObj.GetComponent<GroundEffect>();
+                if (groundEffect != null)
+                {
+                    float damagePerSec = attackPower * 0.5f;
+                    groundEffect.Initialize(groundEffectDuration, damagePerSec, 1.5f);
+                }
             }
         }
         

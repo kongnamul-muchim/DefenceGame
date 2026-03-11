@@ -27,36 +27,36 @@ namespace DefenceGame.Core
         
         private void InitializeAbilities()
         {
-            // Archer abilities
+            // Archer: 투사체 개수 증가 (MultiShot)
             towerAbilities["Archer"] = new SpecialAbility[]
             {
-                new SpecialAbility(3, SpecialAbilityType.Pierce, 1, "관통 1"),
-                new SpecialAbility(5, SpecialAbilityType.Pierce, 2, "관통 2"),
-                new SpecialAbility(7, SpecialAbilityType.SpeedIncrease, 0.2f, "공격속도 20%")
+                new SpecialAbility(3, SpecialAbilityType.MultiShot, 2, "투사체 2개 발사"),
+                new SpecialAbility(5, SpecialAbilityType.MultiShot, 3, "투사체 3개 발사"),
+                new SpecialAbility(7, SpecialAbilityType.MultiShot, 4, "투사체 4개 발사")
             };
             
-            // Mage abilities (Wizard)
+            // Mage: 지속 피해 바닥 생성 (GroundEffect)
             towerAbilities["Mage"] = new SpecialAbility[]
             {
-                new SpecialAbility(3, SpecialAbilityType.AreaDamage, 1, "광역 1칸"),
-                new SpecialAbility(5, SpecialAbilityType.AreaDamage, 2, "광역 2칸"),
-                new SpecialAbility(7, SpecialAbilityType.AttackIncrease, 0.3f, "공격력 30%")
+                new SpecialAbility(3, SpecialAbilityType.GroundEffect, 3, "3초 지속 피해 바닥"),
+                new SpecialAbility(5, SpecialAbilityType.GroundEffect, 5, "5초 지속 피해 바닥"),
+                new SpecialAbility(7, SpecialAbilityType.GroundEffect, 7, "7초 지속 피해 바닥")
             };
             
-            // MageTower abilities (WizardTower)
+            // MageTower: 사거리 증가 및 공격력 증가
             towerAbilities["MageTower"] = new SpecialAbility[]
             {
-                new SpecialAbility(3, SpecialAbilityType.AttackBuff, 0.1f, "공격력 버프 10%"),
-                new SpecialAbility(5, SpecialAbilityType.SlowEffect, 0.3f, "이동속도 30% 감소"),
-                new SpecialAbility(7, SpecialAbilityType.RangeIncrease, 1, "범위 +1")
+                new SpecialAbility(3, SpecialAbilityType.RangeIncrease, 1, "사거리 +1"),
+                new SpecialAbility(5, SpecialAbilityType.AttackIncrease, 0.3f, "공격력 30% 증가"),
+                new SpecialAbility(7, SpecialAbilityType.RangeIncrease, 2, "사거리 +2")
             };
             
-            // Laser abilities
+            // Laser: 연계 공격 (ChainAttack)
             towerAbilities["Laser"] = new SpecialAbility[]
             {
-                new SpecialAbility(3, SpecialAbilityType.RangeIncrease, 1, "사거리 +1"),
-                new SpecialAbility(5, SpecialAbilityType.RangeIncrease, 2, "사거리 +2"),
-                new SpecialAbility(7, SpecialAbilityType.Pierce, 1, "관통")
+                new SpecialAbility(3, SpecialAbilityType.ChainAttack, 1, "연계 1회 (주변 1명)"),
+                new SpecialAbility(5, SpecialAbilityType.ChainAttack, 2, "연계 2회 (주변 2명)"),
+                new SpecialAbility(7, SpecialAbilityType.ChainAttack, 3, "연계 3회 (주변 3명)")
             };
         }
         

@@ -40,7 +40,7 @@ namespace DefenceGame.Core
         // Slow effect (MageTower)
         private float originalSpeed;
         private float currentSlowMultiplier = 1f;
-        private System.Collections.Generic.List<MonoBehaviour> slowSources = new System.Collections.Generic.List<MonoBehaviour>();
+        private System.Collections.Generic.Dictionary<MonoBehaviour, float> slowSources = new System.Collections.Generic.Dictionary<MonoBehaviour, float>();
         
         // Events
         public System.Action<Enemy> OnEnemyDefeated;
@@ -380,13 +380,13 @@ namespace DefenceGame.Core
             }
             
             // 이미 이 소스에서 느려짐이 적용되어 있으면 리턴
-            if (slowSources.Contains(source)) 
+            if (slowSources.ContainsKey(source)) 
             {
                 // Debug.Log($"[{enemyName}] Already slowed by {source.GetType().Name}");
                 return;
             }
             
-            slowSources.Add(source);
+            slowSources.Add(source, slowPercent);
             UpdateSlowMultiplier();
             
             // 시각적 효과 (파란색으로 변경)
@@ -420,14 +420,13 @@ namespace DefenceGame.Core
         {
             // 가장 강한 느려짐 효과 적용 (중첩하지 않음)
             float maxSlow = 0f;
-            foreach (var source in slowSources)
+            foreach (var kvp in slowSources)
             {
-                // TODO: 각 소스별 느려짐 값을 가져와야 함
-                // 현재는 30%로 가정
-                maxSlow = Mathf.Max(maxSlow, 0.3f);
+                maxSlow = Mathf.Max(maxSlow, kvp.Value);
             }
             
-            currentSlowMultiplier = 1f - maxSlow;
+            // 100% 둔화 테스트를 위해 최소값 제한 제거 (0.1f -> 0f)
+            currentSlowMultiplier = Mathf.Max(0f, 1f - maxSlow);
             
             // 속도 업데이트
             float oldSpeed = speed;
@@ -437,7 +436,11 @@ namespace DefenceGame.Core
                 pathAgent.speed = speed;
             }
             
-            // Debug.Log($"[{enemyName}] Speed: {oldSpeed} -> {speed} (multiplier: {currentSlowMultiplier})");
+            // 디버그 로그 (활성화됨)
+            if (maxSlow > 0)
+            {
+                Debug.Log($"[{enemyName}] Speed: {oldSpeed} -> {speed} (slow: {maxSlow * 100}%, multiplier: {currentSlowMultiplier})");
+            }
         }
     }
 }

@@ -5,14 +5,22 @@ namespace DefenceGame.Data
     public enum SpecialAbilityType
     {
         None,
-        Pierce,         // 관통 (Archer, Laser)
-        AreaDamage,     // 광역 (Mage)
-        AttackBuff,     // 공격력 버프 (MageTower)
-        SpeedBuff,      // 공격속도 버프 (MageTower)
-        RangeIncrease,  // 사거리 증가 (Laser, MageTower)
+        // Archer: 투사체 개수 증가
+        MultiShot,      // 다중 발사 (투사체 개수 증가)
+        // Mage: 지속 피해 바닥 생성
+        GroundEffect,   // 지속 피해 바닥 생성
+        // MageTower: 사거리 증가 및 공격력 증가
+        RangeIncrease,  // 사거리 증가
         AttackIncrease, // 공격력 증가
-        SpeedIncrease,  // 공격속도 증가
-        SlowEffect      // 이동속도 감소 (MageTower)
+        // Laser: 연계 공격 (주변에 전이)
+        ChainAttack,    // 연계 공격 (전이)
+        // Deprecated (기존 능력들)
+        Pierce,         // [Deprecated] 관통
+        AreaDamage,     // [Deprecated] 광역
+        AttackBuff,     // [Deprecated] 공격력 버프
+        SpeedBuff,      // [Deprecated] 공격속도 버프
+        SpeedIncrease,  // [Deprecated] 공격속도 증가
+        SlowEffect      // [Deprecated] 이동속도 감소
     }
     
     [System.Serializable]
