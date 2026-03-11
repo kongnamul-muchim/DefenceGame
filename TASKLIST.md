@@ -153,23 +153,31 @@ Data/
 
 ## 🎯 Phase B: 고급 기능 구현 (진행 중)
 
-### 📋 예정된 작업 (To Do)
-| # | 작업 | 설명 | 예상 시간 | 상태 |
-|---|------|------|-----------|------|
-| 21 | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | 30분 | 📝 예정 |
-| 22 | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | 20분 | 📝 예정 |
-| 23 | **타워 레벨/경험치 시스템** | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | 60분 | 📝 예정 |
-| 24 | **타워 레벨 UI** | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | 40분 | 📝 예정 |
-| 25 | **특수 능력 해금 시스템** | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 50분 | 📝 예정 |
+### 📋 진행 상황
+| 단계 | 작업 | 설명 | 상태 | 커밋 |
+|------|------|------|------|------|
+| **Step 1** | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | ✅ 완료 | `77dceca` |
+| Step 2 | Bullet 히트 이펙트 | Bullet 충돌 시 ParticleSystem 효과 생성 | 📝 예정 | - |
+| Step 3 | 타워 레벨/경험치 시스템 | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | 📝 예정 | - |
+| Step 4 | 타워 레벨 UI | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | 📝 예정 | - |
+| Step 5 | 특수 능력 해금 시스템 | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 예정 | - |
 
-### 📋 세부 작업 내용
+### 📋 상세 진행 내용
 
-#### **21. Enemy 체력바 시스템**
-- [ ] Enemy 프리팹에 World Space Canvas 추가
-- [ ] Slider 컴포넌트 설정 (흰색 Background, 녹색 Fill)
-- [ ] 체력바 위치: Enemy 머리 위 (Y +0.8f)
-- [ ] TakeDamage() 호출 시 Slider 값 업데이트
-- [ ] 히트 시 체력바 깜빡임 효과 (선택사항)
+#### **Step 1: Enemy 체력바 시스템** ✅ 완료 (2025-03-11)
+- [x] HealthBar.cs 스크립트 생성 (프리팹 방식)
+- [x] Enemy.cs 수정 (healthBarPrefab 필드 추가)
+- [x] 체력바 위치: Enemy 머리 위 (World Space Canvas)
+- [x] TakeDamage() 호출 시 Slider 값 업데이트
+- [x] 프리팹 방식으로 변경 (크기 조절 용이)
+
+**구현 방식:**
+- `HealthBar` 프리팹을 Unity Inspector에서 연결
+- `World Space` Canvas 사용
+- 크기: Width 0.8, Height 0.15
+- 색상: 흰색 BG + 녹색 Fill
+
+**Git Commit:** `77dceca` - Phase B Step 1: Add Enemy HealthBar system
 
 #### **22. Bullet 히트 이펙트**
 - [ ] Bullet.cs에 hitEffectPrefab 필드 추가
