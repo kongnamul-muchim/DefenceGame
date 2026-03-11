@@ -256,12 +256,19 @@ Data/
 **구현된 기능:**
 - [x] Archer: Lv.3 관통1, Lv.5 관통2, Lv.7 공격속도20%
 - [x] Mage: Lv.3 광역1칸, Lv.5 광역2칸, Lv.7 공격력30%
-- [x] MageTower: Lv.3 공격력버프10%, Lv.5 공속버프10%, Lv.7 범위+1
+  - 광역 공격 시 반투명 원형 범위 표시
+  - 실제 광역 데미지 적용 (범위 내 모든 적에게 데미지)
+- [x] MageTower: Lv.3 공격력버프10%, Lv.5 이동속도30%감소, Lv.7 범위+1
+  - 3x3 범위 반투명 사각형으로 표시
+  - 버프 범위 내 아군 유닛 공격력 증가
+  - 버프 범위 내 적 이동속도 감소 (시각적 효과: 파란색)
 - [x] Laser: Lv.3 사거리+1, Lv.5 사거리+2, Lv.7 관통
 - [x] Bullet.cs 수정 - 관통 기능 구현 (pierce 파라미터 추가)
+- [x] Bullet.cs 수정 - 광역 공격 기능 구현 (areaRadius 파라미터 추가)
 - [x] Unit.cs 수정 - 특수 능력 적용 및 레벨업 이벤트 구독
+- [x] Enemy.cs 수정 - 느려짐 효과 메서드 추가
 
-**Git Commit:** `fd1fb8f` - Phase B Step 5: Add special ability system
+**Git Commit:** `01082ed` - Improve MageTower and Mage abilities
 
 ---
 
