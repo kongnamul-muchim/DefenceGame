@@ -49,6 +49,16 @@ namespace DefenceGame.Core
         private Vector3 originalScale;
         private bool isHovered = false;
         
+        // Special Abilities (특수 능력)
+        private int pierceCount = 0; // 관통 횟수
+        private int areaDamageRadius = 0; // 광역 데미지 반경 (0 = 없음)
+        private float attackBuffValue = 0f; // 공격력 버프 값
+        private float speedBuffValue = 0f; // 공격속도 버프 값
+        private float rangeIncreaseValue = 0f; // 사거리 증가 값
+        private float attackIncreaseValue = 0f; // 공격력 증가 값
+        private float speedIncreaseValue = 0f; // 공격속도 증가 값
+        private string towerType = ""; // 타워 타입 (Archer, Mage, MageTower, Laser)
+        
         private void Awake()
         {
             if (spriteRenderer == null)
@@ -173,10 +183,116 @@ namespace DefenceGame.Core
             range = data.Range;
             grade = data.Grade;
             
+            // 타워 타입 설정 (Name에서 추출)
+            towerType = ExtractTowerType(data.Name);
+            
             // Set sprite color based on grade
             SetGradeColor();
             
-            Debug.Log($"Unit initialized: {unitName}, ATK: {attackPower}, SPD: {attackSpeed}, RNG: {range}");
+            // 특수 능력 적용
+            ApplySpecialAbilities();
+            
+            // 레벨업 이벤트 구독
+            if (TowerLevelManager.Instance != null)
+            {
+                TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
+            }
+            
+            Debug.Log($"Unit initialized: {unitName}, ATK: {attackPower}, SPD: {attackSpeed}, RNG: {range}, Type: {towerType}");
+        }
+        
+        private string ExtractTowerType(string name)
+        {
+            // Name에서 타워 타입 추출 (예: "Archer_Common" -> "Archer")
+            if (name.Contains("Archer")) return "Archer";
+            if (name.Contains("MageTower")) return "MageTower";
+            if (name.Contains("Mage") || name.Contains("Wizard")) return "Mage";
+            if (name.Contains("Laser")) return "Laser";
+            return "";
+        }
+        
+        private void OnTowerLevelUp(string type, int level)
+        {
+            // 자신의 타워 타입이 레벨업되면 능력 재적용
+            if (type == towerType)
+            {
+                ApplySpecialAbilities();
+                Debug.Log($"[{unitName}] Special abilities reapplied at level {level}");
+            }
+        }
+        
+        private void ApplySpecialAbilities()
+        {
+            if (string.IsNullOrEmpty(towerType)) return;
+            if (SpecialAbilityManager.Instance == null) return;
+            if (TowerLevelManager.Instance == null) return;
+            
+            // 현재 레벨 가져오기
+            int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
+            
+            // 능력 초기화
+            pierceCount = 0;
+            areaDamageRadius = 0;
+            attackBuffValue = 0f;
+            speedBuffValue = 0f;
+            rangeIncreaseValue = 0f;
+            attackIncreaseValue = 0f;
+            speedIncreaseValue = 0f;
+            
+            // 해금된 능력 가져오기
+            var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
+            
+            foreach (var ability in unlockedAbilities)
+            {
+                switch (ability.abilityType)
+                {
+                    case SpecialAbilityType.Pierce:
+                        pierceCount = Mathf.Max(pierceCount, (int)ability.value);
+                        break;
+                    case SpecialAbilityType.AreaDamage:
+                        areaDamageRadius = Mathf.Max(areaDamageRadius, (int)ability.value);
+                        break;
+                    case SpecialAbilityType.AttackBuff:
+                        attackBuffValue = Mathf.Max(attackBuffValue, ability.value);
+                        break;
+                    case SpecialAbilityType.SpeedBuff:
+                        speedBuffValue = Mathf.Max(speedBuffValue, ability.value);
+                        break;
+                    case SpecialAbilityType.RangeIncrease:
+                        rangeIncreaseValue = Mathf.Max(rangeIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.AttackIncrease:
+                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.SpeedIncrease:
+                        speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
+                        break;
+                }
+            }
+            
+            // 능력치 적용
+            ApplyBuffs();
+            
+            // 능력 해금 로그
+            if (unlockedAbilities.Count > 0)
+            {
+                Debug.Log($"[{unitName}] Applied {unlockedAbilities.Count} special abilities at level {currentLevel}");
+            }
+        }
+        
+        private void ApplyBuffs()
+        {
+            // 사거리 증가 적용
+            float baseRange = range;
+            range = baseRange + rangeIncreaseValue;
+            
+            // 공격력 증가/버프 적용
+            float totalAttackMultiplier = 1f + attackIncreaseValue;
+            
+            // 공격속도 증가 적용
+            float totalSpeedMultiplier = 1f + speedIncreaseValue;
+            
+            Debug.Log($"[{unitName}] Buffs applied - Range: {baseRange}→{range}, Pierce: {pierceCount}, Area: {areaDamageRadius}");
         }
         
         private void SetGradeColor()
@@ -380,7 +496,15 @@ namespace DefenceGame.Core
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                bulletComponent.Initialize(target, attackPower);
+                // 광역 데미지 계산
+                float finalDamage = attackPower;
+                if (areaDamageRadius > 0)
+                {
+                    // 광역 데미지가 있는 경우 - 나중에 처리
+                    finalDamage = attackPower;
+                }
+                
+                bulletComponent.Initialize(target, finalDamage, pierceCount);
             }
         }
         

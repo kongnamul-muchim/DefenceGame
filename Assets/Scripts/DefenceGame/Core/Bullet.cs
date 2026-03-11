@@ -20,10 +20,18 @@ namespace DefenceGame.Core
         private float spawnTime;
         private bool isMoving = false;
         
-        public void Initialize(Enemy targetEnemy, float damageAmount)
+        // Pierce (관통) 기능
+        private int pierceCount = 0; // 관통 가능 횟수 (0 = 관통 없음)
+        private int pierceRemaining = 0; // 남은 관통 횟수
+        private System.Collections.Generic.List<Enemy> hitEnemies = new System.Collections.Generic.List<Enemy>(); // 이미 맞은 적 목록
+        
+        public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0)
         {
             target = targetEnemy;
             damage = damageAmount;
+            pierceCount = pierce;
+            pierceRemaining = pierce;
+            hitEnemies.Clear();
             spawnTime = Time.time;
             
             if (target != null)
@@ -74,15 +82,52 @@ namespace DefenceGame.Core
         
         private void HitTarget()
         {
-            if (target != null)
+            if (target != null && !hitEnemies.Contains(target))
             {
                 target.TakeDamage(damage);
+                hitEnemies.Add(target);
+                
+                // Spawn hit effect
+                SpawnHitEffect();
+                
+                // 관통 체크
+                if (pierceRemaining > 0)
+                {
+                    pierceRemaining--;
+                    // 다음 타겟 찾기
+                    Enemy nextTarget = FindNextTarget();
+                    if (nextTarget != null)
+                    {
+                        target = nextTarget;
+                        return; // 계속 진행
+                    }
+                }
             }
             
-            // Spawn hit effect
-            SpawnHitEffect();
-            
             Destroy(gameObject);
+        }
+        
+        private Enemy FindNextTarget()
+        {
+            Enemy closestEnemy = null;
+            float closestDistance = 5f; // 주변 5유닛 내에서 검색
+            
+            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            
+            foreach (Enemy enemy in allEnemies)
+            {
+                if (enemy == null || enemy.currentHealth <= 0) continue;
+                if (hitEnemies.Contains(enemy)) continue; // 이미 맞은 적은 제외
+                
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
+            }
+            
+            return closestEnemy;
         }
         
         private void SpawnHitEffect()
