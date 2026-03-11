@@ -17,6 +17,7 @@ namespace DefenceGame.UI
             public Image backgroundImage;
             public Image fillImage;
             public Image panelImage; // 슬롯 전체 Panel의 Image (색상 변경용)
+            public Button clickButton; // 클릭용 버튼 (테스트용)
         }
         
         [Header("UI Settings")]
@@ -43,6 +44,35 @@ namespace DefenceGame.UI
                 TowerLevelManager.Instance.OnTowerExpChanged += OnTowerExpChanged;
                 TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
             }
+            
+            // Setup click buttons for testing
+            SetupClickButtons();
+        }
+        
+        private void SetupClickButtons()
+        {
+            for (int i = 0; i < towerSlots.Length; i++)
+            {
+                int index = i; // Capture index for closure
+                if (towerSlots[i].clickButton != null)
+                {
+                    towerSlots[i].clickButton.onClick.AddListener(() => OnSlotClicked(index));
+                }
+            }
+        }
+        
+        private void OnSlotClicked(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= towerSlots.Length) return;
+            if (TowerLevelManager.Instance == null) return;
+            
+            string towerType = towerSlots[slotIndex].towerType;
+            
+            // 테스트용: 클릭 시 경험치 추가하여 레벨업
+            #if UNITY_EDITOR
+            TowerLevelManager.Instance.AddExp(towerType, GradeType.Epic); // Epic 등급으로 많은 경험치
+            Debug.Log($"[TEST] Clicked {towerType} slot - Added EXP for testing");
+            #endif
         }
         
         private void OnDestroy()
