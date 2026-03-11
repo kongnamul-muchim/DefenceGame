@@ -164,12 +164,15 @@ Data/
 
 ### 📋 상세 진행 내용
 
-#### **Step 1: Enemy 체력바 시스템** ✅ 완료 (2025-03-11)
+#### **Step 1: Enemy 체력바 시스템 + UX 개선** ✅ 완료 (2025-03-11)
 - [x] HealthBar.cs 스크립트 생성 (프리팹 방식)
 - [x] Enemy.cs 수정 (healthBarPrefab 필드 추가)
 - [x] 체력바 위치: Enemy 머리 위 (World Space Canvas)
 - [x] TakeDamage() 호출 시 Slider 값 업데이트
 - [x] 프리팹 방식으로 변경 (크기 조절 용이)
+- [x] **추가: 드래그 중 유닛 공격 비활성화** (`isDragging` 체크)
+- [x] **추가: 마우스 호버 시 유닛 크기 10% 증가** (시각적 피드백)
+- [x] **추가: 거리 기반 마우스 감지** (`hoverDetectionRadius`)
 
 **구현 방식:**
 - `HealthBar` 프리팹을 Unity Inspector에서 연결
@@ -177,7 +180,12 @@ Data/
 - 크기: Width 0.8, Height 0.15
 - 색상: 흰색 BG + 녹색 Fill
 
-**Git Commit:** `77dceca` - Phase B Step 1: Add Enemy HealthBar system
+**UX 개선:**
+- 드래그 중 자동 공격 중지
+- 마우스 호버 시 `transform.localScale` 1.1배 증가
+- `hoverDetectionRadius` (기본 0.5)로 감지 범위 조절 가능
+
+**Git Commit:** `1cac56c` - Phase B Step 1 Complete
 
 #### **22. Bullet 히트 이펙트**
 - [ ] Bullet.cs에 hitEffectPrefab 필드 추가
