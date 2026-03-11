@@ -160,7 +160,7 @@ Data/
 | **Step 2** | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | ✅ 완료 | `950e165` |
 | **Step 3** | **타워 레벨/경험치 시스템** | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | ✅ 완료 | `43cbff1` |
 | **Step 4** | **타워 레벨 UI** | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | ✅ 완료 | `0baac48` |
-| Step 5 | 특수 능력 해금 시스템 | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 예정 | - |
+| **Step 5** | **특수 능력 해금 시스템** | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 진행 중 | `fdad6cb` |
 
 ### 📋 상세 진행 내용
 
@@ -251,40 +251,34 @@ Data/
 
 **Git Commit:** `0baac48` - Phase B Step 4: Add tower level UI with panel color change
 
-#### **Step 5: 특수 능력 해금 시스템**
-- [ ] 레벨 텍스트 표시 (Lv.0~)
-- [ ] 레벨별 박스 색상 변경:
-  - Lv.0-2: 회색
-  - Lv.3-4: 하얀색
-  - Lv.5-6: 연두색
-  - Lv.7+: 노란색
+#### **Step 5: 특수 능력 해금 시스템** 📝 진행 중 (준비 완료)
 
-#### **25. 특수 능력 해금 시스템**
-- [ ] 특수 능력 데이터 구조 설계
-- [ ] 레벨 3/5/7 도달 시 능력 해금 로직
-- [ ] 능력별 구현:
-  - **Archer**: Lv.3 관통1, Lv.5 관통2, Lv.7 공격속도20%
-  - **Wizard**: Lv.3 광역1칸, Lv.5 광역2칸, Lv.7 공격력30%
-  - **WizardTower**: Lv.3 공격력버프10%, Lv.5 공속버프10%, Lv.7 범위+1
-  - **Laser**: Lv.3 사거리+1, Lv.5 사거리+2, Lv.7 관통
-- [ ] 스텟 보너스에만 레어도 계수 적용
+**준비된 파일:**
+- [x] SpecialAbilityData.cs 생성 (능력 타입 및 데이터 구조)
+- [x] SpecialAbilityManager.cs 생성 (Singleton, 능력 관리)
 
-#### **26. Unit.cs 수정 사항**
-- [ ] Initialize()에서 능력치 계산: (기본 + 특수) × 레어도
-- [ ] 특수 능력 적용 로직 추가
-- [ ] ApplySpecialAbilities() 메서드 구현
+**구현할 기능:**
+- [ ] Archer: Lv.3 관통1, Lv.5 관통2, Lv.7 공격속도20%
+- [ ] Mage: Lv.3 광역1칸, Lv.5 광역2칸, Lv.7 공격력30%
+- [ ] MageTower: Lv.3 공격력버프10%, Lv.5 공속버프10%, Lv.7 범위+1
+- [ ] Laser: Lv.3 사거리+1, Lv.5 사거리+2, Lv.7 관통
 
-#### **27. UnitMergeManager.cs 수정 사항**
-- [ ] MergeUnits()에 경험치 획득 로직 추가
-- [ ] TowerLevelManager.Instance.AddExp() 호출
-- [ ] 레벨업 체크 및 UI 업데이트
-- [ ] 상위 유닛 생성 로직 유지
+**다음 작업:**
+- [ ] Unit.cs 수정 - 특수 능력 적용
+- [ ] Bullet.cs 수정 - 관통 기능
+- [ ] Managers 오브젝트에 SpecialAbilityManager 추가
 
-#### **28. Unity 설정**
-- [ ] Enemy 프리팹에 Slider 체력바 오브젝트 추가
-- [ ] Bullet 프리팹에 hitEffectPrefab 연결
-- [ ] UI Canvas에 TowerLevelUI 스크립트 연결
-- [ ] Managers 오브젝트에 TowerLevelManager 컴포넌트 추가
+**Git Commit:** `fdad6cb` - Fix tower type names and prepare Step 5
+
+---
+
+## 🚀 Phase B 전체 완료 체크리스트
+
+- [x] **Step 1**: Enemy 체력바 시스템
+- [x] **Step 2**: Bullet 히트 이펙트
+- [x] **Step 3**: 타워 레벨/경험치 시스템
+- [x] **Step 4**: 타워 레벨 UI
+- [ ] **Step 5**: 특수 능력 해금 시스템 (진행 중)
 
 ### 📊 시스템 흐름도
 
