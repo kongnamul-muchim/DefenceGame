@@ -391,7 +391,7 @@ namespace DefenceGame.Core
             // Set sprite color based on grade
             SetGradeColor();
             
-            // 특수 능력 적용
+            // 특수 능력 적용 (초기화 시 현재 레벨 확인)
             ApplySpecialAbilities();
             
             // MageTower인 경우 버프 범위 시각화 설정
@@ -404,9 +404,10 @@ namespace DefenceGame.Core
             if (TowerLevelManager.Instance != null)
             {
                 TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
+                TowerLevelManager.Instance.OnTowerExpChanged += OnTowerExpChanged;
             }
             
-            Debug.Log($"Unit initialized: {unitName}, ATK: {attackPower}, SPD: {attackSpeed}, RNG: {range}, Type: {towerType}");
+            Debug.Log($"Unit initialized: {unitName}, Type: {towerType}, Grade: {grade}");
         }
         
         private string ExtractTowerType(string name)
@@ -427,8 +428,23 @@ namespace DefenceGame.Core
             // 자신의 타워 타입이 레벨업되면 능력 재적용
             if (type == towerType)
             {
+                Debug.Log($"[{unitName}] Level up event received: {type} -> level {level}");
                 ApplySpecialAbilities();
-                Debug.Log($"[{unitName}] Special abilities reapplied at level {level}");
+                
+                // MageTower인 경우 버프 범위 시각화 재설정
+                if (towerType == "MageTower")
+                {
+                    SetupBuffRangeVisualization();
+                }
+            }
+        }
+        
+        private void OnTowerExpChanged(string type)
+        {
+            // 경험치 변경 시 필요한 처리
+            if (type == towerType)
+            {
+                Debug.Log($"[{unitName}] Exp changed for {type}");
             }
         }
         
@@ -641,6 +657,16 @@ namespace DefenceGame.Core
             {
                 UnitDragSystem.Instance?.CancelDrag();
                 isDragging = false;
+            }
+        }
+        
+        private void OnDestroy()
+        {
+            // 이벤트 구독 해제
+            if (TowerLevelManager.Instance != null)
+            {
+                TowerLevelManager.Instance.OnTowerLevelUp -= OnTowerLevelUp;
+                TowerLevelManager.Instance.OnTowerExpChanged -= OnTowerExpChanged;
             }
         }
         
