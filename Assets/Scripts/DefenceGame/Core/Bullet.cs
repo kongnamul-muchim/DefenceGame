@@ -39,9 +39,12 @@ namespace DefenceGame.Core
             hitEnemies.Clear();
             spawnTime = Time.time;
             
+            Debug.Log($"[Bullet] Initialized - pierce={pierce}, areaRadius={areaRadius}, damage={damageAmount}");
+            
             // 광역 범위 시각화 설정
             if (areaDamageRadius > 0)
             {
+                Debug.Log($"[Bullet] Setting up area visualization with radius {areaDamageRadius}");
                 SetupAreaVisualization();
             }
             
@@ -60,25 +63,30 @@ namespace DefenceGame.Core
         
         private void SetupAreaVisualization()
         {
+            Debug.Log($"[Bullet] SetupAreaVisualization called - areaDamageRadius={areaDamageRadius}");
+            
             // 광역 공격 범위 원형 시각화
             areaRangeRenderer = gameObject.AddComponent<LineRenderer>();
-            areaRangeRenderer.startWidth = 0.05f;
-            areaRangeRenderer.endWidth = 0.05f;
+            areaRangeRenderer.startWidth = 0.08f; // 더 두껍게
+            areaRangeRenderer.endWidth = 0.08f;
             areaRangeRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            areaRangeRenderer.startColor = new Color(1, 0, 1, 0.5f); // 보라색 반투명
-            areaRangeRenderer.endColor = new Color(1, 0, 1, 0.5f);
+            areaRangeRenderer.startColor = new Color(1, 0, 1, 0.8f); // 보라색 더 진하게
+            areaRangeRenderer.endColor = new Color(1, 0, 1, 0.8f);
             areaRangeRenderer.positionCount = 50;
             areaRangeRenderer.useWorldSpace = false;
             areaRangeRenderer.loop = true;
+            areaRangeRenderer.sortingOrder = 1000; // 높은 sorting order
             
             DrawAreaCircle();
+            
+            Debug.Log($"[Bullet] Area visualization setup complete");
         }
         
         private void DrawAreaCircle()
         {
             if (areaRangeRenderer == null) return;
             
-            float radius = areaDamageRadius * 1.5f; // 타일 크기에 맞게 조정
+            float radius = areaDamageRadius * 2.5f; // 광역 범위 확대 (기존 1.5f -> 2.5f)
             for (int i = 0; i < 50; i++)
             {
                 float angle = i * Mathf.PI * 2 / 50;
@@ -161,7 +169,7 @@ namespace DefenceGame.Core
         {
             // 타겟 위치에 광역 데미지 적용
             Vector3 center = target.transform.position;
-            float radius = areaDamageRadius * 1.5f; // 타일 크기에 맞게 조정
+            float radius = areaDamageRadius * 2.5f; // 광역 범위 확대 (기존 1.5f -> 2.5f)
             
             // 디버그 로그
             Debug.Log($"[Area Damage] Center: {center}, Radius: {radius}, Damage: {damage}");
