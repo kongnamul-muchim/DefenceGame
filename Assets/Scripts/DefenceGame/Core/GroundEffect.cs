@@ -8,18 +8,17 @@ namespace DefenceGame.Core
     {
         [Header("Ground Effect Settings")]
         public float damagePerSecond = 10f; // 초당 데미지
-        public float duration = 3f; // 지속 시간
-        public float radius = 1f; // 영향 범위
-        public float tickInterval = 0.5f; // 데미지 적용 간격
+        public float duration = 1.3f; // 지속 시간 (기본 1.3초)
+        public float radius = 1.5f; // 영향 범위
+        public float tickInterval = 0.3f; // 데미지 적용 간격
         
-        [Header("Visual")]
-        public SpriteRenderer effectRenderer;
-        public Color effectColor = new Color(1f, 0.3f, 0.3f, 0.5f); // 붉은색 반투명
-        public float fadeOutDuration = 0.5f; // 사라질 때 페이드 아웃 시간
+        [Header("Particle System")]
+        public ParticleSystem effectParticles; // 파티클 시스템
         
         private float elapsedTime = 0f;
         private float tickTimer = 0f;
         private HashSet<Enemy> enemiesInEffect = new HashSet<Enemy>();
+        private bool isDestroying = false;
         
         public void Initialize(float customDuration, float customDamage, float customRadius)
         {
@@ -27,30 +26,49 @@ namespace DefenceGame.Core
             damagePerSecond = customDamage;
             radius = customRadius;
             
-            // 시각적 설정
-            SetupVisuals();
+            // 파티클 시스템 설정
+            SetupParticleSystem();
             
             Debug.Log($"[GroundEffect] Initialized - Duration: {duration}s, DPS: {damagePerSecond}, Radius: {radius}");
         }
         
-        private void SetupVisuals()
+        private void SetupParticleSystem()
         {
-            // 트랜스폼 설정
-            transform.localScale = Vector3.one * radius * 2f;
-            
-            // 스프라이트 렌더러 설정
-            if (effectRenderer == null)
+            // 파티클 시스템 찾기 또는 생성
+            if (effectParticles == null)
             {
-                effectRenderer = GetComponent<SpriteRenderer>();
-                if (effectRenderer == null)
-                {
-                    effectRenderer = gameObject.AddComponent<SpriteRenderer>();
-                }
+                effectParticles = GetComponent<ParticleSystem>();
             }
             
-            // 원형 스프라이트 생성 또는 기본 원 사용
-            effectRenderer.color = effectColor;
-            effectRenderer.sortingOrder = -1; // 유닛 뒤에 표시
+            if (effectParticles != null)
+            {
+                // 파티클 설정
+                var main = effectParticles.main;
+                main.duration = duration;
+                main.startLifetime = duration;
+                main.startSize = radius * 2f;
+                
+                // 파티클 시작
+                effectParticles.Play();
+            }
+            else
+            {
+                Debug.LogWarning("[GroundEffect] No ParticleSystem found!");
+            }
+            
+            // 지속시간 후 자동 제거
+            StartCoroutine(DestroyAfterDuration());
+        }
+        
+        private IEnumerator DestroyAfterDuration()
+        {
+            yield return new WaitForSeconds(duration);
+            
+            if (!isDestroying)
+            {
+                isDestroying = true;
+                Destroy(gameObject);
+            }
         }
         
         private void Update()
@@ -58,23 +76,12 @@ namespace DefenceGame.Core
             elapsedTime += Time.deltaTime;
             tickTimer += Time.deltaTime;
             
-            // 지속 시간 체크
-            if (elapsedTime >= duration)
-            {
-                StartCoroutine(FadeOutAndDestroy());
-                enabled = false;
-                return;
-            }
-            
             // 틱 데미지 적용
             if (tickTimer >= tickInterval)
             {
                 ApplyTickDamage();
                 tickTimer = 0f;
             }
-            
-            // 범위 내 적 체크 (시각적 효과용)
-            UpdateEnemiesInRange();
         }
         
         private void ApplyTickDamage()
@@ -89,48 +96,13 @@ namespace DefenceGame.Core
                 if (enemy != null && enemy.currentHealth > 0)
                 {
                     enemy.TakeDamage(damage);
-                    Debug.Log($"[GroundEffect] Dealt {damage} damage to {enemy.enemyName}");
                 }
             }
-        }
-        
-        private void UpdateEnemiesInRange()
-        {
-            // 현재 범위 내 적들 업데이트
-            enemiesInEffect.Clear();
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
-            foreach (Collider2D col in colliders)
-            {
-                Enemy enemy = col.GetComponent<Enemy>();
-                if (enemy != null && enemy.currentHealth > 0)
-                {
-                    enemiesInEffect.Add(enemy);
-                }
-            }
-        }
-        
-        private IEnumerator FadeOutAndDestroy()
-        {
-            if (effectRenderer != null)
-            {
-                Color startColor = effectRenderer.color;
-                float fadeTimer = 0f;
-                
-                while (fadeTimer < fadeOutDuration)
-                {
-                    fadeTimer += Time.deltaTime;
-                    float alpha = Mathf.Lerp(startColor.a, 0f, fadeTimer / fadeOutDuration);
-                    effectRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
-                    yield return null;
-                }
-            }
-            
-            Destroy(gameObject);
         }
         
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.red;
+            Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.3f);
             Gizmos.DrawWireSphere(transform.position, radius);
         }
     }

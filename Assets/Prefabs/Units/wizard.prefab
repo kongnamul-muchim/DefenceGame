@@ -276,6 +276,10 @@ MonoBehaviour:
   rangeColor: {r: 0, g: 1, b: 0, a: 1}
   attackColor: {r: 1, g: 0, b: 0, a: 1}
   rareColorRenderer: {fileID: 0}
+  hoverScale: 1.1
+  hoverDuration: 0.1
+  hoverDetectionRadius: 0.5
+  groundEffectPrefab: {fileID: 523310266715830695, guid: ee24fb8b0505e8f47a2d3291d1f99f55, type: 3}
 --- !u!61 &2497124527038385067
 BoxCollider2D:
   m_ObjectHideFlags: 0

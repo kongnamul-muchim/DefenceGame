@@ -35,16 +35,16 @@ namespace DefenceGame.Core
                 new SpecialAbility(7, SpecialAbilityType.MultiShot, 4, "투사체 4개 발사")
             };
             
-            // Mage: 지속 피해 바닥 생성 (GroundEffect)
-            towerAbilities["Mage"] = new SpecialAbility[]
+            // Wizard: 지속 피해 바닥 생성 (GroundEffect)
+            towerAbilities["Wizard"] = new SpecialAbility[]
             {
                 new SpecialAbility(3, SpecialAbilityType.GroundEffect, 3, "3초 지속 피해 바닥"),
                 new SpecialAbility(5, SpecialAbilityType.GroundEffect, 5, "5초 지속 피해 바닥"),
                 new SpecialAbility(7, SpecialAbilityType.GroundEffect, 7, "7초 지속 피해 바닥")
             };
             
-            // MageTower: 사거리 증가 및 공격력 증가
-            towerAbilities["MageTower"] = new SpecialAbility[]
+            // WizardTower: 사거리 증가 및 공격력 증가
+            towerAbilities["WizardTower"] = new SpecialAbility[]
             {
                 new SpecialAbility(3, SpecialAbilityType.RangeIncrease, 1, "사거리 +1"),
                 new SpecialAbility(5, SpecialAbilityType.AttackIncrease, 0.3f, "공격력 30% 증가"),

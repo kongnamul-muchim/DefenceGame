@@ -61,6 +61,57 @@ namespace DefenceGame.Core
             }
         }
         
+        // 부채꼴 발사용 초기화
+        public void InitializeWithDirection(Enemy targetEnemy, float damageAmount, int pierce, int areaRadius, Vector3 moveDirection)
+        {
+            target = targetEnemy;
+            damage = damageAmount;
+            pierceCount = pierce;
+            pierceRemaining = pierce;
+            areaDamageRadius = areaRadius;
+            hitEnemies.Clear();
+            spawnTime = Time.time;
+            
+            // 고정 방향 설정
+            direction = moveDirection.normalized;
+            isMoving = true;
+            
+            // 회전 설정
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle + rotationOffset);
+            
+            // 광역 범위 시각화 설정
+            if (areaDamageRadius > 0)
+            {
+                SetupAreaVisualization();
+            }
+        }
+        
+        // Laser 연계 공격용 초기화
+        public void InitializeChain(Enemy targetEnemy, float damageAmount, int chainCount)
+        {
+            target = targetEnemy;
+            damage = damageAmount;
+            pierceCount = chainCount;
+            pierceRemaining = chainCount;
+            areaDamageRadius = 0;
+            hitEnemies.Clear();
+            spawnTime = Time.time;
+            
+            if (target != null)
+            {
+                direction = (target.transform.position - transform.position).normalized;
+                isMoving = true;
+                
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0, 0, angle + rotationOffset);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+        
         private void SetupAreaVisualization()
         {
             // Debug.Log($"[Bullet] SetupAreaVisualization called - areaDamageRadius={areaDamageRadius}");
@@ -148,7 +199,7 @@ namespace DefenceGame.Core
                 // Spawn hit effect
                 SpawnHitEffect();
                 
-                // 관통 체크
+                // 관통/연계 체크
                 if (pierceRemaining > 0)
                 {
                     pierceRemaining--;
@@ -156,6 +207,9 @@ namespace DefenceGame.Core
                     Enemy nextTarget = FindNextTarget();
                     if (nextTarget != null)
                     {
+                        // 연계 공격 시각 효과
+                        ShowChainEffect(target.transform.position, nextTarget.transform.position);
+                        
                         target = nextTarget;
                         return; // 계속 진행
                     }
@@ -163,6 +217,26 @@ namespace DefenceGame.Core
             }
             
             Destroy(gameObject);
+        }
+        
+        // 연계 공격 시각 효과
+        private void ShowChainEffect(Vector3 from, Vector3 to)
+        {
+            // 라인 렌더러로 연결선 표시
+            GameObject lineObj = new GameObject("ChainEffect");
+            LineRenderer line = lineObj.AddComponent<LineRenderer>();
+            line.startWidth = 0.15f;
+            line.endWidth = 0.15f;
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.startColor = Color.cyan;
+            line.endColor = Color.cyan;
+            line.positionCount = 2;
+            line.SetPosition(0, from);
+            line.SetPosition(1, to);
+            line.sortingOrder = 100;
+            
+            // 0.3초 후 제거
+            Destroy(lineObj, 0.3f);
         }
         
         private void ApplyAreaDamage()
