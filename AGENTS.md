@@ -466,3 +466,62 @@ Laser 타워의 연계(확산) 공격 횟수가 등급에 따라 결정됩니다
 - [ ] Laser 등급별 확산 공격 테스트 (Common~Legendary)
 - [ ] Wizard GroundEffect 5초 지속 및 DPS 테스트
 - [ ] 전체 밸런스 테스트 및 조정
+
+---
+
+## 2024-03-14: 버그 수정 - Laser Common 확산 및 GroundEffect 파티클
+
+### 변경 사항
+테스트 중 발견된 버그를 수정했습니다.
+
+#### 1. Laser Common 등급에서도 확산 공격되는 버그
+
+**문제:**
+- Common 등급 Laser도 확산 공격이 적용됨
+- 원래 Common은 확산 없음(0)이어야 함
+
+**원인:**
+- `Mathf.Max(chainAttackCount, gradeChainCount)` 사용
+- 레벨 3 이상이면 SpecialAbilityManager에서 chainAttackCount=1로 설정됨
+- Common(gradeChainCount=0)과 비교해도 레벨 기반 값(1)이 더 큼
+
+**해결:**
+- Common 등급은 무조건 0으로 설정
+- Common이 아닌 경우에만 `Mathf.Max()` 사용
+
+**수정된 코드:**
+```csharp
+if (grade == GradeType.Common)
+{
+    chainAttackCount = 0;
+}
+else
+{
+    chainAttackCount = Mathf.Max(chainAttackCount, gradeChainCount);
+}
+```
+
+#### 2. GroundEffect 파티클이 한 번만 보이는 문제
+
+**문제:**
+- GroundEffect 지속시간은 5초지만 파티클이 한 번만 재생됨
+
+**원인:**
+- ParticleSystem.main.loop 설정이 false로 되어 있음
+
+**해결:**
+- `main.loop = true` 추가
+- 파티클이 지속시간 동안 계속 재생됨
+
+**수정된 파일:**
+- `Assets/Scripts/DefenceGame/Core/Projectiles/GroundEffect.cs`
+
+### 커밋
+- Hash: `bb5334e`
+- Message: `fix: Laser Common grade chain attack and GroundEffect particle loop`
+- Changes: 2 files changed, 12 insertions(+), 2 deletions(-)
+
+### 테스트 항목
+- [ ] Laser Common: 확산 없음 확인 (단일 타겟만 공격)
+- [ ] Laser Uncommon~Legendary: 등급별 확산 횟수 확인
+- [ ] GroundEffect: 5초 동안 파티클 지속 확인
