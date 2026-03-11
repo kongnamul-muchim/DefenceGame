@@ -81,9 +81,9 @@ namespace DefenceGame.Core
             float gradeDamageMultiplier = GetGradeMultiplier(grade, "damage");
             attackPower = (data.AttackPower + data.LevelBonusAttackPower) * gradeDamageMultiplier;
             
-            // Calculate range: 기본사거리 × 레어도사거리
+            // Calculate range: 기본사거리 × 레어도사거리 ÷ 2.5 (너무 커서 보정)
             float gradeRangeMultiplier = GetGradeMultiplier(grade, "range");
-            range = data.Range * gradeRangeMultiplier;
+            range = data.Range * gradeRangeMultiplier / 2.5f;
             
             // Attack speed from data
             attackSpeed = data.AttackSpeed;

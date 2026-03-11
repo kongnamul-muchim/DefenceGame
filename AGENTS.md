@@ -237,3 +237,104 @@ if (TowerLevelManager.Instance != null)
 - Hash: `TBD`
 - Message: `feat: Add test mode to UnitAbility for auto-applying current tower level`
 - Changes: 1개 파일 수정
+
+---
+
+## 2024-03-14: 버그 수정 및 폴더 구조 개선
+
+### 변경 사항
+여러 가지 버그를 수정하고 코드 폴더 구조를 개선했습니다.
+
+#### 1. Archer 화살 버그 수정
+
+**문제:**
+- 화살이 무한으로 생성되고 적과 충돌하지 않아도 사라지지 않음
+- 적과 닿아도 데미지가 들어가지 않고 뚫고 지나감
+
+**해결:**
+- `Bullet.cs`: lifetime을 5초에서 1초로 변경 (line 9)
+- `Bullet.cs`: `OnTriggerEnter2D` 수정하여 모든 적과의 충돌 감지 (line 353-360)
+  - 기존: `enemy == target` 조건만 체크
+  - 변경: `!hitEnemies.Contains(enemy)` 조건 추가로 중복 타격 방지
+
+#### 2. Wizard GroundEffect 데미지 버그 수정
+
+**문제:**
+- GroundEffect가 생성되지만 적에게 데미지가 들어가지 않음
+
+**해결:**
+- `GroundEffect.cs`: `ApplyTickDamage()` 메서드 개선 (line 87-118)
+  - Trigger collider와 Non-trigger collider 모두 체크
+  - Debug 로그 추가로 데미지 적용 확인 가능
+
+#### 3. 공격력 및 사거리 계산 방식 변경
+
+**기존 방식:**
+- TowerData의 기본값만 사용
+
+**새로운 방식 (Excel UnitGrades 시트 참조):**
+- **공격력**: `(기본공격력 + 레벨추가공격력) × 레어도공격력`
+- **사거리**: `기본사거리 × 레어도사거리`
+
+**수정된 파일:**
+- `Assets/Scripts/DefenceGame/Data/TowerData.cs`: `LevelBonusAttackPower` 필드 추가
+- `Assets/Scripts/DefenceGame/Core/Unit.cs`: 
+  - `Initialize()` 메서드에 등급 기반 스탯 계산 추가
+  - `GetGradeMultiplier()` 메서드 추가로 Excel 데이터 참조
+
+#### 4. 폴더 구조 재정비
+
+**기존:**
+```
+Core/
+  ├── Bullet.cs
+  ├── Enemy.cs
+  ├── GameManager.cs
+  ├── ... (모든 파일이 한 폴더에)
+```
+
+**변경:**
+```
+Core/
+  ├── Units/
+  │   ├── Unit.cs
+  │   ├── UnitAttack.cs
+  │   ├── UnitAbility.cs
+  │   ├── UnitUI.cs
+  │   ├── UnitDrag.cs
+  │   ├── UnitDragSystem.cs
+  │   ├── UnitMergeManager.cs
+  │   ├── UnitPlacementManager.cs
+  │   └── GradeAbilityTestManager.cs
+  ├── Projectiles/
+  │   ├── Bullet.cs
+  │   └── GroundEffect.cs
+  ├── Enemies/
+  │   ├── Enemy.cs
+  │   ├── PathAgent.cs
+  │   └── Pathfinder.cs
+  ├── Managers/
+  │   ├── GameManager.cs
+  │   ├── WaveManager.cs
+  │   ├── GachaManager.cs
+  │   ├── TowerLevelManager.cs
+  │   └── SpecialAbilityManager.cs
+  └── Grid/
+      └── GridSystem.cs
+```
+
+**개선사항:**
+- **가독성**: 파일 역할별로 구분되어 찾기 쉬움
+- **유지보수성**: 관련 파일들이 함께 있어 수정이 용이
+- **네임스페이스**: 기존 `DefenceGame.Core` 네임스페이스 유지로 호환성 보장
+
+### 커밋
+- Hash: `62f22f5`
+- Message: `fix: Arrow lifetime, damage detection, stats calculation, and folder reorganization`
+- Changes: 50 files changed, 486 insertions(+), 80 deletions
+
+### 다음 단계 작업 목록
+- [ ] Unity에서 Excel 데이터 확인 (UnitGrades 시트 값 정상 로드 여부)
+- [ ] Archer 화살 데미지 테스트
+- [ ] Wizard GroundEffect 데미지 테스트
+- [ ] 등급별 스탯 계산 검증 (Common vs Legendary 공격력/사거리 비교)

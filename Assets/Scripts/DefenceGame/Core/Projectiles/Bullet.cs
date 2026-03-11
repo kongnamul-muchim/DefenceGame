@@ -30,6 +30,31 @@ namespace DefenceGame.Core
         private int areaDamageRadius = 0; // 광역 데미지 반경 (0 = 없음, 1 = 1칸, 2 = 2칸)
         private LineRenderer areaRangeRenderer; // 광역 범위 시각화
         
+        private void Awake()
+        {
+            // Rigidbody2D가 없으면 추가 (OnTriggerEnter2D 작동을 위해 필수)
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb == null)
+            {
+                rb = gameObject.AddComponent<Rigidbody2D>();
+                rb.gravityScale = 0;
+                rb.isKinematic = true;
+            }
+            
+            // Collider2D가 없으면 CircleCollider2D 추가
+            Collider2D col = GetComponent<Collider2D>();
+            if (col == null)
+            {
+                CircleCollider2D circleCol = gameObject.AddComponent<CircleCollider2D>();
+                circleCol.isTrigger = true;
+                circleCol.radius = 0.2f;
+            }
+            else if (!col.isTrigger)
+            {
+                col.isTrigger = true;
+            }
+        }
+        
         public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0, int areaRadius = 0)
         {
             target = targetEnemy;

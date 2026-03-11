@@ -43,122 +43,142 @@ MonoBehaviour:
     Name: Archer
     AttackPower: 10
     AttackSpeed: 2
-    Range: 3
+    Range: 1
     Grade: 0
+    LevelBonusAttackPower: 0
   - Id: 2
     Name: Wizard
     AttackPower: 30
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 0
+    LevelBonusAttackPower: 0
   - Id: 3
     Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 0
+    LevelBonusAttackPower: 0
   - Id: 4
     Name: Laser
     AttackPower: 50
     AttackSpeed: 1
-    Range: 3
+    Range: 1
     Grade: 0
+    LevelBonusAttackPower: 0
   - Id: 5
     Name: Archer
     AttackPower: 10
     AttackSpeed: 2
-    Range: 3
+    Range: 1
     Grade: 1
+    LevelBonusAttackPower: 0
   - Id: 6
     Name: Wizard
     AttackPower: 30
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 1
+    LevelBonusAttackPower: 0
   - Id: 7
     Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 1
+    LevelBonusAttackPower: 0
   - Id: 8
     Name: Laser
     AttackPower: 50
     AttackSpeed: 1
-    Range: 3
+    Range: 1
     Grade: 1
+    LevelBonusAttackPower: 0
   - Id: 9
     Name: Archer
     AttackPower: 10
     AttackSpeed: 2
-    Range: 3
+    Range: 1
     Grade: 2
+    LevelBonusAttackPower: 0
   - Id: 10
     Name: Wizard
     AttackPower: 30
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 2
+    LevelBonusAttackPower: 0
   - Id: 11
     Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 2
+    LevelBonusAttackPower: 0
   - Id: 12
     Name: Laser
     AttackPower: 50
     AttackSpeed: 1
-    Range: 3
+    Range: 1
     Grade: 2
+    LevelBonusAttackPower: 0
   - Id: 13
     Name: Archer
     AttackPower: 10
     AttackSpeed: 2
-    Range: 3
+    Range: 1
     Grade: 3
+    LevelBonusAttackPower: 0
   - Id: 14
     Name: Wizard
     AttackPower: 30
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 3
+    LevelBonusAttackPower: 0
   - Id: 15
     Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 3
+    LevelBonusAttackPower: 0
   - Id: 16
     Name: Laser
     AttackPower: 50
     AttackSpeed: 1
-    Range: 3
+    Range: 1
     Grade: 3
+    LevelBonusAttackPower: 0
   - Id: 17
     Name: Archer
     AttackPower: 10
     AttackSpeed: 2
-    Range: 3
+    Range: 1
     Grade: 4
+    LevelBonusAttackPower: 0
   - Id: 18
     Name: Wizard
     AttackPower: 30
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 4
+    LevelBonusAttackPower: 0
   - Id: 19
     Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
-    Range: 3
+    Range: 1
     Grade: 4
+    LevelBonusAttackPower: 0
   - Id: 20
     Name: Laser
     AttackPower: 50
     AttackSpeed: 1
-    Range: 3
+    Range: 1
     Grade: 4
+    LevelBonusAttackPower: 0
   Waves:
   - WaveNumber: 1
     EnemyId: 1

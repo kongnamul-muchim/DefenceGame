@@ -17,8 +17,49 @@ namespace DefenceGame.Core
         
         private float elapsedTime = 0f;
         private float tickTimer = 0f;
-        private HashSet<Enemy> enemiesInEffect = new HashSet<Enemy>();
+        private List<Enemy> enemiesInEffect = new List<Enemy>();
         private bool isDestroying = false;
+        
+        private void Awake()
+        {
+            // Rigidbody2D 추가 (Trigger 감지를 위해 필요)
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb == null)
+            {
+                rb = gameObject.AddComponent<Rigidbody2D>();
+                rb.gravityScale = 0;
+                rb.isKinematic = true;
+            }
+            
+            // Trigger Collider 추가
+            CircleCollider2D col = GetComponent<CircleCollider2D>();
+            if (col == null)
+            {
+                col = gameObject.AddComponent<CircleCollider2D>();
+            }
+            col.isTrigger = true;
+            col.radius = radius;
+        }
+        
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            Enemy enemy = other.GetComponent<Enemy>();
+            if (enemy != null && !enemiesInEffect.Contains(enemy))
+            {
+                enemiesInEffect.Add(enemy);
+                Debug.Log($"[GroundEffect] Enemy entered: {enemy.enemyName}");
+            }
+        }
+        
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            Enemy enemy = other.GetComponent<Enemy>();
+            if (enemy != null && enemiesInEffect.Contains(enemy))
+            {
+                enemiesInEffect.Remove(enemy);
+                Debug.Log($"[GroundEffect] Enemy exited: {enemy.enemyName}");
+            }
+        }
         
         public void Initialize(float customDuration, float customDamage, float customRadius)
         {
@@ -88,35 +129,19 @@ namespace DefenceGame.Core
         {
             float damage = damagePerSecond * tickInterval;
             
-            // 범위 내 모든 적에게 데미지 (trigger와 non-trigger 모두 체크)
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
-            foreach (Collider2D col in colliders)
+            // enemiesInEffect 리스트의 적들에게 데미지
+            for (int i = enemiesInEffect.Count - 1; i >= 0; i--)
             {
-                Enemy enemy = col.GetComponent<Enemy>();
+                Enemy enemy = enemiesInEffect[i];
                 if (enemy != null && enemy.currentHealth > 0)
                 {
                     enemy.TakeDamage(damage);
                     Debug.Log($"[GroundEffect] Dealt {damage:F1} damage to {enemy.enemyName}");
                 }
-            }
-            
-            // Trigger colliders 체크 (별도로 체크 필요)
-            ContactFilter2D filter = new ContactFilter2D();
-            filter.useTriggers = true;
-            List<Collider2D> triggerColliders = new List<Collider2D>();
-            Physics2D.OverlapCircle(transform.position, radius, filter, triggerColliders);
-            
-            foreach (Collider2D col in triggerColliders)
-            {
-                // 이미 위에서 처리된 collider는 스킵
-                if (colliders.Length > 0 && System.Array.Exists(colliders, c => c == col))
-                    continue;
-                    
-                Enemy enemy = col.GetComponent<Enemy>();
-                if (enemy != null && enemy.currentHealth > 0)
+                else
                 {
-                    enemy.TakeDamage(damage);
-                    Debug.Log($"[GroundEffect] Dealt {damage:F1} damage to {enemy.enemyName} (trigger)");
+                    // Remove dead or null enemies
+                    enemiesInEffect.RemoveAt(i);
                 }
             }
         }
