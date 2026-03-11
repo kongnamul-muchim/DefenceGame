@@ -399,3 +399,70 @@ Core/
 3. 게임 실행 후 Archer 화살이 적에게 데미지 들어가는지 확인
 4. Wizard가 GroundEffect 생성 후 적이 밟으면 데미지 들어가는지 확인
 5. 사거리가 적절한지 확인 (약 3 유닛)
+
+---
+
+## 2024-03-14: Wizard GroundEffect 및 Laser 확산 공격 개선
+
+### 변경 사항
+테스트 완료 후 밸런스 조정 및 새로운 기능을 추가했습니다.
+
+#### 1. Wizard GroundEffect 밸런스 조정
+
+**변경 전:**
+- 지속시간: 1.3초
+- DPS: 공격력의 50%
+
+**변경 후:**
+- 지속시간: **5초** (약 4배 증가)
+- DPS: 공격력의 **20%** (절반 감소)
+- 총 데미지: 공격력 × 1.0 (유지)
+
+**목적:**
+- 더 오랜 시간 지속되지만 초당 데미지는 낮춰 전략적 요소 강화
+- 적이 바닥을 오래 밟아야 큰 데미지를 입는 메커니즘
+
+**수정된 파일:**
+- `Assets/Scripts/DefenceGame/Core/Units/UnitAbility.cs` (line 260-262)
+
+#### 2. Laser 등급 기반 확산(ChainAttack) 공격 추가
+
+**새로운 기능:**
+Laser 타워의 연계(확산) 공격 횟수가 등급에 따라 결정됩니다.
+
+| 등급 | 확산 횟수 | 설명 |
+|------|----------|------|
+| **Common** | 0 | 확산 없음 (단일 타겟) |
+| **Uncommon** | 1 | 1회 확산 (주변 1명) |
+| **Rare** | 1 | 1회 확산 (주변 1명) |
+| **Epic** | 2 | 2회 확산 (주변 2명) |
+| **Legendary** | 3 | 3회 확산 (주변 3명) |
+
+**구현 방식:**
+- `UnitAbility.CalculateGradeBasedValues()`에 등급별 chainAttackCount 계산 로직 추가
+- SpecialAbilityManager의 값과 등급 기반 값 중 큰 값을 사용
+- 기존 레벨 기반 능력(3/5/7레벨)과 중첩 가능
+
+**수정된 파일:**
+- `Assets/Scripts/DefenceGame/Core/Units/UnitAbility.cs`
+  - `GetGradeBasedChainAttackCount()` 메서드 추가
+  - CalculateGradeBasedValues()에 Laser 로직 추가
+
+#### 3. Enemy Prefab Collider 설정
+
+**완료된 작업:**
+- 모든 Enemy Prefab에 BoxCollider2D 또는 CircleCollider2D 추가
+- Bullet/GroundEffect와의 충돌 감지 정상 작동 확인
+
+**수정된 파일:**
+- `Assets/Prefabs/Enemies/*.prefab` - Collider2D 컴포넌트 추가
+
+### 커밋
+- Hash: `7661ec5`
+- Message: `feat: Update Wizard GroundEffect duration and add Laser grade-based chain attack`
+- Changes: 16 files changed, 444 insertions(+), 440 deletions(-)
+
+### 다음 단계 작업 목록
+- [ ] Laser 등급별 확산 공격 테스트 (Common~Legendary)
+- [ ] Wizard GroundEffect 5초 지속 및 DPS 테스트
+- [ ] 전체 밸런스 테스트 및 조정
