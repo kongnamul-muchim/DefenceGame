@@ -125,6 +125,39 @@ Unit.cs가 너무 무거워져 (~1000줄) 유지보수가 어려워져 컴포넌
 4. **디버그 로그**: 각 능력 적용 시 등급과 계산된 값 출력
 
 ### 커밋
-- Hash: `TBD`
+- Hash: `2fa35f8`
 - Message: `feat: Add grade-based special ability scaling`
-- Changes: 새 파일 1개, 수정 3개 파일
+- Changes: 새 파일 1개, 수정 7개 파일 (291 insertions, 27 deletions)
+
+---
+
+## 2024-03-13: 등급 기반 특수능력 테스트 매니저 추가
+
+### 변경 사항
+등급 기반 특수능력을 테스트하기 위한 테스트 매니저를 추가했습니다.
+
+#### 기능
+- **자동 소환**: 타워가 레벨 7에 도달하면 해당 타워의 모든 등급(Common~Legendary)을 랜덤 순서로 소환
+- **수동 테스트**: 인스펙터에서 ContextMenu로 각 타워별 테스트 가능
+- **등급별 색상**: 소환된 유닛의 등급에 따른 색상 확인 가능
+
+#### 설정 옵션
+- `enableTestMode`: 테스트 모드 활성화/비활성화
+- `autoSpawnOnLevel7`: 레벨 7 자동 소환 여부
+- `spawnInterval`: 등급별 소환 간격 (초)
+
+#### 새로 생성된 파일
+- `Assets/Scripts/DefenceGame/Core/GradeAbilityTestManager.cs` - 테스트 매니저 (200줄)
+
+#### 테스트 방법
+1. Hierarchy에 빈 GameObject 생성
+2. `GradeAbilityTestManager` 컴포넌트 추가
+3. `enableTestMode` 체크
+4. 게임 플레이 중 타워를 합성하여 레벨 7 달성
+5. 또는 인스펙터에서 `Test Spawn XXX` 메뉴 클릭
+
+### 디버그 로그
+콘솔에서 다음 로그로 등급 기반 능력 확인 가능:
+- `[UnitAbility] Archer Speed Increase: Base=0.5, Grade=Rare, Final=0.75`
+- `[UnitAbility] Wizard GroundEffect Chance: Base=0.1, Grade=Epic, Final=0.2`
+- `[GradeAbilityTest] 소환됨: Archer (Legendary) - 배율: 3.00`
