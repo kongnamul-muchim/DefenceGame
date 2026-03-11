@@ -111,12 +111,12 @@ namespace DefenceGame.Core
         
         private void SetupBuffRangeVisualization()
         {
-            Debug.Log($"[SetupBuffRange] towerType={towerType}, isMageTower={towerType == "MageTower"}");
+            // Debug.Log($"[SetupBuffRange] towerType={towerType}, isMageTower={towerType == "MageTower"}");
             
             // MageTower만 버프 범위 시각화
             if (towerType != "MageTower") 
             {
-                Debug.Log($"[SetupBuffRange] Skipping - not MageTower");
+                // Debug.Log($"[SetupBuffRange] Skipping - not MageTower");
                 return;
             }
             
@@ -233,11 +233,11 @@ namespace DefenceGame.Core
         {
             // MageTower: 버프 범위 내 아군 유닛에 공격력 버프, 적에게 이동속도 감소
             
-            // 디버그: 매 프레임 값 확인
-            if (Time.frameCount % 60 == 0)
-            {
-                Debug.Log($"[MageTower {unitName}] attackBuffValue={attackBuffValue}, slowEffectValue={slowEffectValue}, buffRange={buffRange}");
-            }
+            // 디버그: 매 프레임 값 확인 (필요시 활성화)
+            // if (Time.frameCount % 60 == 0)
+            // {
+            //     Debug.Log($"[MageTower {unitName}] attackBuffValue={attackBuffValue}, slowEffectValue={slowEffectValue}, buffRange={buffRange}");
+            // }
             
             // 아군 유닛 버프 적용
             if (attackBuffValue > 0)
@@ -274,7 +274,7 @@ namespace DefenceGame.Core
                     float distance = Vector3.Distance(transform.position, enemy.transform.position);
                     if (distance <= buffRange / 2f)
                     {
-                        // 느려짐 적용
+                        // slow effect apply
                         enemy.ApplySlowEffect(slowEffectValue, this);
                         slowedCount++;
                     }
@@ -285,16 +285,16 @@ namespace DefenceGame.Core
                     }
                 }
                 
-                // 1초마다 로그 출력 (너무 많은 로그 방지)
-                if (Time.frameCount % 60 == 0 && slowedCount > 0)
-                {
-                    Debug.Log($"[{unitName}] Slowed {slowedCount} enemies by {slowEffectValue * 100}%");
-                }
+                // 1초마다 로그 출력 (필요시 활성화)
+                // if (Time.frameCount % 60 == 0 && slowedCount > 0)
+                // {
+                //     Debug.Log($"[{unitName}] Slowed {slowedCount} enemies by {slowEffectValue * 100}%");
+                // }
             }
-            else if (Time.frameCount % 60 == 0)
-            {
-                Debug.Log($"[{unitName}] slowEffectValue is 0 or negative, skipping slow effect");
-            }
+            // else if (Time.frameCount % 60 == 0)
+            // {
+            //     Debug.Log($"[{unitName}] slowEffectValue is 0 or negative, skipping slow effect");
+            // }
         }
         
         // 버프 받기 (다른 MageTower에서 호출)
@@ -476,17 +476,17 @@ namespace DefenceGame.Core
             // 능력치 적용
             ApplyBuffs();
             
-            // 능력 해금 로그
-            Debug.Log($"[{unitName}] towerType={towerType}, level={currentLevel}, unlocked={unlockedAbilities.Count}");
-            Debug.Log($"[{unitName}] Abilities: pierce={pierceCount}, area={areaDamageRadius}, atkBuff={attackBuffValue}, slow={slowEffectValue}");
-            
-            if (unlockedAbilities.Count > 0)
-            {
-                foreach (var ability in unlockedAbilities)
-                {
-                    Debug.Log($"[{unitName}] - {ability.abilityType} at Lv.{ability.unlockLevel}: {ability.value}");
-                }
-            }
+            // 능력 해금 로그 (필요시 활성화)
+            // Debug.Log($"[{unitName}] towerType={towerType}, level={currentLevel}, unlocked={unlockedAbilities.Count}");
+            // Debug.Log($"[{unitName}] Abilities: pierce={pierceCount}, area={areaDamageRadius}, atkBuff={attackBuffValue}, slow={slowEffectValue}");
+            // 
+            // if (unlockedAbilities.Count > 0)
+            // {
+            //     foreach (var ability in unlockedAbilities)
+            //     {
+            //         Debug.Log($"[{unitName}] - {ability.abilityType} at Lv.{ability.unlockLevel}: {ability.value}");
+            //     }
+            // }
         }
         
         private void ApplyBuffs()
@@ -694,38 +694,38 @@ namespace DefenceGame.Core
             // Visual feedback
             ShowAttackEffect();
             
-            Debug.Log($"[{grade}] {unitName} attacks {enemy.enemyName} for {attackPower} damage!");
+            // Debug.Log($"[{grade}] {unitName} attacks {enemy.enemyName} for {attackPower} damage!");
         }
         
         private void SpawnBullet(Enemy target)
         {
             if (bulletPrefab == null) 
             {
-                Debug.LogWarning($"[{unitName}] bulletPrefab is null!");
+                // Debug.LogWarning($"[{unitName}] bulletPrefab is null!");
                 return;
             }
             
-            Debug.Log($"[{unitName}] Spawning bullet - areaDamageRadius={areaDamageRadius}, pierceCount={pierceCount}");
+            // Debug.Log($"[{unitName}] Spawning bullet - areaDamageRadius={areaDamageRadius}, pierceCount={pierceCount}");
             
             GameObject bullet = Instantiate(bulletPrefab, attackPoint.position, Quaternion.identity);
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                // 광역 데미지가 있으면 표시
-                if (areaDamageRadius > 0)
-                {
-                    Debug.Log($"[{unitName}] Firing area damage bullet (radius: {areaDamageRadius})");
-                }
-                else
-                {
-                    Debug.Log($"[{unitName}] Firing normal bullet (no area damage)");
-                }
+                // 광역 데미지가 있으면 표시 (필요시 활성화)
+                // if (areaDamageRadius > 0)
+                // {
+                //     Debug.Log($"[{unitName}] Firing area damage bullet (radius: {areaDamageRadius})");
+                // }
+                // else
+                // {
+                //     Debug.Log($"[{unitName}] Firing normal bullet (no area damage)");
+                // }
                 
                 bulletComponent.Initialize(target, attackPower, pierceCount, areaDamageRadius);
             }
             else
             {
-                Debug.LogError($"[{unitName}] Bullet component not found on prefab!");
+                // Debug.LogError($"[{unitName}] Bullet component not found on prefab!");
             }
         }
         

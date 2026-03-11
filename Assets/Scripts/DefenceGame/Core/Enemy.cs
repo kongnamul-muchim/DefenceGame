@@ -375,14 +375,14 @@ namespace DefenceGame.Core
         {
             if (source == null) 
             {
-                Debug.LogWarning("[Enemy] ApplySlowEffect called with null source");
+                // Debug.LogWarning("[Enemy] ApplySlowEffect called with null source");
                 return;
             }
             
             // 이미 이 소스에서 느려짐이 적용되어 있으면 리턴
             if (slowSources.Contains(source)) 
             {
-                Debug.Log($"[{enemyName}] Already slowed by {source.GetType().Name}");
+                // Debug.Log($"[{enemyName}] Already slowed by {source.GetType().Name}");
                 return;
             }
             
@@ -393,11 +393,11 @@ namespace DefenceGame.Core
             if (spriteRenderer != null)
             {
                 spriteRenderer.color = new Color(0.3f, 0.3f, 1f, 1f); // 더 진한 파란색 틴트
-                Debug.Log($"[{enemyName}] Slowed by {slowPercent * 100}% - Color changed to BLUE");
+                // Debug.Log($"[{enemyName}] Slowed by {slowPercent * 100}% - Color changed to BLUE");
             }
             else
             {
-                Debug.LogWarning($"[{enemyName}] SpriteRenderer is null - cannot change color");
+                // Debug.LogWarning($"[{enemyName}] SpriteRenderer is null - cannot change color");
             }
         }
         
@@ -412,7 +412,7 @@ namespace DefenceGame.Core
             if (slowSources.Count == 0 && spriteRenderer != null)
             {
                 spriteRenderer.color = Color.white;
-                Debug.Log($"[{enemyName}] Slow removed - Color restored to WHITE");
+                // Debug.Log($"[{enemyName}] Slow removed - Color restored to WHITE");
             }
         }
         
@@ -437,7 +437,7 @@ namespace DefenceGame.Core
                 pathAgent.speed = speed;
             }
             
-            Debug.Log($"[{enemyName}] Speed: {oldSpeed} -> {speed} (multiplier: {currentSlowMultiplier})");
+            // Debug.Log($"[{enemyName}] Speed: {oldSpeed} -> {speed} (multiplier: {currentSlowMultiplier})");
         }
     }
 }

@@ -39,12 +39,12 @@ namespace DefenceGame.Core
             hitEnemies.Clear();
             spawnTime = Time.time;
             
-            Debug.Log($"[Bullet] Initialized - pierce={pierce}, areaRadius={areaRadius}, damage={damageAmount}");
+            // Debug.Log($"[Bullet] Initialized - pierce={pierce}, areaRadius={areaRadius}, damage={damageAmount}");
             
             // 광역 범위 시각화 설정
             if (areaDamageRadius > 0)
             {
-                Debug.Log($"[Bullet] Setting up area visualization with radius {areaDamageRadius}");
+                // Debug.Log($"[Bullet] Setting up area visualization with radius {areaDamageRadius}");
                 SetupAreaVisualization();
             }
             
@@ -63,7 +63,7 @@ namespace DefenceGame.Core
         
         private void SetupAreaVisualization()
         {
-            Debug.Log($"[Bullet] SetupAreaVisualization called - areaDamageRadius={areaDamageRadius}");
+            // Debug.Log($"[Bullet] SetupAreaVisualization called - areaDamageRadius={areaDamageRadius}");
             
             // 광역 공격 범위 원형 시각화
             areaRangeRenderer = gameObject.AddComponent<LineRenderer>();
@@ -79,7 +79,7 @@ namespace DefenceGame.Core
             
             DrawAreaCircle();
             
-            Debug.Log($"[Bullet] Area visualization setup complete");
+            // Debug.Log($"[Bullet] Area visualization setup complete");
         }
         
         private void DrawAreaCircle()
@@ -171,8 +171,8 @@ namespace DefenceGame.Core
             Vector3 center = target.transform.position;
             float radius = areaDamageRadius * 2.5f; // 광역 범위 확대 (기존 1.5f -> 2.5f)
             
-            // 디버그 로그
-            Debug.Log($"[Area Damage] Center: {center}, Radius: {radius}, Damage: {damage}");
+            // 디버그 로그 (필요시 활성화)
+            // Debug.Log($"[Area Damage] Center: {center}, Radius: {radius}, Damage: {damage}");
             
             // 범위 내 모든 적 찾기
             Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
@@ -187,11 +187,11 @@ namespace DefenceGame.Core
                 {
                     enemy.TakeDamage(damage);
                     hitCount++;
-                    Debug.Log($"[Area Damage] Hit {enemy.enemyName} at distance {distance:F2}");
+                    // Debug.Log($"[Area Damage] Hit {enemy.enemyName} at distance {distance:F2}");
                 }
             }
             
-            Debug.Log($"[Area Damage] Total {hitCount} enemies hit");
+            // Debug.Log($"[Area Damage] Total {hitCount} enemies hit");
         }
         
         private Enemy FindNextTarget()
