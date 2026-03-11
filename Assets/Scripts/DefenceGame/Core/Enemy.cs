@@ -112,28 +112,18 @@ namespace DefenceGame.Core
         
         private void SetupHealthBar()
         {
-            if (healthBarPrefab == null)
+            // 이미 Enemy 프리팹에 자식으로 있는 HealthBar 찾기
+            healthBar = GetComponentInChildren<HealthBar>(true);
+            
+            if (healthBar == null)
             {
-                Debug.LogWarning($"[{enemyName}] HealthBar prefab is not assigned!");
+                Debug.LogWarning($"[{enemyName}] HealthBar not found in children!");
                 return;
             }
             
-            // Instantiate health bar prefab
-            healthBarInstance = Instantiate(healthBarPrefab, transform);
-            healthBarInstance.transform.localPosition = healthBarOffset;
-            
-            // Get HealthBar component
-            healthBar = healthBarInstance.GetComponent<HealthBar>();
-            if (healthBar == null)
-            {
-                healthBar = healthBarInstance.GetComponentInChildren<HealthBar>();
-            }
-            
             // Initialize health bar
-            if (healthBar != null)
-            {
-                healthBar.Initialize(maxHealth);
-            }
+            healthBar.Initialize(maxHealth);
+            Debug.Log($"[{enemyName}] HealthBar initialized with {maxHealth} HP");
         }
         
         private void InitializeRandomMovement()
@@ -337,6 +327,11 @@ namespace DefenceGame.Core
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(currentHealth);
+                Debug.Log($"[{enemyName}] Health updated: {currentHealth}/{maxHealth}");
+            }
+            else
+            {
+                Debug.LogWarning($"[{enemyName}] HealthBar is null! Cannot update health bar.");
             }
             
             if (currentHealth <= 0)

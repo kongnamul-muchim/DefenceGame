@@ -28,6 +28,11 @@ namespace DefenceGame.Core
         public Color attackColor = Color.red;
         public SpriteRenderer rareColorRenderer; // 그림자 색상용 (Inspector에서 RareColor 연결)
         
+        [Header("Hover Effect")]
+        public float hoverScale = 1.1f; // 마우스 호버 시 커지는 정도
+        public float hoverDuration = 0.1f; // 크기 변화 시간
+        public float hoverDetectionRadius = 0.5f; // 마우스 감지 반경 (Collider 대신 사용)
+        
         private float lastAttackTime;
         private Enemy targetEnemy;
         private LineRenderer rangeLineRenderer;
@@ -39,6 +44,10 @@ namespace DefenceGame.Core
         // 원래 등급 색상 저장
         private Color gradeColor;
         private Color rareOriginalColor; // RareColor 원래 색상 저장
+        
+        // Hover
+        private Vector3 originalScale;
+        private bool isHovered = false;
         
         private void Awake()
         {
@@ -77,6 +86,9 @@ namespace DefenceGame.Core
             {
                 gameObject.AddComponent<BoxCollider2D>();
             }
+            
+            // Save original scale for hover effect
+            originalScale = transform.localScale;
         }
         
         private void SetupRangeVisualization()
@@ -111,7 +123,45 @@ namespace DefenceGame.Core
         
         private void Update()
         {
-            FindAndAttackTarget();
+            // 드래그 중에는 공격하지 않음
+            if (!isDragging)
+            {
+                FindAndAttackTarget();
+            }
+            
+            // 마우스 호버 체크 (Collider 대신 거리 기반)
+            CheckMouseHover();
+        }
+        
+        // 마우스 위치 체크하여 호버 상태 업데이트
+        private void CheckMouseHover()
+        {
+            if (mainCamera == null) return;
+            
+            // 마우스 위치를 월드 좌표로 변환
+            Vector3 mouseWorldPos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = transform.position.z; // Z축은 유닛과 동일하게
+            
+            // 유닛과 마우스 사이의 거리 계산
+            float distanceToMouse = Vector2.Distance(transform.position, mouseWorldPos);
+            
+            // 감지 반경 내에 마우스가 있고 드래그 중이 아닐 때
+            bool shouldHover = distanceToMouse <= hoverDetectionRadius && !isDragging;
+            
+            if (shouldHover && !isHovered)
+            {
+                // 마우스가 들어옴
+                isHovered = true;
+                StopCoroutine("ScaleUnit");
+                StartCoroutine(ScaleUnit(originalScale * hoverScale));
+            }
+            else if (!shouldHover && isHovered)
+            {
+                // 마우스가 나감
+                isHovered = false;
+                StopCoroutine("ScaleUnit");
+                StartCoroutine(ScaleUnit(originalScale));
+            }
         }
         
         public void Initialize(TowerData data)
@@ -207,6 +257,25 @@ namespace DefenceGame.Core
         public void OnDragEnd()
         {
             isDragging = false;
+        }
+        
+        // 크기 변화 코루틴
+        private IEnumerator ScaleUnit(Vector3 targetScale)
+        {
+            Vector3 startScale = transform.localScale;
+            float elapsedTime = 0f;
+            
+            while (elapsedTime < hoverDuration)
+            {
+                elapsedTime += Time.deltaTime;
+                float t = elapsedTime / hoverDuration;
+                // 부드러운 보간
+                t = Mathf.SmoothStep(0, 1, t);
+                transform.localScale = Vector3.Lerp(startScale, targetScale, t);
+                yield return null;
+            }
+            
+            transform.localScale = targetScale;
         }
         
         private void OnDisable()
