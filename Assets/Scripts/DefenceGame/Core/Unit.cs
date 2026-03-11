@@ -120,15 +120,24 @@ namespace DefenceGame.Core
                 return;
             }
             
-            // 기존 LineRenderer 제거 (중복 방지)
-            LineRenderer existingRenderer = GetComponent<LineRenderer>();
-            if (existingRenderer != null && existingRenderer != rangeLineRenderer)
+            // 기존 LineRenderer 제거 (중복 방지) - null 체크 추가
+            LineRenderer[] existingRenderers = GetComponents<LineRenderer>();
+            foreach (var renderer in existingRenderers)
             {
-                Destroy(existingRenderer);
+                if (renderer != rangeLineRenderer && renderer != buffRangeRenderer)
+                {
+                    Destroy(renderer);
+                }
             }
             
             // 버프 범위 LineRenderer 설정
             buffRangeRenderer = gameObject.AddComponent<LineRenderer>();
+            if (buffRangeRenderer == null)
+            {
+                Debug.LogError($"[{unitName}] Failed to add LineRenderer for buff range!");
+                return;
+            }
+            
             buffRangeRenderer.startWidth = 0.1f; // 더 두껍게
             buffRangeRenderer.endWidth = 0.1f;
             buffRangeRenderer.material = new Material(Shader.Find("Sprites/Default"));
