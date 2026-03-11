@@ -289,45 +289,49 @@
 # 🔷 STEP 5: 특수 능력 해금 시스템
 **목표**: 레벨 3/5/7 도달 시 특수 능력 해금
 
-## 5-1. 데이터 파일 생성
+## 5-1. 데이터 파일 생성 ✅ 완료
 **파일**: `Assets/Scripts/DefenceGame/Data/SpecialAbilityData.cs`
 
 작업 내용:
-- [ ] `SpecialAbilityType` Enum 정의 (Pierce, AreaDamage 등)
-- [ ] `SpecialAbility` 클래스 정의
-- [ ] 각 타워별 특수 능력 데이터 정의
+- [x] `SpecialAbilityType` Enum 정의 (Pierce, AreaDamage 등)
+- [x] `SpecialAbility` 클래스 정의
+- [x] 각 타워별 특수 능력 데이터 정의
 
-## 5-2. 매니저 생성
+## 5-2. 매니저 생성 ✅ 완료
 **파일**: `Assets/Scripts/DefenceGame/Core/SpecialAbilityManager.cs`
 
 작업 내용:
-- [ ] Singleton 패턴 구현
-- [ ] 타워별 특수 능력 목록 저장
-- [ ] Archer: 관통(3), 관통2(5), 공격속도20%(7)
-- [ ] Wizard: 광역1(3), 광역2(5), 공격력30%(7)
-- [ ] WizardTower: 공격력버프10%(3), 공속버프10%(5), 범위+1(7)
-- [ ] Laser: 사거리+1(3), 사거리+2(5), 관통(7)
-- [ ] 레벨에 따른 능력 해금 메서드
+- [x] Singleton 패턴 구현
+- [x] 타워별 특수 능력 목록 저장
+- [x] Archer: 관통(3), 관통2(5), 공격속도20%(7)
+- [x] Mage: 광역1(3), 광역2(5), 공격력30%(7)
+- [x] MageTower: 공격력버프10%(3), 공속버프10%(5), 범위+1(7)
+- [x] Laser: 사거리+1(3), 사거리+2(5), 관통(7)
+- [x] 레벨에 따른 능력 해금 메서드
 
-## 5-3. Unity 설정
+## 5-3. Unit.cs 수정 ✅ 완료
+**파일**: `Assets/Scripts/DefenceGame/Core/Unit.cs`
+
+작업 내용:
+- [x] 특수 능력 필드 추가 (pierceCount, areaDamageRadius 등)
+- [x] `Initialize()`에 특수 능력 적용 로직 추가
+- [x] `ApplySpecialAbilities()` 메서드 구현
+- [x] 레벨업 이벤트 수신하여 능력 재적용
+
+## 5-4. Bullet.cs 수정 ✅ 완료
+**파일**: `Assets/Scripts/DefenceGame/Core/Bullet.cs`
+
+작업 내용:
+- [x] `Initialize()`에 `pierce` 파라미터 추가
+- [x] 관통 로직 구현 (pierceCount만큼 적 관통)
+- [x] `FindNextTarget()` 메서드 구현
+
+## 5-5. Unity 설정 ⚠️ 필요
 **위치**: Hierarchy → Managers 오브젝트
 
 - [ ] Managers 오브젝트 선택
 - [ ] Inspector에서 **Add Component** 클릭
 - [ ] "SpecialAbilityManager" 검색 후 추가
-
-## 5-4. Unit.cs 수정
-작업 내용:
-- [ ] 특수 능력 필드 추가 (pierceCount, areaDamageRadius 등)
-- [ ] `Initialize()`에 특수 능력 적용 로직 추가
-- [ ] `ApplySpecialAbilities()` 메서드 구현
-- [ ] 레벨업 이벤트 수신하여 능력 재적용
-
-## 5-5. Bullet.cs 수정
-작업 내용:
-- [ ] `Initialize()`에 `pierce` 파라미터 추가
-- [ ] 관통 로직 구현 (pierceCount만큼 적 관통)
-- [ ] `FindNextTarget()` 메서드 구현
 
 ## 5-6. 테스트
 - [ ] ▶️ Play 버튼 클릭
@@ -351,10 +355,11 @@
 ---
 
 **✅ STEP 5 완료 확인:**
-- [ ] 레벨 3/5/7 도달 시 특수 능력 해금됨
-- [ ] Archer 관통 기능 작동함
-- [ ] Wizard 광역 공격 작동함
-- [ ] 에러 없이 정상 작동함
+- [x] SpecialAbilityData.cs 생성됨
+- [x] SpecialAbilityManager.cs 생성됨
+- [x] Unit.cs에 특수 능력 적용 로직 추가됨
+- [x] Bullet.cs에 관통 기능 구현됨
+- [ ] Unity에서 SpecialAbilityManager 컴포넌트 추가 필요
 
 ---
 

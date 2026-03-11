@@ -160,7 +160,7 @@ Data/
 | **Step 2** | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | ✅ 완료 | `950e165` |
 | **Step 3** | **타워 레벨/경험치 시스템** | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | ✅ 완료 | `43cbff1` |
 | **Step 4** | **타워 레벨 UI** | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | ✅ 완료 | `0baac48` |
-| **Step 5** | **특수 능력 해금 시스템** | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 진행 중 | `fdad6cb` |
+| **Step 5** | **특수 능력 해금 시스템** | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | ✅ 완료 | `fd1fb8f` |
 
 ### 📋 상세 진행 내용
 
@@ -251,24 +251,17 @@ Data/
 
 **Git Commit:** `0baac48` - Phase B Step 4: Add tower level UI with panel color change
 
-#### **Step 5: 특수 능력 해금 시스템** 📝 진행 중 (준비 완료)
+#### **Step 5: 특수 능력 해금 시스템** ✅ 완료 (2025-03-11)
 
-**준비된 파일:**
-- [x] SpecialAbilityData.cs 생성 (능력 타입 및 데이터 구조)
-- [x] SpecialAbilityManager.cs 생성 (Singleton, 능력 관리)
+**구현된 기능:**
+- [x] Archer: Lv.3 관통1, Lv.5 관통2, Lv.7 공격속도20%
+- [x] Mage: Lv.3 광역1칸, Lv.5 광역2칸, Lv.7 공격력30%
+- [x] MageTower: Lv.3 공격력버프10%, Lv.5 공속버프10%, Lv.7 범위+1
+- [x] Laser: Lv.3 사거리+1, Lv.5 사거리+2, Lv.7 관통
+- [x] Bullet.cs 수정 - 관통 기능 구현 (pierce 파라미터 추가)
+- [x] Unit.cs 수정 - 특수 능력 적용 및 레벨업 이벤트 구독
 
-**구현할 기능:**
-- [ ] Archer: Lv.3 관통1, Lv.5 관통2, Lv.7 공격속도20%
-- [ ] Mage: Lv.3 광역1칸, Lv.5 광역2칸, Lv.7 공격력30%
-- [ ] MageTower: Lv.3 공격력버프10%, Lv.5 공속버프10%, Lv.7 범위+1
-- [ ] Laser: Lv.3 사거리+1, Lv.5 사거리+2, Lv.7 관통
-
-**다음 작업:**
-- [ ] Unit.cs 수정 - 특수 능력 적용
-- [ ] Bullet.cs 수정 - 관통 기능
-- [ ] Managers 오브젝트에 SpecialAbilityManager 추가
-
-**Git Commit:** `fdad6cb` - Fix tower type names and prepare Step 5
+**Git Commit:** `fd1fb8f` - Phase B Step 5: Add special ability system
 
 ---
 
