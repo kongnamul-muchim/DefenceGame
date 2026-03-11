@@ -525,3 +525,52 @@ else
 - [ ] Laser Common: 확산 없음 확인 (단일 타겟만 공격)
 - [ ] Laser Uncommon~Legendary: 등급별 확산 횟수 확인
 - [ ] GroundEffect: 5초 동안 파티클 지속 확인
+
+---
+
+## 2024-03-14: Laser 특수 능력 시스템 변경
+
+### 변경 사항
+Laser의 특수 능력 시스템을 변경했습니다.
+
+**기존 시스템:**
+- 확산(ChainAttack): 레벨 3/5/7에 따라 1/2/3회
+- 등급과 무관하게 레벨만으로 결정
+
+**새로운 시스템:**
+- **확산(ChainAttack)**: 등급 기반으로만 결정
+  - Common: 0회 (단일 타겟)
+  - Uncommon: 1회
+  - Rare: 1회
+  - Epic: 2회
+  - Legendary: 3회
+
+- **레벨 특수 능력**: 공격력 증가 + 공격속도 감소
+  - 레벨 3: 공격력 +20%
+  - 레벨 5: 공격속도 -15% (더 느리게)
+  - 레벨 7: 공격력 +30%
+
+**변경 이유:**
+- 확산은 타워의 기본 특성(등급)으로 고정
+- 레벨업으로는 순수한 성능 향상(데미지↑)과 트레이드오프(속도↓)를 제공
+
+#### 수정된 파일
+- `Assets/Scripts/DefenceGame/Data/SpecialAbilityData.cs`
+  - 새로운 능력 타입 추가: `AttackUp`, `SpeedDown`
+  
+- `Assets/Scripts/DefenceGame/Core/Managers/SpecialAbilityManager.cs`
+  - Laser 능력 설정 변경
+  
+- `Assets/Scripts/DefenceGame/Core/Units/UnitAbility.cs`
+  - `AttackUp`, `SpeedDown` 처리 로직 추가
+  - `ApplyBuffs()`에서 음수 speed 값도 처리하도록 수정
+
+### 커밋
+- Hash: `96e9fe2`
+- Message: `feat: Change Laser level abilities to Attack Up + Speed Down`
+- Changes: 3 files changed, 26 insertions(+), 7 deletions(-)
+
+### 다음 단계 작업 목록
+- [ ] Laser Common 등급: 확산 없음 + 레벨 3 능력 적용 확인
+- [ ] Laser Legendary 등급: 확산 3회 + 레벨 7 능력 적용 확인
+- [ ] 공격속도 감소(-15%)가 정상적으로 적용되는지 확인
