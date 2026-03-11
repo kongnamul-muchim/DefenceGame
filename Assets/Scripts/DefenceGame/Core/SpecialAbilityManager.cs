@@ -47,7 +47,7 @@ namespace DefenceGame.Core
             towerAbilities["MageTower"] = new SpecialAbility[]
             {
                 new SpecialAbility(3, SpecialAbilityType.AttackBuff, 0.1f, "공격력 버프 10%"),
-                new SpecialAbility(5, SpecialAbilityType.SpeedBuff, 0.1f, "공속 버프 10%"),
+                new SpecialAbility(5, SpecialAbilityType.SlowEffect, 0.3f, "이동속도 30% 감소"),
                 new SpecialAbility(7, SpecialAbilityType.RangeIncrease, 1, "범위 +1")
             };
             

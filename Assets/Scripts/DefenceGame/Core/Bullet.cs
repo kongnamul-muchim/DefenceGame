@@ -25,14 +25,25 @@ namespace DefenceGame.Core
         private int pierceRemaining = 0; // 남은 관통 횟수
         private System.Collections.Generic.List<Enemy> hitEnemies = new System.Collections.Generic.List<Enemy>(); // 이미 맞은 적 목록
         
-        public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0)
+        // Area damage (Mage 광역 공격)
+        private int areaDamageRadius = 0; // 광역 데미지 반경 (0 = 없음, 1 = 1칸, 2 = 2칸)
+        private LineRenderer areaRangeRenderer; // 광역 범위 시각화
+        
+        public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0, int areaRadius = 0)
         {
             target = targetEnemy;
             damage = damageAmount;
             pierceCount = pierce;
             pierceRemaining = pierce;
+            areaDamageRadius = areaRadius;
             hitEnemies.Clear();
             spawnTime = Time.time;
+            
+            // 광역 범위 시각화 설정
+            if (areaDamageRadius > 0)
+            {
+                SetupAreaVisualization();
+            }
             
             if (target != null)
             {
@@ -44,6 +55,36 @@ namespace DefenceGame.Core
             {
                 // No target, destroy immediately
                 Destroy(gameObject);
+            }
+        }
+        
+        private void SetupAreaVisualization()
+        {
+            // 광역 공격 범위 원형 시각화
+            areaRangeRenderer = gameObject.AddComponent<LineRenderer>();
+            areaRangeRenderer.startWidth = 0.05f;
+            areaRangeRenderer.endWidth = 0.05f;
+            areaRangeRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            areaRangeRenderer.startColor = new Color(1, 0, 1, 0.5f); // 보라색 반투명
+            areaRangeRenderer.endColor = new Color(1, 0, 1, 0.5f);
+            areaRangeRenderer.positionCount = 50;
+            areaRangeRenderer.useWorldSpace = false;
+            areaRangeRenderer.loop = true;
+            
+            DrawAreaCircle();
+        }
+        
+        private void DrawAreaCircle()
+        {
+            if (areaRangeRenderer == null) return;
+            
+            float radius = areaDamageRadius * 1.5f; // 타일 크기에 맞게 조정
+            for (int i = 0; i < 50; i++)
+            {
+                float angle = i * Mathf.PI * 2 / 50;
+                float x = Mathf.Cos(angle) * radius;
+                float y = Mathf.Sin(angle) * radius;
+                areaRangeRenderer.SetPosition(i, new Vector3(x, y, 0));
             }
         }
         
@@ -84,7 +125,16 @@ namespace DefenceGame.Core
         {
             if (target != null && !hitEnemies.Contains(target))
             {
-                target.TakeDamage(damage);
+                // 광역 데미지 적용
+                if (areaDamageRadius > 0)
+                {
+                    ApplyAreaDamage();
+                }
+                else
+                {
+                    // 단일 대상 데미지
+                    target.TakeDamage(damage);
+                }
                 hitEnemies.Add(target);
                 
                 // Spawn hit effect
@@ -105,6 +155,35 @@ namespace DefenceGame.Core
             }
             
             Destroy(gameObject);
+        }
+        
+        private void ApplyAreaDamage()
+        {
+            // 타겟 위치에 광역 데미지 적용
+            Vector3 center = target.transform.position;
+            float radius = areaDamageRadius * 1.5f; // 타일 크기에 맞게 조정
+            
+            // 디버그 로그
+            Debug.Log($"[Area Damage] Center: {center}, Radius: {radius}, Damage: {damage}");
+            
+            // 범위 내 모든 적 찾기
+            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            int hitCount = 0;
+            
+            foreach (Enemy enemy in allEnemies)
+            {
+                if (enemy == null || enemy.currentHealth <= 0) continue;
+                
+                float distance = Vector3.Distance(center, enemy.transform.position);
+                if (distance <= radius)
+                {
+                    enemy.TakeDamage(damage);
+                    hitCount++;
+                    Debug.Log($"[Area Damage] Hit {enemy.enemyName} at distance {distance:F2}");
+                }
+            }
+            
+            Debug.Log($"[Area Damage] Total {hitCount} enemies hit");
         }
         
         private Enemy FindNextTarget()

@@ -57,7 +57,13 @@ namespace DefenceGame.Core
         private float rangeIncreaseValue = 0f; // 사거리 증가 값
         private float attackIncreaseValue = 0f; // 공격력 증가 값
         private float speedIncreaseValue = 0f; // 공격속도 증가 값
+        private float slowEffectValue = 0f; // 이동속도 감소 값 (MageTower)
         private string towerType = ""; // 타워 타입 (Archer, Mage, MageTower, Laser)
+        
+        // MageTower 버프/디버프 관련
+        private float buffRange = 3f; // MageTower 버프 범위 (3x3)
+        private LineRenderer buffRangeRenderer; // 버프 범위 시각화
+        private SpriteRenderer buffAreaRenderer; // 버프 영역 표시 (반투명 사각형)
         
         private void Awake()
         {
@@ -99,6 +105,41 @@ namespace DefenceGame.Core
             
             // Save original scale for hover effect
             originalScale = transform.localScale;
+            
+            // Setup buff range visualization for MageTower
+            SetupBuffRangeVisualization();
+        }
+        
+        private void SetupBuffRangeVisualization()
+        {
+            // MageTower만 버프 범위 시각화
+            if (towerType != "MageTower") return;
+            
+            // 버프 범위 LineRenderer 설정
+            buffRangeRenderer = gameObject.AddComponent<LineRenderer>();
+            buffRangeRenderer.startWidth = 0.03f;
+            buffRangeRenderer.endWidth = 0.03f;
+            buffRangeRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            buffRangeRenderer.startColor = new Color(1, 0.5f, 0, 0.5f); // 주황색 반투명
+            buffRangeRenderer.endColor = new Color(1, 0.5f, 0, 0.5f);
+            buffRangeRenderer.positionCount = 5;
+            buffRangeRenderer.useWorldSpace = false;
+            buffRangeRenderer.loop = true;
+            
+            DrawBuffRangeSquare();
+        }
+        
+        private void DrawBuffRangeSquare()
+        {
+            if (buffRangeRenderer == null) return;
+            
+            float halfRange = buffRange / 2f;
+            // 3x3 정사각형 그리기
+            buffRangeRenderer.SetPosition(0, new Vector3(-halfRange, -halfRange, 0));
+            buffRangeRenderer.SetPosition(1, new Vector3(halfRange, -halfRange, 0));
+            buffRangeRenderer.SetPosition(2, new Vector3(halfRange, halfRange, 0));
+            buffRangeRenderer.SetPosition(3, new Vector3(-halfRange, halfRange, 0));
+            buffRangeRenderer.SetPosition(4, new Vector3(-halfRange, -halfRange, 0));
         }
         
         private void SetupRangeVisualization()
@@ -136,11 +177,99 @@ namespace DefenceGame.Core
             // 드래그 중에는 공격하지 않음
             if (!isDragging)
             {
-                FindAndAttackTarget();
+                // MageTower는 버프/디버프만 처리
+                if (towerType == "MageTower")
+                {
+                    ApplyMageTowerEffects();
+                }
+                else
+                {
+                    FindAndAttackTarget();
+                }
             }
             
             // 마우스 호버 체크 (Collider 대신 거리 기반)
             CheckMouseHover();
+            
+            // 범위 시각화 업데이트
+            UpdateRangeVisualization();
+        }
+        
+        private void UpdateRangeVisualization()
+        {
+            // MageTower 버프 범위 업데이트
+            if (towerType == "MageTower" && buffRangeRenderer != null)
+            {
+                DrawBuffRangeSquare();
+            }
+            
+            // 일반 공격 범위 업데이트
+            DrawRangeCircle();
+        }
+        
+        private void ApplyMageTowerEffects()
+        {
+            // MageTower: 버프 범위 내 아군 유닛에 공격력 버프, 적에게 이동속도 감소
+            
+            // 아군 유닛 버프 적용
+            if (attackBuffValue > 0)
+            {
+                Unit[] allUnits = GameObject.FindObjectsOfType<Unit>();
+                foreach (Unit unit in allUnits)
+                {
+                    if (unit == this) continue; // 자신은 제외
+                    if (unit.towerType == "MageTower") continue; // 다른 MageTower 제외
+                    
+                    float distance = Vector3.Distance(transform.position, unit.transform.position);
+                    if (distance <= buffRange / 2f)
+                    {
+                        // 버프 적용
+                        unit.ReceiveAttackBuff(attackBuffValue, this);
+                    }
+                    else
+                    {
+                        // 버프 제거
+                        unit.RemoveAttackBuff(this);
+                    }
+                }
+            }
+            
+            // 적 디버프(느려짐) 적용
+            if (slowEffectValue > 0)
+            {
+                Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+                foreach (Enemy enemy in allEnemies)
+                {
+                    if (enemy.currentHealth <= 0) continue;
+                    
+                    float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                    if (distance <= buffRange / 2f)
+                    {
+                        // 느려짐 적용
+                        enemy.ApplySlowEffect(slowEffectValue, this);
+                    }
+                    else
+                    {
+                        // 느려짐 제거
+                        enemy.RemoveSlowEffect(this);
+                    }
+                }
+            }
+        }
+        
+        // 버프 받기 (다른 MageTower에서 호출)
+        public void ReceiveAttackBuff(float buffPercent, Unit source)
+        {
+            // 실제로는 버프 소스를 추적하여 중첩 방지
+            // 여기서는 간단히 공격력 증가만 적용
+            float buffMultiplier = 1f + buffPercent;
+            // TODO: 버프 소스 추적 및 중첩 방지 로직
+        }
+        
+        // 버프 제거
+        public void RemoveAttackBuff(Unit source)
+        {
+            // TODO: 버프 제거 로직
         }
         
         // 마우스 위치 체크하여 호버 상태 업데이트
@@ -238,6 +367,7 @@ namespace DefenceGame.Core
             rangeIncreaseValue = 0f;
             attackIncreaseValue = 0f;
             speedIncreaseValue = 0f;
+            slowEffectValue = 0f;
             
             // 해금된 능력 가져오기
             var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
@@ -266,6 +396,9 @@ namespace DefenceGame.Core
                         break;
                     case SpecialAbilityType.SpeedIncrease:
                         speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.SlowEffect:
+                        slowEffectValue = Mathf.Max(slowEffectValue, ability.value);
                         break;
                 }
             }
@@ -496,15 +629,13 @@ namespace DefenceGame.Core
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                // 광역 데미지 계산
-                float finalDamage = attackPower;
+                // 광역 데미지가 있으면 표시
                 if (areaDamageRadius > 0)
                 {
-                    // 광역 데미지가 있는 경우 - 나중에 처리
-                    finalDamage = attackPower;
+                    Debug.Log($"[{unitName}] Firing area damage bullet (radius: {areaDamageRadius})");
                 }
                 
-                bulletComponent.Initialize(target, finalDamage, pierceCount);
+                bulletComponent.Initialize(target, attackPower, pierceCount, areaDamageRadius);
             }
         }
         

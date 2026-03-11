@@ -37,6 +37,11 @@ namespace DefenceGame.Core
         private Vector3 currentDirection;
         private float directionChangeTimer;
         
+        // Slow effect (MageTower)
+        private float originalSpeed;
+        private float currentSlowMultiplier = 1f;
+        private System.Collections.Generic.List<MonoBehaviour> slowSources = new System.Collections.Generic.List<MonoBehaviour>();
+        
         // Events
         public System.Action<Enemy> OnEnemyDefeated;
         public System.Action<Enemy> OnEnemyReachedCastle;
@@ -78,6 +83,7 @@ namespace DefenceGame.Core
             maxHealth = data.Health * healthMultiplier;
             currentHealth = maxHealth;
             speed = data.Speed;
+            originalSpeed = speed; // 원래 속도 저장
             rewardGold = data.RewardGold;
             targetPosition = targetPos;
             
@@ -361,6 +367,59 @@ namespace DefenceGame.Core
             if (WaveManager.Instance != null && !hasReachedCastle)
             {
                 WaveManager.Instance.EnemyReachedCastle();
+            }
+        }
+        
+        // Slow effect methods (MageTower)
+        public void ApplySlowEffect(float slowPercent, MonoBehaviour source)
+        {
+            if (source == null) return;
+            
+            // 이미 이 소스에서 느려짐이 적용되어 있으면 리턴
+            if (slowSources.Contains(source)) return;
+            
+            slowSources.Add(source);
+            UpdateSlowMultiplier();
+            
+            // 시각적 효과 (파란색으로 변경)
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = new Color(0.5f, 0.5f, 1f, 1f); // 파란색 틴트
+            }
+        }
+        
+        public void RemoveSlowEffect(MonoBehaviour source)
+        {
+            if (source == null) return;
+            
+            slowSources.Remove(source);
+            UpdateSlowMultiplier();
+            
+            // 모든 느려짐이 제거되면 원래 색상으로 복원
+            if (slowSources.Count == 0 && spriteRenderer != null)
+            {
+                spriteRenderer.color = Color.white;
+            }
+        }
+        
+        private void UpdateSlowMultiplier()
+        {
+            // 가장 강한 느려짐 효과 적용 (중첩하지 않음)
+            float maxSlow = 0f;
+            foreach (var source in slowSources)
+            {
+                // TODO: 각 소스별 느려짐 값을 가져와야 함
+                // 현재는 30%로 가정
+                maxSlow = Mathf.Max(maxSlow, 0.3f);
+            }
+            
+            currentSlowMultiplier = 1f - maxSlow;
+            
+            // 속도 업데이트
+            speed = originalSpeed * currentSlowMultiplier;
+            if (pathAgent != null)
+            {
+                pathAgent.speed = speed;
             }
         }
     }

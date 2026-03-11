@@ -11,7 +11,8 @@ namespace DefenceGame.Data
         SpeedBuff,      // 공격속도 버프 (MageTower)
         RangeIncrease,  // 사거리 증가 (Laser, MageTower)
         AttackIncrease, // 공격력 증가
-        SpeedIncrease   // 공격속도 증가
+        SpeedIncrease,  // 공격속도 증가
+        SlowEffect      // 이동속도 감소 (MageTower)
     }
     
     [System.Serializable]
