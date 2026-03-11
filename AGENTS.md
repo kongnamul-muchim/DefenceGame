@@ -338,3 +338,64 @@ Core/
 - [ ] Archer 화살 데미지 테스트
 - [ ] Wizard GroundEffect 데미지 테스트
 - [ ] 등급별 스탯 계산 검증 (Common vs Legendary 공격력/사거리 비교)
+
+---
+
+## 2024-03-14: 충돌 감지 및 사거리 버그 수정
+
+### 변경 사항
+충돌 감지와 사거리 계산 문제를 해결했습니다.
+
+#### 1. Bullet 충돌 감지 문제 해결
+
+**문제:**
+- Archer 화살이 적을 관통하고 지나감
+- OnTriggerEnter2D가 작동하지 않음
+
+**원인:**
+- Bullet 프리팹에 Rigidbody2D가 없음
+- OnTriggerEnter2D는 Rigidbody2D가 있어야 작동
+
+**해결:**
+- `Bullet.cs`: Awake()에서 자동으로 Rigidbody2D와 CircleCollider2D 추가
+  - `rb = gameObject.AddComponent<Rigidbody2D>()`
+  - `rb.gravityScale = 0`, `rb.isKinematic = true`
+  - `col = gameObject.AddComponent<CircleCollider2D>()`
+  - `col.isTrigger = true`, `col.radius = 0.2f`
+
+#### 2. GroundEffect 데미지 문제 해결
+
+**문제:**
+- GroundEffect가 생성되지만 적에게 데미지가 들어가지 않음
+- OverlapCircleAll이 Trigger Collider를 감지하지 못함
+
+**해결:**
+- `GroundEffect.cs`: OnTriggerEnter2D/OnTriggerExit2D 사용으로 변경
+  - `OnTriggerEnter2D`: 적이 GroundEffect에 들어오면 enemiesInEffect 리스트에 추가
+  - `OnTriggerExit2D`: 적이 나가면 리스트에서 제거
+  - `ApplyTickDamage()`: 리스트의 적들에게 주기적으로 데미지
+- Awake()에서 CircleCollider2D 자동 추가
+
+#### 3. 사거리 계산 보정
+
+**문제:**
+- 사거리 계산 결과가 너무 커서 최솟값이 8
+- 유저 요청: 3 정도로 줄일 것
+
+**해결:**
+- `Unit.cs` (line 86): 사거리 계산에 보정값 추가
+  - 기존: `range = data.Range * gradeRangeMultiplier`
+  - 변경: `range = data.Range * gradeRangeMultiplier / 2.5f`
+  - 결과: 최솟값이 8에서 약 3.2로 감소
+
+### 커밋
+- Hash: `59b44bc`
+- Message: `fix: Bullet/GroundEffect collision detection and range calculation`
+- Changes: Bullet.cs, GroundEffect.cs, Unit.cs 수정
+
+### 테스트 방법
+1. Unity에서 Bullet 프리팹 확인 (Rigidbody2D와 Collider2D 자동 추가됨)
+2. GroundEffect 프리팹 확인 (CircleCollider2D 자동 추가됨)
+3. 게임 실행 후 Archer 화살이 적에게 데미지 들어가는지 확인
+4. Wizard가 GroundEffect 생성 후 적이 밟으면 데미지 들어가는지 확인
+5. 사거리가 적절한지 확인 (약 3 유닛)

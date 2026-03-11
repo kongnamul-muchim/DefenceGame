@@ -288,6 +288,7 @@ GameObject:
   - component: {fileID: 9123669768118550008}
   - component: {fileID: 8319982428267128993}
   - component: {fileID: 7501524935446079183}
+  - component: {fileID: 1340673700377118944}
   m_Layer: 0
   m_Name: slime-black
   m_TagString: Untagged
@@ -435,6 +436,52 @@ MonoBehaviour:
   fillImage: {fileID: 3666824055687169062}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
   fillColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
+--- !u!61 &1340673700377118944
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861923924840178436}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: -0.051671445}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.64, y: 0.64}
+    newSize: {x: 0.64, y: 0.64}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.64, y: 0.5366571}
+  m_EdgeRadius: 0
 --- !u!1 &8988637459545293177
 GameObject:
   m_ObjectHideFlags: 0

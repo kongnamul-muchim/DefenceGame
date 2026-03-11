@@ -206,6 +206,38 @@ namespace DefenceGame.Core
                 finalAttackIncreaseValue = GradeMultiplier.ApplyMultiplier(attackIncreaseValue, grade);
                 Debug.Log($"[UnitAbility] Tower Attack Increase: Base={attackIncreaseValue}, Grade={grade}, Final={finalAttackIncreaseValue:F2}");
             }
+            
+            // Laser: 등급 기반 확산(ChainAttack) 설정
+            if (towerType == "Laser")
+            {
+                int gradeChainCount = GetGradeBasedChainAttackCount(grade);
+                // SpecialAbilityManager에서 가져온 값과 등급 기반 값 중 큰 것 사용
+                chainAttackCount = Mathf.Max(chainAttackCount, gradeChainCount);
+                Debug.Log($"[UnitAbility] Laser ChainAttack: Grade={grade}, BaseCount={chainAttackCount}, GradeCount={gradeChainCount}, Final={chainAttackCount}");
+            }
+        }
+        
+        /// <summary>
+        /// Laser 등급별 확산 공격 횟수 반환
+        /// Common: 0, Uncommon: 1, Rare: 1, Epic: 2, Legendary: 3
+        /// </summary>
+        private int GetGradeBasedChainAttackCount(GradeType grade)
+        {
+            switch (grade)
+            {
+                case GradeType.Common:
+                    return 0;
+                case GradeType.Uncommon:
+                    return 1;
+                case GradeType.Rare:
+                    return 1;
+                case GradeType.Epic:
+                    return 2;
+                case GradeType.Legendary:
+                    return 3;
+                default:
+                    return 0;
+            }
         }
         
         private void ApplyBuffs()
@@ -254,8 +286,10 @@ namespace DefenceGame.Core
             GroundEffect groundEffect = groundEffectObj.GetComponent<GroundEffect>();
             if (groundEffect != null)
             {
-                float damagePerSec = unit != null ? unit.attackPower * 0.5f : 10f;
-                groundEffect.Initialize(1.3f, damagePerSec, 1.5f);
+                // 지속시간 5초로 늘리고, 데미지는 낮춤 (총 데미지 = attackPower)
+                float damagePerSec = unit != null ? unit.attackPower * 0.2f : 10f;
+                groundEffect.Initialize(5f, damagePerSec, 1.5f);
+                Debug.Log($"[UnitAbility] GroundEffect spawned: Duration=5s, DPS={damagePerSec:F1}");
             }
         }
         
