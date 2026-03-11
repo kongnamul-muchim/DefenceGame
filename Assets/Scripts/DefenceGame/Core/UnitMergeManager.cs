@@ -81,14 +81,7 @@ namespace DefenceGame.Core
             string unitName = draggedUnit.unitName;
             GradeType originalGrade = draggedUnit.grade;
             
-            // 4. 경험치 획득 (합성하는 유닛의 등급 기준)
-            if (TowerLevelManager.Instance != null)
-            {
-                TowerLevelManager.Instance.AddExp(unitName, originalGrade);
-                Debug.Log($"[Merge] Added {originalGrade} exp to {unitName}");
-            }
-            
-            // 5. 새 유닛 선택 (같은 유닛 확률 또는 랜덤 유닛)
+            // 4. 새 유닛 선택 (같은 유닛 확률 또는 랜덤 유닛)
             TowerData newTower = null;
             
             // 같은 유닛이 나올지 랜덤 유닛이 나올지 결정
@@ -133,10 +126,10 @@ namespace DefenceGame.Core
             
             Debug.Log($"[Merge] New tower selected: {newTower.Name} ({newTower.Grade})");
             
-            // 5. 이펙트 재생
+            // 4. 이펙트 재생
             PlayMergeEffect(mergePosition);
             
-            // 6. 기존 유닛들 제거 (새 유닛이 확실히 있을 때만)
+            // 5. 기존 유닛들 제거 (새 유닛이 확실히 있을 때만)
             if (UnitPlacementManager.Instance != null)
             {
                 UnitPlacementManager.Instance.RemoveUnit(draggedUnit);
@@ -146,7 +139,7 @@ namespace DefenceGame.Core
             Destroy(draggedUnit.gameObject);
             Destroy(targetUnit.gameObject);
             
-            // 7. 새 유닛 생성
+            // 6. 새 유닛 생성
             UnitPlacementManager.Instance?.PlaceUnitAtPosition(newTower, mergePosition);
             Debug.Log($"[Merge] SUCCESS! {originalGrade} {unitName} x{mergeCount} → {nextGrade} {newTower.Name}");
         }

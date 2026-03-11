@@ -161,3 +161,40 @@ Unit.cs가 너무 무거워져 (~1000줄) 유지보수가 어려워져 컴포넌
 - `[UnitAbility] Archer Speed Increase: Base=0.5, Grade=Rare, Final=0.75`
 - `[UnitAbility] Wizard GroundEffect Chance: Base=0.1, Grade=Epic, Final=0.2`
 - `[GradeAbilityTest] 소환됨: Archer (Legendary) - 배율: 3.00`
+
+---
+
+## 2024-03-14: 합성 경험치 획득 제거
+
+### 변경 사항
+합성(merge)을 통한 타워 레벨 경험치 획득을 제거했습니다.
+
+**기존 시스템:**
+- 합성 시 해당 타워 타입에 경험치 추가
+- 예: Common Archer 2개 합성 → Archer 타워에 Common 등급 경험치만큼 추가
+
+**변경된 시스템:**
+- 합성 시 경험치 획득 없음
+- 타워 레벨업은 오직 적 처치를 통해서만 가능
+
+#### 수정된 파일
+- `Assets/Scripts/DefenceGame/Core/UnitMergeManager.cs` - 합성 시 경험치 획득 코드 제거 (lines 84-89)
+
+#### 삭제된 코드
+```csharp
+// 4. 경험치 획득 (합성하는 유닛의 등급 기준)
+if (TowerLevelManager.Instance != null)
+{
+    TowerLevelManager.Instance.AddExp(unitName, originalGrade);
+    Debug.Log($"[Merge] Added {originalGrade} exp to {unitName}");
+}
+```
+
+#### 주석 번호 수정
+기존: 3 → 4 → 5 → 6 → 7
+변경: 3 → 4 → 5 → 6 (경험치 획득 단계 제거로 인한 번호 축소)
+
+### 커밋
+- Hash: `TBD`
+- Message: `refactor: Remove exp gain from merge`
+- Changes: 1개 파일 수정 (7 lines removed)
