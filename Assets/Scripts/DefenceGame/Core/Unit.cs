@@ -434,12 +434,27 @@ namespace DefenceGame.Core
         
         private void ApplySpecialAbilities()
         {
-            if (string.IsNullOrEmpty(towerType)) return;
-            if (SpecialAbilityManager.Instance == null) return;
-            if (TowerLevelManager.Instance == null) return;
+            Debug.Log($"[ApplySpecialAbilities] {unitName} - towerType={towerType}");
+            
+            if (string.IsNullOrEmpty(towerType)) 
+            {
+                Debug.LogWarning($"[{unitName}] towerType is null or empty!");
+                return;
+            }
+            if (SpecialAbilityManager.Instance == null) 
+            {
+                Debug.LogWarning($"[{unitName}] SpecialAbilityManager.Instance is null!");
+                return;
+            }
+            if (TowerLevelManager.Instance == null) 
+            {
+                Debug.LogWarning($"[{unitName}] TowerLevelManager.Instance is null!");
+                return;
+            }
             
             // 현재 레벨 가져오기
             int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
+            Debug.Log($"[{unitName}] Current level for {towerType}: {currentLevel}");
             
             // 능력 초기화
             pierceCount = 0;
@@ -454,8 +469,12 @@ namespace DefenceGame.Core
             // 해금된 능력 가져오기
             var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
             
+            Debug.Log($"[{unitName}] Found {unlockedAbilities.Count} unlocked abilities for {towerType} at level {currentLevel}");
+            
             foreach (var ability in unlockedAbilities)
             {
+                Debug.Log($"[{unitName}] Applying ability: {ability.abilityType} = {ability.value} (Lv.{ability.unlockLevel})");
+                
                 switch (ability.abilityType)
                 {
                     case SpecialAbilityType.Pierce:
@@ -513,7 +532,7 @@ namespace DefenceGame.Core
             // 공격속도 증가 적용
             float totalSpeedMultiplier = 1f + speedIncreaseValue;
             
-            Debug.Log($"[{unitName}] Buffs applied - Range: {baseRange}→{range}, Pierce: {pierceCount}, Area: {areaDamageRadius}");
+            Debug.Log($"[{unitName}] Buffs applied - Range: {baseRange}→{range}, Pierce: {pierceCount}, Area: {areaDamageRadius}, Slow: {slowEffectValue}, AtkBuff: {attackBuffValue}");
         }
         
         private void SetGradeColor()
