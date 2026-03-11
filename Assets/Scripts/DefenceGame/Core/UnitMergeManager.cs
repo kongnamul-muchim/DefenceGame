@@ -273,6 +273,14 @@ namespace DefenceGame.Core
             if (mergeEffectPrefab != null)
             {
                 ParticleSystem effect = Instantiate(mergeEffectPrefab, position, Quaternion.identity);
+                
+                // Sorting Order 높게 설정하여 Tilemap 위에 표시
+                ParticleSystemRenderer renderer = effect.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingOrder = 1000; // Tilemap 위에 표시
+                }
+                
                 Destroy(effect.gameObject, effect.main.duration);
             }
             
