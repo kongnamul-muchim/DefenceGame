@@ -195,6 +195,45 @@ if (TowerLevelManager.Instance != null)
 변경: 3 → 4 → 5 → 6 (경험치 획득 단계 제거로 인한 번호 축소)
 
 ### 커밋
-- Hash: `TBD`
+- Hash: `8be6aba`
 - Message: `refactor: Remove exp gain from merge`
 - Changes: 1개 파일 수정 (7 lines removed)
+
+---
+
+## 2024-03-14: UnitAbility 테스트 모드 추가
+
+### 변경 사항
+특수효과가 UI 클릭 레벨업 시 적용되지 않는 문제를 해결했습니다.
+
+**문제 원인:**
+- UnitAbility.Initialize()에서 TowerLevelManager.GetTowerLevel() 호출 시 레벨이 0으로 반환
+- 특수능력은 레벨 3/5/7에 unlock되므로 레벨 0에서는 적용되지 않음
+
+**해결 방안:**
+- `autoApplyCurrentLevel` 옵션 추가 (기본값: true)
+- Initialize 시 TowerLevelManager에서 현재 레벨을 조회하여 자동 적용
+- ForceApplyLevel() 메서드 추가하여 특정 레벨의 능력 강제 적용 가능
+
+#### 수정된 파일
+- `Assets/Scripts/DefenceGame/Core/UnitAbility.cs`
+  - `autoApplyCurrentLevel` 필드 추가 (Inspector에서 확인/조작 가능)
+  - `currentTowerLevel`, `currentTowerType` 디버그 필드 추가
+  - `ForceApplyLevel(int level)` 메서드 추가
+  - Initialize()에 테스트 모드 로직 추가
+
+#### 사용 방법
+1. Unit Prefab의 UnitAbility 컴포넌트 확인
+2. `Auto Apply Current Level` 체크됨 확인 (기본값)
+3. TowerLevelUI에서 타워 클릭하여 레벨업
+4. 새로 소환되는 유닛에 해당 레벨의 특수능력 자동 적용
+
+#### 인스펙터 표시 항목
+- **Current Tower Level**: 현재 적용된 타워 레벨 (읽기 전용)
+- **Current Tower Type**: 현재 타워 타입 (읽기 전용)
+- **Auto Apply Current Level**: 테스트 모드 활성화/비활성화
+
+### 커밋
+- Hash: `TBD`
+- Message: `feat: Add test mode to UnitAbility for auto-applying current tower level`
+- Changes: 1개 파일 수정

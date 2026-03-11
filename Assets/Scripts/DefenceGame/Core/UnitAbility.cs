@@ -27,6 +27,14 @@ namespace DefenceGame.Core
         private string towerType = "";
         private Unit unit;
         
+        [Header("Debug Info")]
+        [SerializeField] private int currentTowerLevel = 0;
+        [SerializeField] private string currentTowerType = "";
+        
+        [Header("Test Mode")]
+        [Tooltip("테스트 모드: Initialize 시 현재 타워 레벨을 자동으로 적용")]
+        public bool autoApplyCurrentLevel = true;
+        
         private void Awake()
         {
             unit = GetComponent<Unit>();
@@ -35,7 +43,75 @@ namespace DefenceGame.Core
         public void Initialize(string type)
         {
             towerType = type;
+            currentTowerType = type;
+            
+            // 테스트 모드: 현재 타워 레벨 자동 적용
+            if (autoApplyCurrentLevel && TowerLevelManager.Instance != null)
+            {
+                int actualLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
+                if (actualLevel > 0)
+                {
+                    ForceApplyLevel(actualLevel);
+                    Debug.Log($"[UnitAbility] {towerType} 테스트 모드로 레벨 {actualLevel} 자동 적용");
+                    return;
+                }
+            }
+            
             ApplySpecialAbilities();
+        }
+        
+        /// <summary>
+        /// 특정 레벨의 특수능력 강제 적용 (테스트용)
+        /// </summary>
+        public void ForceApplyLevel(int level)
+        {
+            currentTowerLevel = level;
+            
+            if (string.IsNullOrEmpty(towerType)) return;
+            if (SpecialAbilityManager.Instance == null) return;
+            
+            // Reset abilities
+            multiShotCount = 1;
+            groundEffectDuration = 0f;
+            rangeIncreaseValue = 0f;
+            attackIncreaseValue = 0f;
+            chainAttackCount = 0;
+            speedIncreaseValue = 0f;
+            
+            var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, level);
+            
+            Debug.Log($"[UnitAbility] {towerType} 레벨 {level} 능력 적용: {unlockedAbilities.Count}개");
+            
+            foreach (var ability in unlockedAbilities)
+            {
+                Debug.Log($"[UnitAbility] 적용: {ability.abilityType} = {ability.value}");
+                switch (ability.abilityType)
+                {
+                    case SpecialAbilityType.MultiShot:
+                        multiShotCount = Mathf.Max(multiShotCount, (int)ability.value);
+                        break;
+                    case SpecialAbilityType.GroundEffect:
+                        groundEffectDuration = Mathf.Max(groundEffectDuration, ability.value);
+                        break;
+                    case SpecialAbilityType.ChainAttack:
+                        chainAttackCount = Mathf.Max(chainAttackCount, (int)ability.value);
+                        break;
+                    case SpecialAbilityType.RangeIncrease:
+                        rangeIncreaseValue = Mathf.Max(rangeIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.AttackIncrease:
+                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.SpeedIncrease:
+                        speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
+                        break;
+                }
+            }
+            
+            // 등급 기반 최종 값 계산
+            CalculateGradeBasedValues();
+            
+            ApplyBuffs();
         }
         
         public void OnLevelUp(string type, int level)
@@ -53,6 +129,9 @@ namespace DefenceGame.Core
             if (TowerLevelManager.Instance == null) return;
             
             int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
+            currentTowerLevel = currentLevel; // 인스펙터 표시용
+            
+            Debug.Log($"[UnitAbility] {towerType} 현재 레벨: {currentLevel}");
             
             // Reset abilities
             multiShotCount = 1;
@@ -64,8 +143,11 @@ namespace DefenceGame.Core
             
             var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
             
+            Debug.Log($"[UnitAbility] {towerType} 해제된 능력 수: {unlockedAbilities.Count}");
+            
             foreach (var ability in unlockedAbilities)
             {
+                Debug.Log($"[UnitAbility] 적용 중: {ability.abilityType} = {ability.value}");
                 switch (ability.abilityType)
                 {
                     case SpecialAbilityType.MultiShot:
