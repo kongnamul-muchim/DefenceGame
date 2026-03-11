@@ -3525,7 +3525,7 @@ TilemapRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: -2
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0.03333336, y: 0.03333336, z: 0}
@@ -6916,7 +6916,7 @@ TilemapRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0.03333336, y: 0.03333336, z: 0}
@@ -7657,39 +7657,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0203c8903986a1c488e9935da712c79e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.UI.TowerLevelUI
-  towerSlots:
-  - towerType: Archer
-    levelText: {fileID: 827526836}
-    expSlider: {fileID: 1044394581}
-    backgroundImage: {fileID: 399474848}
-    fillImage: {fileID: 1709513918}
-  backgroundColor:
-    r: 1
-    g: 1
-    b: 1
-    a: 0.3
-  fillColor:
-    r: 0
-    g: 1
-    b: 0
-    a: 1
-  levelColors:
-  - r: 0.5
-    g: 0.5
-    b: 0.5
-    a: 0.3
-  - r: 1
-    g: 1
-    b: 1
-    a: 0.3
-  - r: 0
-    g: 1
-    b: 0
-    a: 0.3
-  - r: 1
-    g: 1
-    b: 0
-    a: 0.3
 --- !u!1 &1600610654
 GameObject:
   m_ObjectHideFlags: 0
@@ -16912,16 +16879,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 500d389b16fc5a34eb83618a10ee9251, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.TowerLevelManager
-  towerTypes:
-  - Archer
-  - Wizard
-  - WizardTower
-  - Laser
-  commonExp: 50
-  uncommonExp: 100
-  rareExp: 150
-  epicExp: 200
-  legendaryExp: 0
 --- !u!1 &1922054927
 GameObject:
   m_ObjectHideFlags: 0

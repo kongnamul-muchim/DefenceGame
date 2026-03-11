@@ -108,7 +108,7 @@ MonoBehaviour:
   speed: 10
   lifetime: 5
   rotationOffset: -90
-  hitEffectPrefab: {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
+  hitEffectPrefab: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
 --- !u!61 &7291316248963225748
 BoxCollider2D:
   m_ObjectHideFlags: 0

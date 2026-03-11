@@ -81,7 +81,14 @@ namespace DefenceGame.Core
             string unitName = draggedUnit.unitName;
             GradeType originalGrade = draggedUnit.grade;
             
-            // 4. 새 유닛 선택 (같은 유닛 확률 또는 랜덤 유닛)
+            // 4. 경험치 획득 (합성하는 유닛의 등급 기준)
+            if (TowerLevelManager.Instance != null)
+            {
+                TowerLevelManager.Instance.AddExp(unitName, originalGrade);
+                Debug.Log($"[Merge] Added {originalGrade} exp to {unitName}");
+            }
+            
+            // 5. 새 유닛 선택 (같은 유닛 확률 또는 랜덤 유닛)
             TowerData newTower = null;
             
             // 같은 유닛이 나올지 랜덤 유닛이 나올지 결정
