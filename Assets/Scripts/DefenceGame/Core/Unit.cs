@@ -403,9 +403,12 @@ namespace DefenceGame.Core
         private string ExtractTowerType(string name)
         {
             // Name에서 타워 타입 추출 (예: "Archer_Common" -> "Archer")
+            // 순서 중요: 더 구체적인 이름을 먼저 체크
             if (name.Contains("Archer")) return "Archer";
+            if (name.Contains("WizardTower")) return "MageTower"; // WizardTower -> MageTower로 매핑
+            if (name.Contains("Wizard")) return "Mage"; // Wizard -> Mage로 매핑
             if (name.Contains("MageTower")) return "MageTower";
-            if (name.Contains("Mage") || name.Contains("Wizard")) return "Mage";
+            if (name.Contains("Mage")) return "Mage";
             if (name.Contains("Laser")) return "Laser";
             return "";
         }
