@@ -158,7 +158,7 @@ Data/
 |------|------|------|------|------|
 | **Step 1** | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | ✅ 완료 | `1cac56c` |
 | **Step 2** | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | ✅ 완료 | `950e165` |
-| Step 3 | 타워 레벨/경험치 시스템 | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | 📝 예정 | - |
+| **Step 3** | **타워 레벨/경험치 시스템** | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | ✅ 완료 | `43cbff1` |
 | Step 4 | 타워 레벨 UI | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | 📝 예정 | - |
 | Step 5 | 특수 능력 해금 시스템 | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 예정 | - |
 
@@ -203,15 +203,32 @@ Data/
 
 **Git Commit:** `950e165` - Phase B Step 2: Add Bullet hit effect and fix merge effect sorting
 
-#### **23. 타워 레벨/경험치 시스템**
-- [ ] TowerLevelData.cs 신규 생성 (데이터 구조)
-- [ ] TowerLevelManager.cs 신규 생성 (Singleton)
-- [ ] 경험치 획득량 설정 (Common+50, Uncommon+100...)
-- [ ] 레벨업 필요 경험치 공식: 100 + (currentLevel × 50)
-- [ ] 초과 경험치 이월 처리 (연속 레벨업 지원)
-- [ ] Legendary 합성 시 경험치 없음 처리
+#### **Step 3: 타워 레벨/경험치 시스템** ✅ 완료 (2025-03-11)
+- [x] TowerLevelData.cs 신규 생성 (데이터 구조)
+  - 레벨, 현재 경험치, 다음 레벨 필요 경험치
+  - 레벨업 공식: `100 + (currentLevel × 50)`
+  - 초과 경험치 이월 처리 (연속 레벨업 지원)
+- [x] TowerLevelManager.cs 신규 생성 (Singleton)
+  - 4개 타워 타입 지원 (Archer, Wizard, WizardTower, Laser)
+  - 등급별 경험치 획득량 설정
+  - 레벨업 및 경험치 변경 이벤트 발생
+- [x] UnitMergeManager.cs 수정
+  - 합성 시 `TowerLevelManager.Instance.AddExp()` 호출
+  - Console에 경험치 획득 로그 출력
+- [x] 경험치 획득량 설정:
+  - Common: +50 EXP
+  - Uncommon: +100 EXP
+  - Rare: +150 EXP
+  - Epic: +200 EXP
+  - Legendary: +0 EXP (경험치 없음)
 
-#### **24. 타워 레벨 UI**
+**Unity 설정:**
+- Hierarchy → Managers 오브젝트에 `TowerLevelManager` 컴포넌트 추가
+- Tower Types: Archer, Wizard, WizardTower, Laser 자동 설정
+
+**Git Commit:** `43cbff1` - Phase B Step 3: Add tower level and experience system
+
+#### **Step 4: 타워 레벨 UI**
 - [ ] TowerLevelUI.cs 신규 생성
 - [ ] 화면 우측 상단에 4개 타워 슬롯 배치 (Archer/Wizard/WizardTower/Laser)
 - [ ] 각 슬롯에 Slider 추가 (흰색 BG, 녹색 Fill)
