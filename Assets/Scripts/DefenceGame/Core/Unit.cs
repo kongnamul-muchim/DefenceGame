@@ -804,10 +804,13 @@ namespace DefenceGame.Core
                 {
                     SpawnChainBullet(enemy, chainAttackCount);
                 }
-                // Wizard: GroundEffect 처리 (지속 피해 바닥 생성) + 일반 공격
+                // Wizard: GroundEffect 처리 (지속 피해 바닥 생성) - 10% 확률 + 일반 공격
                 else if (towerType == "Wizard" && groundEffectDuration > 0)
                 {
-                    SpawnGroundEffect(enemy.transform.position);
+                    if (Random.value <= 0.1f)
+                    {
+                        SpawnGroundEffect(enemy.transform.position);
+                    }
                     SpawnBullet(enemy);
                 }
                 else
