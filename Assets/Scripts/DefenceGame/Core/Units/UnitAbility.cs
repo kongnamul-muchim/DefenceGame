@@ -211,8 +211,17 @@ namespace DefenceGame.Core
             if (towerType == "Laser")
             {
                 int gradeChainCount = GetGradeBasedChainAttackCount(grade);
-                // SpecialAbilityManager에서 가져온 값과 등급 기반 값 중 큰 것 사용
-                chainAttackCount = Mathf.Max(chainAttackCount, gradeChainCount);
+                // 등급 기반 값이 있으면 그것을 사용, 없으면 SpecialAbilityManager의 값 사용
+                // 단, Common은 확산 없음(0)
+                if (grade == GradeType.Common)
+                {
+                    chainAttackCount = 0;
+                }
+                else
+                {
+                    // 등급 기반 값과 레벨 기반 값 중 큰 값 사용
+                    chainAttackCount = Mathf.Max(chainAttackCount, gradeChainCount);
+                }
                 Debug.Log($"[UnitAbility] Laser ChainAttack: Grade={grade}, BaseCount={chainAttackCount}, GradeCount={gradeChainCount}, Final={chainAttackCount}");
             }
         }

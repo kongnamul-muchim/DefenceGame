@@ -88,6 +88,7 @@ namespace DefenceGame.Core
                 main.duration = duration;
                 main.startLifetime = duration;
                 main.startSize = radius * 2f;
+                main.loop = true; // Loop 활성화
                 
                 // 파티클 시작
                 effectParticles.Play();
