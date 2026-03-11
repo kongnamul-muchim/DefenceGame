@@ -108,6 +108,7 @@ MonoBehaviour:
   speed: 10
   lifetime: 5
   rotationOffset: 0
+  hitEffectPrefab: {fileID: 5112403345868107898, guid: 6f34ef0d986e9db4199cf75805f79753, type: 3}
 --- !u!58 &6563068133018904003
 CircleCollider2D:
   m_ObjectHideFlags: 0

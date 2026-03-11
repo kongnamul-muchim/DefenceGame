@@ -17,6 +17,13 @@ namespace DefenceGame.Core
         public SpriteRenderer spriteRenderer;
         private PathAgent pathAgent;
         
+        [Header("Health Bar")]
+        [Tooltip("체력바 프리팹 (World Space Canvas with Slider)")]
+        public GameObject healthBarPrefab;
+        public Vector3 healthBarOffset = new Vector3(0, 0.6f, 0);
+        private HealthBar healthBar;
+        private GameObject healthBarInstance;
+        
         [Header("Random Movement")]
         public bool useRandomMovement = false;
         public float directionChangeInterval = 2f;
@@ -83,6 +90,9 @@ namespace DefenceGame.Core
                 pathAgent.speed = speed;
             }
             
+            // Setup health bar
+            SetupHealthBar();
+            
             // Initialize movement
             if (useRandomMovement)
             {
@@ -98,6 +108,32 @@ namespace DefenceGame.Core
             hasReachedCastle = false;
             
             Debug.Log($"Enemy initialized: {enemyName}, HP: {currentHealth}, Speed: {speed}");
+        }
+        
+        private void SetupHealthBar()
+        {
+            if (healthBarPrefab == null)
+            {
+                Debug.LogWarning($"[{enemyName}] HealthBar prefab is not assigned!");
+                return;
+            }
+            
+            // Instantiate health bar prefab
+            healthBarInstance = Instantiate(healthBarPrefab, transform);
+            healthBarInstance.transform.localPosition = healthBarOffset;
+            
+            // Get HealthBar component
+            healthBar = healthBarInstance.GetComponent<HealthBar>();
+            if (healthBar == null)
+            {
+                healthBar = healthBarInstance.GetComponentInChildren<HealthBar>();
+            }
+            
+            // Initialize health bar
+            if (healthBar != null)
+            {
+                healthBar.Initialize(maxHealth);
+            }
         }
         
         private void InitializeRandomMovement()
@@ -296,6 +332,12 @@ namespace DefenceGame.Core
             if (hasReachedCastle) return;
             
             currentHealth -= damage;
+            
+            // Update health bar
+            if (healthBar != null)
+            {
+                healthBar.UpdateHealth(currentHealth);
+            }
             
             if (currentHealth <= 0)
             {
