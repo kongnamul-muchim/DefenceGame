@@ -51,12 +51,12 @@ namespace DefenceGame.Core
                 new SpecialAbility(7, SpecialAbilityType.RangeIncrease, 1f, "사거리 +1")
             };
             
-            // Laser: 연계 공격 (ChainAttack)
+            // Laser: 연계 공격은 등급 기반, 레벨 특수 능력은 데미지+ 공격속도-
             towerAbilities["Laser"] = new SpecialAbility[]
             {
-                new SpecialAbility(3, SpecialAbilityType.ChainAttack, 1, "연계 1회 (주변 1명)"),
-                new SpecialAbility(5, SpecialAbilityType.ChainAttack, 2, "연계 2회 (주변 2명)"),
-                new SpecialAbility(7, SpecialAbilityType.ChainAttack, 3, "연계 3회 (주변 3명)")
+                new SpecialAbility(3, SpecialAbilityType.AttackUp, 0.2f, "공격력 20% 증가"),
+                new SpecialAbility(5, SpecialAbilityType.SpeedDown, 0.15f, "공격속도 15% 감소"),
+                new SpecialAbility(7, SpecialAbilityType.AttackUp, 0.3f, "공격력 30% 증가")
             };
         }
         

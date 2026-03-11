@@ -12,8 +12,10 @@ namespace DefenceGame.Data
         // MageTower: 사거리 증가 및 공격력 증가
         RangeIncrease,  // 사거리 증가
         AttackIncrease, // 공격력 증가
-        // Laser: 연계 공격 (주변에 전이)
-        ChainAttack,    // 연계 공격 (전이)
+        // Laser: 연계 공격 (주변에 전이) + 레벨 특수 능력
+        ChainAttack,    // 연계 공격 (전이) - 등급 기반
+        AttackUp,       // 레벨 특수: 공격력 증가
+        SpeedDown,      // 레벨 특수: 공격속도 감소
         // Deprecated (기존 능력들)
         Pierce,         // [Deprecated] 관통
         AreaDamage,     // [Deprecated] 광역

@@ -105,6 +105,13 @@ namespace DefenceGame.Core
                     case SpecialAbilityType.SpeedIncrease:
                         speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
                         break;
+                    // Laser 레벨 특수 능력
+                    case SpecialAbilityType.AttackUp:
+                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
+                        break;
+                    case SpecialAbilityType.SpeedDown:
+                        speedIncreaseValue = Mathf.Min(speedIncreaseValue, -ability.value);
+                        break;
                 }
             }
             
@@ -167,6 +174,16 @@ namespace DefenceGame.Core
                         break;
                     case SpecialAbilityType.SpeedIncrease:
                         speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
+                        break;
+                    // Laser 레벨 특수 능력
+                    case SpecialAbilityType.AttackUp:
+                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
+                        Debug.Log($"[UnitAbility] Laser Attack Up: +{ability.value*100}%");
+                        break;
+                    case SpecialAbilityType.SpeedDown:
+                        // 공격속도 감소 (음수로 저장)
+                        speedIncreaseValue = Mathf.Min(speedIncreaseValue, -ability.value);
+                        Debug.Log($"[UnitAbility] Laser Speed Down: -{ability.value*100}%");
                         break;
                 }
             }
@@ -270,7 +287,7 @@ namespace DefenceGame.Core
                 {
                     unit.attackSpeed *= (1f + finalSpeedIncreaseValue);
                 }
-                else if (speedIncreaseValue > 0)
+                else if (speedIncreaseValue != 0)  // 0이 아닐 때만 적용 (양수/음수 모두)
                 {
                     unit.attackSpeed *= (1f + speedIncreaseValue);
                 }
