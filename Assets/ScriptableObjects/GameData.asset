@@ -46,13 +46,13 @@ MonoBehaviour:
     Range: 3
     Grade: 0
   - Id: 2
-    Name: Mage
+    Name: Wizard
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
     Grade: 0
   - Id: 3
-    Name: MageTower
+    Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
     Range: 3
@@ -70,13 +70,13 @@ MonoBehaviour:
     Range: 3
     Grade: 1
   - Id: 6
-    Name: Mage
+    Name: Wizard
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
     Grade: 1
   - Id: 7
-    Name: MageTower
+    Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
     Range: 3
@@ -94,13 +94,13 @@ MonoBehaviour:
     Range: 3
     Grade: 2
   - Id: 10
-    Name: Mage
+    Name: Wizard
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
     Grade: 2
   - Id: 11
-    Name: MageTower
+    Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
     Range: 3
@@ -118,13 +118,13 @@ MonoBehaviour:
     Range: 3
     Grade: 3
   - Id: 14
-    Name: Mage
+    Name: Wizard
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
     Grade: 3
   - Id: 15
-    Name: MageTower
+    Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
     Range: 3
@@ -142,13 +142,13 @@ MonoBehaviour:
     Range: 3
     Grade: 4
   - Id: 18
-    Name: Mage
+    Name: Wizard
     AttackPower: 25
     AttackSpeed: 0.8
     Range: 3
     Grade: 4
   - Id: 19
-    Name: MageTower
+    Name: WizardTower
     AttackPower: 50
     AttackSpeed: 0.8
     Range: 3
@@ -252,19 +252,19 @@ MonoBehaviour:
     HealthMultiplier: 1.5
   GachaProbabilities:
   - Grade: 0
-    Probability: 55
+    Probability: 75
     Cost: 0
   - Grade: 1
-    Probability: 25
+    Probability: 15
     Cost: 0
   - Grade: 2
-    Probability: 12
-    Cost: 0
-  - Grade: 3
     Probability: 6
     Cost: 0
+  - Grade: 3
+    Probability: 3
+    Cost: 0
   - Grade: 4
-    Probability: 2
+    Probability: 1
     Cost: 0
   UnitGrades:
   - Grade: 0

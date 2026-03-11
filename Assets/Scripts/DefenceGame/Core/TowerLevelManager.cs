@@ -9,7 +9,7 @@ namespace DefenceGame.Core
         public static TowerLevelManager Instance { get; private set; }
         
         [Header("Tower Types")]
-        public string[] towerTypes = { "Archer", "Wizard", "WizardTower", "Laser" };
+        public string[] towerTypes = { "Archer", "Mage", "MageTower", "Laser" };
         
         [Header("Experience Settings")]
         public int commonExp = 50;
