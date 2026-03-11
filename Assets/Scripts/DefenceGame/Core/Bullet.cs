@@ -19,6 +19,7 @@ namespace DefenceGame.Core
         private Vector3 direction;
         private float spawnTime;
         private bool isMoving = false;
+        private bool isHoming = true; // 자동 추적 여부 (Archer는 false)
         
         // Pierce (관통) 기능
         private int pierceCount = 0; // 관통 가능 횟수 (0 = 관통 없음)
@@ -61,7 +62,7 @@ namespace DefenceGame.Core
             }
         }
         
-        // 부채꼴 발사용 초기화
+        // 부채꼴 발사용 초기화 (자동추적 안함)
         public void InitializeWithDirection(Enemy targetEnemy, float damageAmount, int pierce, int areaRadius, Vector3 moveDirection)
         {
             target = targetEnemy;
@@ -71,6 +72,7 @@ namespace DefenceGame.Core
             areaDamageRadius = areaRadius;
             hitEnemies.Clear();
             spawnTime = Time.time;
+            isHoming = false; // 자동 추적 비활성화
             
             // 고정 방향 설정
             direction = moveDirection.normalized;
@@ -158,8 +160,8 @@ namespace DefenceGame.Core
                 return;
             }
 
-            // Update direction to follow target if still alive
-            if (target != null && target.currentHealth > 0)
+            // 자동 추적일 때만 방향 업데이트
+            if (isHoming && target != null && target.currentHealth > 0)
             {
                 direction = (target.transform.position - transform.position).normalized;
 
@@ -175,9 +177,30 @@ namespace DefenceGame.Core
                     return;
                 }
             }
+            else if (!isHoming)
+            {
+                // 고정 방향 발사 - 경로상의 적 체크
+                CheckHitOnPath();
+            }
 
             // Move bullet
             transform.position += direction * speed * Time.deltaTime;
+        }
+        
+        // 고정 방향 발사 시 경로상의 적 체크
+        private void CheckHitOnPath()
+        {
+            // 앞쪽으로 레이캐스트
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, 0.5f);
+            if (hit.collider != null)
+            {
+                Enemy enemy = hit.collider.GetComponent<Enemy>();
+                if (enemy != null && enemy.currentHealth > 0 && !hitEnemies.Contains(enemy))
+                {
+                    target = enemy;
+                    HitTarget();
+                }
+            }
         }
         
         private void HitTarget()
