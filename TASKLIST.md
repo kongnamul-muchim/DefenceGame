@@ -156,8 +156,8 @@ Data/
 ### 📋 진행 상황
 | 단계 | 작업 | 설명 | 상태 | 커밋 |
 |------|------|------|------|------|
-| **Step 1** | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | ✅ 완료 | `77dceca` |
-| Step 2 | Bullet 히트 이펙트 | Bullet 충돌 시 ParticleSystem 효과 생성 | 📝 예정 | - |
+| **Step 1** | **Enemy 체력바 시스템** | Slider UI로 체력 표시 (머리 위, 흰색 BG + 녹색 Fill) | ✅ 완료 | `1cac56c` |
+| **Step 2** | **Bullet 히트 이펙트** | Bullet 충돌 시 ParticleSystem 효과 생성 | ✅ 완료 | `950e165` |
 | Step 3 | 타워 레벨/경험치 시스템 | 합성 시 경험치 획득, 무제한 레벨업, 능력치 증가 | 📝 예정 | - |
 | Step 4 | 타워 레벨 UI | 화면 우측에 4개 타워 레벨/경험치 Slider 표시 | 📝 예정 | - |
 | Step 5 | 특수 능력 해금 시스템 | 레벨 3/5/7 도달 시 특수 능력 해금 (관통/광역/버프 등) | 📝 예정 | - |
@@ -187,11 +187,21 @@ Data/
 
 **Git Commit:** `1cac56c` - Phase B Step 1 Complete
 
-#### **22. Bullet 히트 이펙트**
-- [ ] Bullet.cs에 hitEffectPrefab 필드 추가
-- [ ] OnTriggerEnter2D에서 이펙트 생성
-- [ ] Inspector에서 ParticleSystem 프리팹 연결
-- [ ] 이펙트 2초 후 자동 삭제
+#### **Step 2: Bullet 히트 이펙트 + 이펙트 가려짐 버그 수정** ✅ 완료 (2025-03-11)
+- [x] Bullet.cs에 `hitEffectPrefab` 필드 추가
+- [x] `SpawnHitEffect()` 메서드 구현 (이펙트 생성 및 자동 삭제)
+- [x] Inspector에서 ParticleSystem 프리팹 연결 가능
+- [x] **버그 수정: 이펙트가 Tilemap에 가려지는 문제 해결**
+  - UnitMergeManager.cs: `renderer.sortingOrder = 1000` 추가
+  - Bullet.cs: `renderer.sortingOrder = 1000` 추가
+- [x] 이펙트 2초 후 자동 삭제 (또는 ParticleSystem duration 기준)
+
+**구현 방식:**
+- Bullet 프리팹 Inspector에서 `Hit Effect Prefet` 필드에 ParticleSystem 연결
+- 추천 이펙트: `CFXR2 Ground Hit`, `CFXR Hit Crit`, `CFXR Magic Poof`
+- Sorting Order 1000으로 설정하여 항상 Tilemap 위에 표시
+
+**Git Commit:** `950e165` - Phase B Step 2: Add Bullet hit effect and fix merge effect sorting
 
 #### **23. 타워 레벨/경험치 시스템**
 - [ ] TowerLevelData.cs 신규 생성 (데이터 구조)
