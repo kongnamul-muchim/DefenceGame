@@ -11,5 +11,6 @@ namespace DefenceGame.Data
         public float AttackSpeed;
         public float Range;
         public GradeType Grade;
+        public float LevelBonusAttackPower;
     }
 }

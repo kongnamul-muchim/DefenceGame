@@ -47,7 +47,7 @@ MonoBehaviour:
     Grade: 0
   - Id: 2
     Name: Wizard
-    AttackPower: 25
+    AttackPower: 30
     AttackSpeed: 0.8
     Range: 3
     Grade: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
     Grade: 0
   - Id: 4
     Name: Laser
-    AttackPower: 100
+    AttackPower: 50
     AttackSpeed: 1
     Range: 3
     Grade: 0
@@ -71,7 +71,7 @@ MonoBehaviour:
     Grade: 1
   - Id: 6
     Name: Wizard
-    AttackPower: 25
+    AttackPower: 30
     AttackSpeed: 0.8
     Range: 3
     Grade: 1
@@ -83,7 +83,7 @@ MonoBehaviour:
     Grade: 1
   - Id: 8
     Name: Laser
-    AttackPower: 100
+    AttackPower: 50
     AttackSpeed: 1
     Range: 3
     Grade: 1
@@ -95,7 +95,7 @@ MonoBehaviour:
     Grade: 2
   - Id: 10
     Name: Wizard
-    AttackPower: 25
+    AttackPower: 30
     AttackSpeed: 0.8
     Range: 3
     Grade: 2
@@ -107,7 +107,7 @@ MonoBehaviour:
     Grade: 2
   - Id: 12
     Name: Laser
-    AttackPower: 100
+    AttackPower: 50
     AttackSpeed: 1
     Range: 3
     Grade: 2
@@ -119,7 +119,7 @@ MonoBehaviour:
     Grade: 3
   - Id: 14
     Name: Wizard
-    AttackPower: 25
+    AttackPower: 30
     AttackSpeed: 0.8
     Range: 3
     Grade: 3
@@ -131,7 +131,7 @@ MonoBehaviour:
     Grade: 3
   - Id: 16
     Name: Laser
-    AttackPower: 100
+    AttackPower: 50
     AttackSpeed: 1
     Range: 3
     Grade: 3
@@ -143,7 +143,7 @@ MonoBehaviour:
     Grade: 4
   - Id: 18
     Name: Wizard
-    AttackPower: 25
+    AttackPower: 30
     AttackSpeed: 0.8
     Range: 3
     Grade: 4
@@ -155,35 +155,35 @@ MonoBehaviour:
     Grade: 4
   - Id: 20
     Name: Laser
-    AttackPower: 100
+    AttackPower: 50
     AttackSpeed: 1
     Range: 3
     Grade: 4
   Waves:
   - WaveNumber: 1
     EnemyId: 1
-    Count: 10
-    SpawnInterval: 2
+    Count: 20
+    SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 2
     EnemyId: 1
-    Count: 8
-    SpawnInterval: 1.8
+    Count: 15
+    SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 3
     EnemyId: 2
-    Count: 30
+    Count: 20
     SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 4
     EnemyId: 3
-    Count: 5
-    SpawnInterval: 2
+    Count: 100
+    SpawnInterval: 0.1
     HealthMultiplier: 1
   - WaveNumber: 5
     EnemyId: 4
     Count: 5
-    SpawnInterval: 3
+    SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 6
     EnemyId: 5
@@ -192,28 +192,28 @@ MonoBehaviour:
     HealthMultiplier: 1
   - WaveNumber: 7
     EnemyId: 1
-    Count: 15
-    SpawnInterval: 2
+    Count: 30
+    SpawnInterval: 1
     HealthMultiplier: 1.2
   - WaveNumber: 8
     EnemyId: 1
-    Count: 12
-    SpawnInterval: 1.8
+    Count: 22
+    SpawnInterval: 1
     HealthMultiplier: 1.2
   - WaveNumber: 9
     EnemyId: 2
-    Count: 45
+    Count: 30
     SpawnInterval: 1
     HealthMultiplier: 1.2
   - WaveNumber: 10
     EnemyId: 3
-    Count: 7
-    SpawnInterval: 2
+    Count: 150
+    SpawnInterval: 0.1
     HealthMultiplier: 1.2
   - WaveNumber: 11
     EnemyId: 4
     Count: 7
-    SpawnInterval: 3
+    SpawnInterval: 1
     HealthMultiplier: 1.2
   - WaveNumber: 12
     EnemyId: 5
@@ -222,28 +222,28 @@ MonoBehaviour:
     HealthMultiplier: 1.2
   - WaveNumber: 13
     EnemyId: 1
-    Count: 22
-    SpawnInterval: 2
+    Count: 45
+    SpawnInterval: 1
     HealthMultiplier: 1.5
   - WaveNumber: 14
     EnemyId: 1
-    Count: 18
-    SpawnInterval: 1.8
+    Count: 33
+    SpawnInterval: 1
     HealthMultiplier: 1.5
   - WaveNumber: 15
     EnemyId: 2
-    Count: 67
+    Count: 45
     SpawnInterval: 1
     HealthMultiplier: 1.5
   - WaveNumber: 16
     EnemyId: 3
-    Count: 10
-    SpawnInterval: 2
+    Count: 225
+    SpawnInterval: 0.1
     HealthMultiplier: 1.5
   - WaveNumber: 17
     EnemyId: 4
     Count: 10
-    SpawnInterval: 3
+    SpawnInterval: 1
     HealthMultiplier: 1.5
   - WaveNumber: 18
     EnemyId: 5
@@ -273,17 +273,17 @@ MonoBehaviour:
     AttackSpeedMultiplier: 1
   - Grade: 1
     DamageMultiplier: 1.5
-    RangeMultiplier: 1.2
+    RangeMultiplier: 1.1
     AttackSpeedMultiplier: 1.1
   - Grade: 2
     DamageMultiplier: 2
-    RangeMultiplier: 1.5
+    RangeMultiplier: 1.2
     AttackSpeedMultiplier: 1.3
   - Grade: 3
     DamageMultiplier: 2.5
-    RangeMultiplier: 2
+    RangeMultiplier: 1.3
     AttackSpeedMultiplier: 1.5
   - Grade: 4
     DamageMultiplier: 5
-    RangeMultiplier: 3
+    RangeMultiplier: 1.5
     AttackSpeedMultiplier: 2

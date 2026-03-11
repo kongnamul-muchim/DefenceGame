@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: 6864540314888818746}
   - component: {fileID: -839821952342053864}
   - component: {fileID: 2497124527038385067}
+  - component: {fileID: 1176145730295210371}
   m_Layer: 7
   m_Name: wizard
   m_TagString: Untagged
@@ -272,13 +273,6 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   attackPoint: {fileID: 0}
   bulletPrefab: {fileID: 7745142762624293333, guid: 61219932917575a41b9210d158329652, type: 3}
-  showAttackRange: 1
-  rangeColor: {r: 0, g: 1, b: 0, a: 1}
-  attackColor: {r: 1, g: 0, b: 0, a: 1}
-  rareColorRenderer: {fileID: 0}
-  hoverScale: 1.1
-  hoverDuration: 0.1
-  hoverDetectionRadius: 0.5
   groundEffectPrefab: {fileID: 1373658663257844713, guid: ee24fb8b0505e8f47a2d3291d1f99f55, type: 3}
 --- !u!61 &2497124527038385067
 BoxCollider2D:
@@ -326,6 +320,32 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.4, y: 0.6}
   m_EdgeRadius: 0
+--- !u!114 &1176145730295210371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8174225532452540114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44195fcf24cf18749a91283a0623bbca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.UnitAbility
+  multiShotCount: 1
+  groundEffectDuration: 0
+  rangeIncreaseValue: 0
+  attackIncreaseValue: 0
+  chainAttackCount: 0
+  speedIncreaseValue: 0
+  groundEffectProcChance: 0.1
+  groundEffectPrefab: {fileID: 1373658663257844713, guid: ee24fb8b0505e8f47a2d3291d1f99f55, type: 3}
+  finalSpeedIncreaseValue: 0
+  finalGroundEffectChance: 0
+  finalAttackIncreaseValue: 0
+  currentTowerLevel: 0
+  currentTowerType: 
+  autoApplyCurrentLevel: 1
 --- !u!1 &8959760154723928515
 GameObject:
   m_ObjectHideFlags: 0

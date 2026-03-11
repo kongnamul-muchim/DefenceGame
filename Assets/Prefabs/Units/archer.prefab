@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5099323197744471432}
   - component: {fileID: 8766215368955804073}
   - component: {fileID: 8645156678587173567}
+  - component: {fileID: 9014579741883934847}
   m_Layer: 7
   m_Name: archer
   m_TagString: Untagged
@@ -59,10 +60,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   attackPoint: {fileID: 0}
   bulletPrefab: {fileID: 7451752783137866988, guid: d35dcf43c79c89e45a6b2870d19d221e, type: 3}
-  showAttackRange: 1
-  rangeColor: {r: 0, g: 1, b: 0, a: 1}
-  attackColor: {r: 1, g: 0, b: 0, a: 1}
-  rareColorRenderer: {fileID: 0}
+  groundEffectPrefab: {fileID: 0}
 --- !u!61 &8645156678587173567
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -109,6 +107,32 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.45, y: 0.6}
   m_EdgeRadius: 0
+--- !u!114 &9014579741883934847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040012967342116403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44195fcf24cf18749a91283a0623bbca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.UnitAbility
+  multiShotCount: 1
+  groundEffectDuration: 0
+  rangeIncreaseValue: 0
+  attackIncreaseValue: 0
+  chainAttackCount: 0
+  speedIncreaseValue: 0
+  groundEffectProcChance: 0.1
+  groundEffectPrefab: {fileID: 0}
+  finalSpeedIncreaseValue: 0
+  finalGroundEffectChance: 0
+  finalAttackIncreaseValue: 0
+  currentTowerLevel: 0
+  currentTowerType: 
+  autoApplyCurrentLevel: 1
 --- !u!1 &2951350364968507841
 GameObject:
   m_ObjectHideFlags: 0

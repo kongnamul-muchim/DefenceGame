@@ -88,7 +88,7 @@ namespace DefenceGame.Core
         {
             float damage = damagePerSecond * tickInterval;
             
-            // 범위 내 모든 적에게 데미지
+            // 범위 내 모든 적에게 데미지 (trigger와 non-trigger 모두 체크)
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, radius);
             foreach (Collider2D col in colliders)
             {
@@ -96,6 +96,27 @@ namespace DefenceGame.Core
                 if (enemy != null && enemy.currentHealth > 0)
                 {
                     enemy.TakeDamage(damage);
+                    Debug.Log($"[GroundEffect] Dealt {damage:F1} damage to {enemy.enemyName}");
+                }
+            }
+            
+            // Trigger colliders 체크 (별도로 체크 필요)
+            ContactFilter2D filter = new ContactFilter2D();
+            filter.useTriggers = true;
+            List<Collider2D> triggerColliders = new List<Collider2D>();
+            Physics2D.OverlapCircle(transform.position, radius, filter, triggerColliders);
+            
+            foreach (Collider2D col in triggerColliders)
+            {
+                // 이미 위에서 처리된 collider는 스킵
+                if (colliders.Length > 0 && System.Array.Exists(colliders, c => c == col))
+                    continue;
+                    
+                Enemy enemy = col.GetComponent<Enemy>();
+                if (enemy != null && enemy.currentHealth > 0)
+                {
+                    enemy.TakeDamage(damage);
+                    Debug.Log($"[GroundEffect] Dealt {damage:F1} damage to {enemy.enemyName} (trigger)");
                 }
             }
         }

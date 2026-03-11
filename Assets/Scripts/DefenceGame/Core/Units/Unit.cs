@@ -74,11 +74,19 @@ namespace DefenceGame.Core
         {
             id = data.Id;
             unitName = data.Name;
-            attackPower = data.AttackPower;
-            attackSpeed = data.AttackSpeed;
-            range = data.Range;
             grade = data.Grade;
             TowerType = ExtractTowerType(data.Name);
+            
+            // Calculate attack power: (기본공격력 + 레벨추가공격력) × 레어도공격력
+            float gradeDamageMultiplier = GetGradeMultiplier(grade, "damage");
+            attackPower = (data.AttackPower + data.LevelBonusAttackPower) * gradeDamageMultiplier;
+            
+            // Calculate range: 기본사거리 × 레어도사거리
+            float gradeRangeMultiplier = GetGradeMultiplier(grade, "range");
+            range = data.Range * gradeRangeMultiplier;
+            
+            // Attack speed from data
+            attackSpeed = data.AttackSpeed;
             
             // Initialize components
             if (unitUI != null) unitUI.SetGradeColor(GetGradeColor(grade));
@@ -90,7 +98,27 @@ namespace DefenceGame.Core
                 TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
             }
             
-            Debug.Log($"Unit initialized: {unitName}, Type: {TowerType}, Grade: {grade}");
+            Debug.Log($"Unit initialized: {unitName}, Type: {TowerType}, Grade: {grade}, Attack: {attackPower}, Range: {range}");
+        }
+        
+        private float GetGradeMultiplier(GradeType grade, string type)
+        {
+            if (GameDataSO.Instance == null) return 1f;
+            
+            foreach (var unitGrade in GameDataSO.Instance.UnitGrades)
+            {
+                if (unitGrade.Grade == grade)
+                {
+                    if (type == "damage")
+                        return unitGrade.DamageMultiplier;
+                    else if (type == "range")
+                        return unitGrade.RangeMultiplier;
+                    else if (type == "speed")
+                        return unitGrade.AttackSpeedMultiplier;
+                }
+            }
+            
+            return 1f;
         }
         
         private string ExtractTowerType(string name)

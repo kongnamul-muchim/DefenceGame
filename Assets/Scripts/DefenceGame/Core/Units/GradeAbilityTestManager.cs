@@ -144,19 +144,24 @@ namespace DefenceGame.Core
         /// </summary>
         private int GetTowerIdByType(string towerType)
         {
-            // TowerDataSO에서 타워 ID 매핑
+            // UnitPlacementManager의 GetTowerPrefab 로직에 맞춰 ID 설정
+            // ((towerId - 1) % 4) + 1로 변환됨
+            // 1,5,9,13,17 → 1 (Archer)
+            // 2,6,10,14,18 → 2 (Wizard)
+            // 3,7,11,15,19 → 3 (WizardTower)
+            // 4,8,12,16,20 → 4 (Laser)
             switch (towerType)
             {
                 case "Archer":
-                    return 101; // Archer 기본 ID
+                    return 1;  // 1,5,9,13,17 → 1
                 case "Wizard":
-                    return 201; // Wizard 기본 ID
+                    return 2;  // 2,6,10,14,18 → 2
                 case "WizardTower":
-                    return 301; // WizardTower 기본 ID
+                    return 3;  // 3,7,11,15,19 → 3
                 case "Laser":
-                    return 401; // Laser 기본 ID
+                    return 4;  // 4,8,12,16,20 → 4
                 default:
-                    return -1;
+                    return 1;
             }
         }
         

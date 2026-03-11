@@ -6,7 +6,7 @@ namespace DefenceGame.Core
     {
         [Header("Settings")]
         public float speed = 10f;
-        public float lifetime = 5f;
+        public float lifetime = 1f;
         [Tooltip("스프라이트 기본 방향 보정 (Arrow는 -90)")]
         public float rotationOffset = 0f;
         
@@ -353,8 +353,9 @@ namespace DefenceGame.Core
         private void OnTriggerEnter2D(Collider2D other)
         {
             Enemy enemy = other.GetComponent<Enemy>();
-            if (enemy != null && enemy == target)
+            if (enemy != null && enemy.currentHealth > 0 && !hitEnemies.Contains(enemy))
             {
+                target = enemy;
                 HitTarget();
             }
         }
