@@ -81,24 +81,18 @@ namespace DefenceGame.Core
             float gradeDamageMultiplier = GetGradeMultiplier(grade, "damage");
             attackPower = (data.AttackPower + data.LevelBonusAttackPower) * gradeDamageMultiplier;
             
-            // Calculate range: 기본사거리 × 레어도사거리 ÷ 2.5 (너무 커서 보정)
+            // Calculate range: Towers시트 Range값 × UnitGrades RangeMultiplier
             float gradeRangeMultiplier = GetGradeMultiplier(grade, "range");
-            range = data.Range * gradeRangeMultiplier / 2.5f;
+            range = data.Range * gradeRangeMultiplier;
             
             // Attack speed from data
             attackSpeed = data.AttackSpeed;
-            
-            // Initialize components
-            if (unitUI != null) unitUI.SetGradeColor(GetGradeColor(grade));
-            if (unitAbility != null) unitAbility.Initialize(TowerType);
             
             // Subscribe to events
             if (TowerLevelManager.Instance != null)
             {
                 TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
             }
-            
-            Debug.Log($"Unit initialized: {unitName}, Type: {TowerType}, Grade: {grade}, Attack: {attackPower}, Range: {range}");
         }
         
         private float GetGradeMultiplier(GradeType grade, string type)

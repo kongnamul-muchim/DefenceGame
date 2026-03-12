@@ -27,14 +27,6 @@ namespace DefenceGame.Core
         private string towerType = "";
         private Unit unit;
         
-        [Header("Debug Info")]
-        [SerializeField] private int currentTowerLevel = 0;
-        [SerializeField] private string currentTowerType = "";
-        
-        [Header("Test Mode")]
-        [Tooltip("테스트 모드: Initialize 시 현재 타워 레벨을 자동으로 적용")]
-        public bool autoApplyCurrentLevel = true;
-        
         private void Awake()
         {
             unit = GetComponent<Unit>();
@@ -43,82 +35,7 @@ namespace DefenceGame.Core
         public void Initialize(string type)
         {
             towerType = type;
-            currentTowerType = type;
-            
-            // 테스트 모드: 현재 타워 레벨 자동 적용
-            if (autoApplyCurrentLevel && TowerLevelManager.Instance != null)
-            {
-                int actualLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
-                if (actualLevel > 0)
-                {
-                    ForceApplyLevel(actualLevel);
-                    Debug.Log($"[UnitAbility] {towerType} 테스트 모드로 레벨 {actualLevel} 자동 적용");
-                    return;
-                }
-            }
-            
             ApplySpecialAbilities();
-        }
-        
-        /// <summary>
-        /// 특정 레벨의 특수능력 강제 적용 (테스트용)
-        /// </summary>
-        public void ForceApplyLevel(int level)
-        {
-            currentTowerLevel = level;
-            
-            if (string.IsNullOrEmpty(towerType)) return;
-            if (SpecialAbilityManager.Instance == null) return;
-            
-            // Reset abilities
-            multiShotCount = 1;
-            groundEffectDuration = 0f;
-            rangeIncreaseValue = 0f;
-            attackIncreaseValue = 0f;
-            chainAttackCount = 0;
-            speedIncreaseValue = 0f;
-            
-            var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, level);
-            
-            Debug.Log($"[UnitAbility] {towerType} 레벨 {level} 능력 적용: {unlockedAbilities.Count}개");
-            
-            foreach (var ability in unlockedAbilities)
-            {
-                Debug.Log($"[UnitAbility] 적용: {ability.abilityType} = {ability.value}");
-                switch (ability.abilityType)
-                {
-                    case SpecialAbilityType.MultiShot:
-                        multiShotCount = Mathf.Max(multiShotCount, (int)ability.value);
-                        break;
-                    case SpecialAbilityType.GroundEffect:
-                        groundEffectDuration = Mathf.Max(groundEffectDuration, ability.value);
-                        break;
-                    case SpecialAbilityType.ChainAttack:
-                        chainAttackCount = Mathf.Max(chainAttackCount, (int)ability.value);
-                        break;
-                    case SpecialAbilityType.RangeIncrease:
-                        rangeIncreaseValue = Mathf.Max(rangeIncreaseValue, ability.value);
-                        break;
-                    case SpecialAbilityType.AttackIncrease:
-                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
-                        break;
-                    case SpecialAbilityType.SpeedIncrease:
-                        speedIncreaseValue = Mathf.Max(speedIncreaseValue, ability.value);
-                        break;
-                    // Laser 레벨 특수 능력
-                    case SpecialAbilityType.AttackUp:
-                        attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
-                        break;
-                    case SpecialAbilityType.SpeedDown:
-                        speedIncreaseValue = Mathf.Min(speedIncreaseValue, -ability.value);
-                        break;
-                }
-            }
-            
-            // 등급 기반 최종 값 계산
-            CalculateGradeBasedValues();
-            
-            ApplyBuffs();
         }
         
         public void OnLevelUp(string type, int level)
@@ -136,9 +53,6 @@ namespace DefenceGame.Core
             if (TowerLevelManager.Instance == null) return;
             
             int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
-            currentTowerLevel = currentLevel; // 인스펙터 표시용
-            
-            Debug.Log($"[UnitAbility] {towerType} 현재 레벨: {currentLevel}");
             
             // Reset abilities
             multiShotCount = 1;
@@ -150,11 +64,8 @@ namespace DefenceGame.Core
             
             var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
             
-            Debug.Log($"[UnitAbility] {towerType} 해제된 능력 수: {unlockedAbilities.Count}");
-            
             foreach (var ability in unlockedAbilities)
             {
-                Debug.Log($"[UnitAbility] 적용 중: {ability.abilityType} = {ability.value}");
                 switch (ability.abilityType)
                 {
                     case SpecialAbilityType.MultiShot:
@@ -178,12 +89,10 @@ namespace DefenceGame.Core
                     // Laser 레벨 특수 능력
                     case SpecialAbilityType.AttackUp:
                         attackIncreaseValue = Mathf.Max(attackIncreaseValue, ability.value);
-                        Debug.Log($"[UnitAbility] Laser Attack Up: +{ability.value*100}%");
                         break;
                     case SpecialAbilityType.SpeedDown:
                         // 공격속도 감소 (음수로 저장)
                         speedIncreaseValue = Mathf.Min(speedIncreaseValue, -ability.value);
-                        Debug.Log($"[UnitAbility] Laser Speed Down: -{ability.value*100}%");
                         break;
                 }
             }
@@ -207,21 +116,18 @@ namespace DefenceGame.Core
             if (towerType == "Archer" && speedIncreaseValue > 0)
             {
                 finalSpeedIncreaseValue = GradeMultiplier.ApplyMultiplier(speedIncreaseValue, grade);
-                Debug.Log($"[UnitAbility] Archer Speed Increase: Base={speedIncreaseValue}, Grade={grade}, Final={finalSpeedIncreaseValue:F2}");
             }
             
             // Wizard: GroundEffect 확률 증가
             if (towerType == "Wizard")
             {
                 finalGroundEffectChance = GradeMultiplier.ApplyMultiplier(groundEffectProcChance, grade);
-                Debug.Log($"[UnitAbility] Wizard GroundEffect Chance: Base={groundEffectProcChance}, Grade={grade}, Final={finalGroundEffectChance:F2}");
             }
             
             // Tower: 공격력 상승치 증가
             if (towerType == "WizardTower" && attackIncreaseValue > 0)
             {
                 finalAttackIncreaseValue = GradeMultiplier.ApplyMultiplier(attackIncreaseValue, grade);
-                Debug.Log($"[UnitAbility] Tower Attack Increase: Base={attackIncreaseValue}, Grade={grade}, Final={finalAttackIncreaseValue:F2}");
             }
             
             // Laser: 등급 기반 확산(ChainAttack) 설정
@@ -239,7 +145,6 @@ namespace DefenceGame.Core
                     // 등급 기반 값과 레벨 기반 값 중 큰 값 사용
                     chainAttackCount = Mathf.Max(chainAttackCount, gradeChainCount);
                 }
-                Debug.Log($"[UnitAbility] Laser ChainAttack: Grade={grade}, BaseCount={chainAttackCount}, GradeCount={gradeChainCount}, Final={chainAttackCount}");
             }
         }
         
@@ -270,7 +175,12 @@ namespace DefenceGame.Core
         {
             if (unit != null)
             {
-                unit.range += rangeIncreaseValue;
+                // 사거리 증가: 특수능력RangeIncrease × UnitGrades.RangeMultiplier
+                if (rangeIncreaseValue > 0)
+                {
+                    float gradeRangeMultiplier = GetGradeRangeMultiplier(unit.grade);
+                    unit.range += rangeIncreaseValue * gradeRangeMultiplier;
+                }
                 
                 // Tower는 등급 기반 공격력 증가 적용
                 if (towerType == "WizardTower" && finalAttackIncreaseValue > 0)
@@ -315,7 +225,6 @@ namespace DefenceGame.Core
                 // 지속시간 5초로 늘리고, 데미지는 낮춤 (총 데미지 = attackPower)
                 float damagePerSec = unit != null ? unit.attackPower * 0.2f : 10f;
                 groundEffect.Initialize(5f, damagePerSec, 1.5f);
-                Debug.Log($"[UnitAbility] GroundEffect spawned: Duration=5s, DPS={damagePerSec:F1}");
             }
         }
         
@@ -326,6 +235,32 @@ namespace DefenceGame.Core
         {
             if (unit == null) return 1.0f;
             return GradeMultiplier.GetWeakMultiplier(unit.grade);
+        }
+        
+        /// <summary>
+        /// 사거리 증가 값 반환 (Range 계산용)
+        /// </summary>
+        public float GetRangeIncreaseValue()
+        {
+            return rangeIncreaseValue;
+        }
+        
+        /// <summary>
+        /// UnitGrades 시트에서 해당 등급의 RangeMultiplier 값을 가져옴
+        /// </summary>
+        private float GetGradeRangeMultiplier(GradeType grade)
+        {
+            if (GameDataSO.Instance == null) return 1f;
+            
+            foreach (var unitGrade in GameDataSO.Instance.UnitGrades)
+            {
+                if (unitGrade.Grade == grade)
+                {
+                    return unitGrade.RangeMultiplier;
+                }
+            }
+            
+            return 1f;
         }
     }
 }

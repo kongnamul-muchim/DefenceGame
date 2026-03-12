@@ -1049,6 +1049,7 @@ GameObject:
   m_Component:
   - component: {fileID: 467705516}
   - component: {fileID: 467705517}
+  - component: {fileID: 467705518}
   m_Layer: 0
   m_Name: TestManager
   m_TagString: Untagged
@@ -1088,6 +1089,32 @@ MonoBehaviour:
   spawnInterval: 0.5
   spawnOffset: {x: 2, y: 0, z: 0}
   showGradeColors: 1
+--- !u!114 &467705518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 467705515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44195fcf24cf18749a91283a0623bbca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.UnitAbility
+  multiShotCount: 1
+  groundEffectDuration: 0
+  rangeIncreaseValue: 0
+  attackIncreaseValue: 0
+  chainAttackCount: 0
+  speedIncreaseValue: 0
+  groundEffectProcChance: 0.1
+  groundEffectPrefab: {fileID: 0}
+  finalSpeedIncreaseValue: 0
+  finalGroundEffectChance: 0
+  finalAttackIncreaseValue: 0
+  currentTowerLevel: 0
+  currentTowerType: 
+  autoApplyCurrentLevel: 1
 --- !u!1 &471797332
 GameObject:
   m_ObjectHideFlags: 0
