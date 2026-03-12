@@ -20,6 +20,7 @@ namespace DefenceGame.Core
         private float spawnTime;
         private bool isMoving = false;
         private bool isHoming = true; // 자동 추적 여부 (Archer는 false)
+        private Unit attacker; // 공격한 유닛 (경험치 획득용)
         
         // Pierce (관통) 기능
         private int pierceCount = 0; // 관통 가능 횟수 (0 = 관통 없음)
@@ -55,13 +56,14 @@ namespace DefenceGame.Core
             }
         }
         
-        public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0, int areaRadius = 0)
+        public void Initialize(Enemy targetEnemy, float damageAmount, int pierce = 0, int areaRadius = 0, Unit attackerUnit = null)
         {
             target = targetEnemy;
             damage = damageAmount;
             pierceCount = pierce;
             pierceRemaining = pierce;
             areaDamageRadius = areaRadius;
+            attacker = attackerUnit;
             hitEnemies.Clear();
             spawnTime = Time.time;
             
@@ -88,13 +90,14 @@ namespace DefenceGame.Core
         }
         
         // 부채꼴 발사용 초기화 (자동추적 안함)
-        public void InitializeWithDirection(Enemy targetEnemy, float damageAmount, int pierce, int areaRadius, Vector3 moveDirection)
+        public void InitializeWithDirection(Enemy targetEnemy, float damageAmount, int pierce, int areaRadius, Vector3 moveDirection, Unit attackerUnit = null)
         {
             target = targetEnemy;
             damage = damageAmount;
             pierceCount = pierce;
             pierceRemaining = pierce;
             areaDamageRadius = areaRadius;
+            attacker = attackerUnit;
             hitEnemies.Clear();
             spawnTime = Time.time;
             isHoming = false; // 자동 추적 비활성화
@@ -117,7 +120,7 @@ namespace DefenceGame.Core
         // Laser 연계 공격용
         private float chainDamageMultiplier = 1.0f; // 등급 기반 데미지 배율
         private int currentChainIndex = 0; // 현재 연계 단계 초기화
-        public void InitializeChain(Enemy targetEnemy, float damageAmount, int chainCount, float damageMultiplier = 1.0f)
+        public void InitializeChain(Enemy targetEnemy, float damageAmount, int chainCount, float damageMultiplier = 1.0f, Unit attackerUnit = null)
         {
             target = targetEnemy;
             damage = damageAmount * damageMultiplier; // 등급 기반 데미지 적용
@@ -126,6 +129,7 @@ namespace DefenceGame.Core
             chainDamageMultiplier = damageMultiplier;
             currentChainIndex = 0;
             areaDamageRadius = 0;
+            attacker = attackerUnit;
             hitEnemies.Clear();
             spawnTime = Time.time;
             
@@ -243,8 +247,8 @@ namespace DefenceGame.Core
                 }
                 else
                 {
-                    // 단일 대상 데미지
-                    target.TakeDamage(damage);
+                    // 단일 대상 데미지 - attacker 정보 전달
+                    target.TakeDamage(damage, attacker);
                 }
                 hitEnemies.Add(target);
                 
@@ -317,9 +321,8 @@ namespace DefenceGame.Core
                 float distance = Vector3.Distance(center, enemy.transform.position);
                 if (distance <= radius)
                 {
-                    enemy.TakeDamage(damage);
+                    enemy.TakeDamage(damage, attacker);
                     hitCount++;
-                    // Debug.Log($"[Area Damage] Hit {enemy.enemyName} at distance {distance:F2}");
                 }
             }
             

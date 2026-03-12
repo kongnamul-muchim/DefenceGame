@@ -42,6 +42,9 @@ namespace DefenceGame.Core
         private float currentSlowMultiplier = 1f;
         private System.Collections.Generic.Dictionary<MonoBehaviour, float> slowSources = new System.Collections.Generic.Dictionary<MonoBehaviour, float>();
         
+        // Last attacker tracking (for exp reward)
+        private Unit lastAttacker;
+        
         // Events
         public System.Action<Enemy> OnEnemyDefeated;
         public System.Action<Enemy> OnEnemyReachedCastle;
@@ -325,19 +328,25 @@ namespace DefenceGame.Core
         
         public void TakeDamage(float damage)
         {
+            TakeDamage(damage, null);
+        }
+        
+        public void TakeDamage(float damage, Unit attacker)
+        {
             if (hasReachedCastle) return;
             
             currentHealth -= damage;
+            
+            // Track last attacker
+            if (attacker != null)
+            {
+                lastAttacker = attacker;
+            }
             
             // Update health bar
             if (healthBar != null)
             {
                 healthBar.UpdateHealth(currentHealth);
-                Debug.Log($"[{enemyName}] Health updated: {currentHealth}/{maxHealth}");
-            }
-            else
-            {
-                Debug.LogWarning($"[{enemyName}] HealthBar is null! Cannot update health bar.");
             }
             
             if (currentHealth <= 0)
@@ -354,9 +363,13 @@ namespace DefenceGame.Core
                 GameManager.Instance.EnemyDefeated(rewardGold, rewardGold);
             }
             
-            OnEnemyDefeated?.Invoke(this);
+            // Give exp to last attacker
+            if (lastAttacker != null && TowerLevelManager.Instance != null)
+            {
+                TowerLevelManager.Instance.AddExpFromKill(lastAttacker, this);
+            }
             
-            Debug.Log($"Enemy {enemyName} defeated! Reward: {rewardGold} gold");
+            OnEnemyDefeated?.Invoke(this);
             
             // Destroy enemy
             Destroy(gameObject);

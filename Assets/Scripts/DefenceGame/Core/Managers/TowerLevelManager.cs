@@ -77,7 +77,54 @@ namespace DefenceGame.Core
             if (leveledUp)
             {
                 OnTowerLevelUp?.Invoke(towerType, towerLevels[towerType].level);
-                Debug.Log($"Tower {towerType} leveled up to level {towerLevels[towerType].level}!");
+            }
+        }
+        
+        public void AddExpFromKill(Unit attacker, Enemy enemy)
+        {
+            if (attacker == null || enemy == null) return;
+            
+            string towerType = attacker.TowerType;
+            if (string.IsNullOrEmpty(towerType)) return;
+            
+            // Calculate exp based on enemy reward and grade
+            int expAmount = Mathf.RoundToInt(enemy.rewardGold * 0.5f); // 50% of gold reward as exp
+            
+            // Add grade multiplier bonus
+            switch (attacker.grade)
+            {
+                case GradeType.Common:
+                    expAmount = Mathf.RoundToInt(expAmount * 1.0f);
+                    break;
+                case GradeType.Uncommon:
+                    expAmount = Mathf.RoundToInt(expAmount * 1.2f);
+                    break;
+                case GradeType.Rare:
+                    expAmount = Mathf.RoundToInt(expAmount * 1.5f);
+                    break;
+                case GradeType.Epic:
+                    expAmount = Mathf.RoundToInt(expAmount * 2.0f);
+                    break;
+                case GradeType.Legendary:
+                    expAmount = Mathf.RoundToInt(expAmount * 3.0f);
+                    break;
+            }
+            
+            if (!towerLevels.ContainsKey(towerType))
+            {
+                towerLevels[towerType] = new TowerLevelData();
+            }
+            
+            // Add exp and check for level up
+            bool leveledUp = towerLevels[towerType].AddExp(expAmount);
+            
+            // Notify exp change
+            OnTowerExpChanged?.Invoke(towerType);
+            
+            // Notify level up if occurred
+            if (leveledUp)
+            {
+                OnTowerLevelUp?.Invoke(towerType, towerLevels[towerType].level);
             }
         }
         

@@ -88,6 +88,10 @@ namespace DefenceGame.Core
             // Attack speed from data
             attackSpeed = data.AttackSpeed;
             
+            // Initialize components
+            if (unitUI != null) unitUI.SetGradeColor(GetGradeColor(grade));
+            if (unitAbility != null) unitAbility.Initialize(TowerType);
+            
             // Subscribe to events
             if (TowerLevelManager.Instance != null)
             {

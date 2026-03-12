@@ -289,21 +289,21 @@ MonoBehaviour:
   UnitGrades:
   - Grade: 0
     DamageMultiplier: 1
-    RangeMultiplier: 1
+    RangeMultiplier: 0.8
     AttackSpeedMultiplier: 1
   - Grade: 1
     DamageMultiplier: 1.5
-    RangeMultiplier: 1.1
+    RangeMultiplier: 0.9
     AttackSpeedMultiplier: 1.1
   - Grade: 2
     DamageMultiplier: 2
-    RangeMultiplier: 1.2
-    AttackSpeedMultiplier: 1.3
+    RangeMultiplier: 1
+    AttackSpeedMultiplier: 1.2
   - Grade: 3
     DamageMultiplier: 2.5
-    RangeMultiplier: 1.3
-    AttackSpeedMultiplier: 1.5
+    RangeMultiplier: 1.1
+    AttackSpeedMultiplier: 1.3
   - Grade: 4
     DamageMultiplier: 5
-    RangeMultiplier: 1.5
-    AttackSpeedMultiplier: 2
+    RangeMultiplier: 1.2
+    AttackSpeedMultiplier: 1.5

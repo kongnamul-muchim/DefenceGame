@@ -574,3 +574,52 @@ Laser의 특수 능력 시스템을 변경했습니다.
 - [ ] Laser Common 등급: 확산 없음 + 레벨 3 능력 적용 확인
 - [ ] Laser Legendary 등급: 확산 3회 + 레벨 7 능력 적용 확인
 - [ ] 공격속도 감소(-15%)가 정상적으로 적용되는지 확인
+
+---
+
+## 2024-03-15: 테스트 코드 및 Debug.Log 정리
+
+### 변경 사항
+개발 단계에서 사용한 테스트 코드와 디버그 로그를 정리하여 프로덕션 코드를 깔끔하게 만들었습니다.
+
+#### 삭제된 파일
+- `Assets/Scripts/DefenceGame/Core/Units/GradeAbilityTestManager.cs` (200줄)
+  - 등급 기반 특수능력 테스트용 매니저
+  - 자동 소환 기능 및 수동 테스트 기능 포함
+
+#### 수정된 파일
+
+**UnitAbility.cs:**
+- `Test Mode` 헤더 및 `autoApplyCurrentLevel` 필드 제거
+- `Debug Info` 헤더 및 디버그 필드 (`currentTowerLevel`, `currentTowerType`) 제거
+- `ForceApplyLevel()` 메서드 제거 (테스트용 메서드)
+- 모든 `Debug.Log` 제거 (총 15개)
+  - 능력 적용 로그
+  - 등급 기반 값 계산 로그
+  - 버프 적용 로그 등
+
+**Unit.cs:**
+- `Initialize()` 메서드의 `Debug.Log` 제거
+
+**TowerLevelUI.cs:**
+- `clickButton` 필드 제거 (테스트용 클릭 버튼)
+- `SetupClickButtons()` 메서드 제거
+- `OnSlotClicked()` 메서드 제거
+- 에디터 테스트 코드 (`#if UNITY_EDITOR`) 제거
+
+### 커밋
+- Hash: `9e70785`
+- Message: `refactor: Remove test code and Debug.Logs`
+- Changes: 5 files changed, 88 insertions(+), 419 deletions(-)
+
+### 변경 내용 요약
+| 파일 | 변경 사항 | 라인 변화 |
+|------|----------|----------|
+| GradeAbilityTestManager.cs | 파일 삭제 | -200 |
+| UnitAbility.cs | 테스트 모드 제거, Debug.Log 제거 | -120 |
+| Unit.cs | Debug.Log 제거 | -1 |
+| TowerLevelUI.cs | 테스트 버튼 로직 제거 | -30 |
+
+### 다음 단계 작업 목록
+- [ ] 빌드 테스트 (Debug.Log 없이 정상 작동 확인)
+- [ ] 성능 테스트 (로그 제거로 인한 성능 개선 확인)

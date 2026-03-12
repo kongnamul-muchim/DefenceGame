@@ -91,7 +91,7 @@ namespace DefenceGame.Core
             }
             else
             {
-                enemy.TakeDamage(attackPower);
+                enemy.TakeDamage(attackPower, unit);
             }
             
             unit?.ShowAttackEffect();
@@ -132,7 +132,7 @@ namespace DefenceGame.Core
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                bulletComponent.Initialize(target, attackPower, 0, 0);
+                bulletComponent.Initialize(target, attackPower, 0, 0, unit);
             }
         }
         
@@ -157,7 +157,7 @@ namespace DefenceGame.Core
                 Bullet bulletComponent = bullet.GetComponent<Bullet>();
                 if (bulletComponent != null)
                 {
-                    bulletComponent.InitializeWithDirection(target, attackPower, 0, 0, direction);
+                    bulletComponent.InitializeWithDirection(target, attackPower, 0, 0, direction, unit);
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace DefenceGame.Core
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent != null)
             {
-                bulletComponent.InitializeChain(target, attackPower, chainCount, damageMultiplier);
+                bulletComponent.InitializeChain(target, attackPower, chainCount, damageMultiplier, unit);
             }
         }
         
