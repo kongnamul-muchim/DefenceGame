@@ -11,8 +11,12 @@ namespace DefenceGame.Core
         public static GachaManager Instance { get; private set; }
         
         [Header("Settings")]
-        public int gachaCost = 50;
+        public int baseGachaCost = 50;
+        public int gachaCostIncrease = 10;
+        public int freeGachaCount = 4;
         public GameDataSO gameData;
+        
+        private int gachaCount = 0;
         
         [Header("Input")]
         public KeyCode gachaKey = KeyCode.Space;
@@ -112,25 +116,41 @@ namespace DefenceGame.Core
         }
         
         /// <summary>
+        /// Get current gacha cost based on summon count
+        /// </summary>
+        public int GetCurrentGachaCost()
+        {
+            if (gachaCount < freeGachaCount)
+            {
+                return baseGachaCost;
+            }
+            else
+            {
+                int extraPulls = gachaCount - freeGachaCount + 1;
+                return baseGachaCost + (extraPulls * gachaCostIncrease);
+            }
+        }
+        
+        /// <summary>
         /// Perform gacha and return a random tower
         /// </summary>
         public TowerData PerformGacha()
         {
+            int currentCost = GetCurrentGachaCost();
+            
             // Check gold
-            if (GameManager.Instance == null || GameManager.Instance.CurrentGold < gachaCost)
+            if (GameManager.Instance == null || GameManager.Instance.CurrentGold < currentCost)
             {
                 int currentGold = GameManager.Instance?.CurrentGold ?? 0;
-                string message = $"골드가 부족합니다! (필요: {gachaCost}, 보유: {currentGold})";
-                Debug.LogWarning(message); // Add direct log
+                string message = $"골드가 부족합니다! (필요: {currentCost}, 보유: {currentGold})";
                 OnGachaFailed?.Invoke(message);
                 return null;
             }
             
             // Deduct gold
-            if (!GameManager.Instance.SpendGold(gachaCost))
+            if (!GameManager.Instance.SpendGold(currentCost))
             {
                 string message = "골드 차감에 실패했습니다.";
-                Debug.LogWarning(message);
                 OnGachaFailed?.Invoke(message);
                 return null;
             }
@@ -143,13 +163,12 @@ namespace DefenceGame.Core
             
             if (result != null)
             {
-                Debug.Log($"Gacha Result: [{rolledGrade}] {result.Name}!");
+                gachaCount++;
                 OnGachaSuccess?.Invoke(result);
             }
             else
             {
                 string message = "가챠 실패: 유닛을 찾을 수 없습니다.";
-                Debug.LogWarning(message);
                 OnGachaFailed?.Invoke(message);
             }
             

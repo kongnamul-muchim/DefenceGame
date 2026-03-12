@@ -19,6 +19,7 @@ namespace DefenceGame.Core
         private float tickTimer = 0f;
         private List<Enemy> enemiesInEffect = new List<Enemy>();
         private bool isDestroying = false;
+        private Unit attacker; // 공격자 (Wizard) - 킬 크레딧용
         
         private void Awake()
         {
@@ -61,11 +62,12 @@ namespace DefenceGame.Core
             }
         }
         
-        public void Initialize(float customDuration, float customDamage, float customRadius)
+        public void Initialize(float customDuration, float customDamage, float customRadius, Unit attackerUnit = null)
         {
             duration = customDuration;
             damagePerSecond = customDamage;
             radius = customRadius;
+            attacker = attackerUnit;
             
             // 파티클 시스템 설정
             SetupParticleSystem();
@@ -136,8 +138,7 @@ namespace DefenceGame.Core
                 Enemy enemy = enemiesInEffect[i];
                 if (enemy != null && enemy.currentHealth > 0)
                 {
-                    enemy.TakeDamage(damage);
-                    Debug.Log($"[GroundEffect] Dealt {damage:F1} damage to {enemy.enemyName}");
+                    enemy.TakeDamage(damage, attacker);
                 }
                 else
                 {

@@ -85,8 +85,9 @@ namespace DefenceGame.Core
             float gradeRangeMultiplier = GetGradeMultiplier(grade, "range");
             range = data.Range * gradeRangeMultiplier;
             
-            // Attack speed from data
-            attackSpeed = data.AttackSpeed;
+            // Calculate attack speed: Towers시트 AttackSpeed × UnitGrades AttackSpeedMultiplier
+            float gradeSpeedMultiplier = GetGradeMultiplier(grade, "speed");
+            attackSpeed = data.AttackSpeed * gradeSpeedMultiplier;
             
             // Initialize components
             if (unitUI != null) unitUI.SetGradeColor(GetGradeColor(grade));

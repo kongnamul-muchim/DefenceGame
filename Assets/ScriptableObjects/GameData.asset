@@ -182,12 +182,12 @@ MonoBehaviour:
   Waves:
   - WaveNumber: 1
     EnemyId: 1
-    Count: 20
+    Count: 15
     SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 2
     EnemyId: 1
-    Count: 15
+    Count: 20
     SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 3
@@ -202,7 +202,7 @@ MonoBehaviour:
     HealthMultiplier: 1
   - WaveNumber: 5
     EnemyId: 4
-    Count: 5
+    Count: 10
     SpawnInterval: 1
     HealthMultiplier: 1
   - WaveNumber: 6
@@ -210,66 +210,6 @@ MonoBehaviour:
     Count: 1
     SpawnInterval: 1
     HealthMultiplier: 1
-  - WaveNumber: 7
-    EnemyId: 1
-    Count: 30
-    SpawnInterval: 1
-    HealthMultiplier: 1.2
-  - WaveNumber: 8
-    EnemyId: 1
-    Count: 22
-    SpawnInterval: 1
-    HealthMultiplier: 1.2
-  - WaveNumber: 9
-    EnemyId: 2
-    Count: 30
-    SpawnInterval: 1
-    HealthMultiplier: 1.2
-  - WaveNumber: 10
-    EnemyId: 3
-    Count: 150
-    SpawnInterval: 0.1
-    HealthMultiplier: 1.2
-  - WaveNumber: 11
-    EnemyId: 4
-    Count: 7
-    SpawnInterval: 1
-    HealthMultiplier: 1.2
-  - WaveNumber: 12
-    EnemyId: 5
-    Count: 1
-    SpawnInterval: 1
-    HealthMultiplier: 1.2
-  - WaveNumber: 13
-    EnemyId: 1
-    Count: 45
-    SpawnInterval: 1
-    HealthMultiplier: 1.5
-  - WaveNumber: 14
-    EnemyId: 1
-    Count: 33
-    SpawnInterval: 1
-    HealthMultiplier: 1.5
-  - WaveNumber: 15
-    EnemyId: 2
-    Count: 45
-    SpawnInterval: 1
-    HealthMultiplier: 1.5
-  - WaveNumber: 16
-    EnemyId: 3
-    Count: 225
-    SpawnInterval: 0.1
-    HealthMultiplier: 1.5
-  - WaveNumber: 17
-    EnemyId: 4
-    Count: 10
-    SpawnInterval: 1
-    HealthMultiplier: 1.5
-  - WaveNumber: 18
-    EnemyId: 5
-    Count: 1
-    SpawnInterval: 1
-    HealthMultiplier: 1.5
   GachaProbabilities:
   - Grade: 0
     Probability: 75

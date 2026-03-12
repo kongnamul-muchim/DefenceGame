@@ -21,7 +21,6 @@ namespace DefenceGame.Core
         public Transform castleTarget;
         
         [Header("Enemy Prefabs")]
-        // Map enemy ID to prefab (set in Inspector)
         public List<EnemyPrefabMapping> enemyPrefabs = new List<EnemyPrefabMapping>();
         private Dictionary<int, GameObject> enemyPrefabDict;
         
@@ -34,16 +33,22 @@ namespace DefenceGame.Core
         [SerializeField] private int enemiesRemainingInWave = 0;
         [SerializeField] private int totalEnemiesSpawned = 0;
         
+        [Header("Infinite Wave Settings")]
+        [SerializeField] private int maxWaveNumber = 6;
+        [SerializeField] private float healthIncreasePerWave = 0.1f;
+        [SerializeField] private float eliteSpawnChance = 0.1f;
+        [SerializeField] private float eliteHealthMultiplier = 2.0f;
+        [SerializeField] private int eliteGoldMultiplier = 3;
+        [SerializeField] private float eliteSizeMultiplier = 1.2f;
+        
         private List<WaveData> waveDataList;
         private Dictionary<int, List<WaveData>> wavesByNumber;
         private Coroutine currentWaveCoroutine;
         
-        // Events
         public System.Action<int> OnWaveStarted;
         public System.Action<int> OnWaveCompleted;
         public System.Action OnAllWavesCompleted;
         
-        // Properties
         public int CurrentWave => currentWave;
         public bool IsWaveActive => isWaveActive;
         public int EnemiesRemaining => enemiesRemainingInWave;
@@ -65,7 +70,6 @@ namespace DefenceGame.Core
         {
             InitializeWaves();
             
-            // Auto-start game after initialization
             if (wavesByNumber != null && wavesByNumber.Count > 0)
             {
                 StartGame();
@@ -76,7 +80,6 @@ namespace DefenceGame.Core
         {
             if (gameData == null)
             {
-                Debug.LogError("GameDataSO not assigned!");
                 return;
             }
             
@@ -84,11 +87,9 @@ namespace DefenceGame.Core
             
             if (waveDataList == null || waveDataList.Count == 0)
             {
-                Debug.LogError("No wave data found in GameDataSO!");
                 return;
             }
             
-            // Group waves by wave number
             wavesByNumber = new Dictionary<int, List<WaveData>>();
             foreach (var wave in waveDataList)
             {
@@ -98,8 +99,6 @@ namespace DefenceGame.Core
                 }
                 wavesByNumber[wave.WaveNumber].Add(wave);
             }
-            
-            Debug.Log($"WaveManager initialized with {waveDataList.Count} wave entries");
         }
         
         public void StartGame()
@@ -113,50 +112,39 @@ namespace DefenceGame.Core
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
             {
-                Debug.Log("Cannot start wave: Game is over");
                 return;
             }
             
             currentWave++;
             
-            if (!wavesByNumber.ContainsKey(currentWave))
-            {
-                Debug.Log($"Wave {currentWave} not found. All waves completed!");
-                OnAllWavesCompleted?.Invoke();
-                return;
-            }
+            int waveDataIndex = ((currentWave - 1) % maxWaveNumber) + 1;
             
             if (currentWaveCoroutine != null)
             {
                 StopCoroutine(currentWaveCoroutine);
             }
             
-            currentWaveCoroutine = StartCoroutine(SpawnWave(currentWave));
+            currentWaveCoroutine = StartCoroutine(SpawnWave(currentWave, waveDataIndex));
         }
         
-        private IEnumerator SpawnWave(int waveNumber)
+        private IEnumerator SpawnWave(int waveNumber, int waveDataIndex)
         {
             isWaveActive = true;
             OnWaveStarted?.Invoke(waveNumber);
             
-            List<WaveData> waveData = wavesByNumber[waveNumber];
+            List<WaveData> waveData = wavesByNumber[waveDataIndex];
             enemiesRemainingInWave = 0;
             
-            // Calculate total enemies in this wave
             foreach (var data in waveData)
             {
                 enemiesRemainingInWave += data.Count;
             }
             
-            Debug.Log($"Wave {waveNumber} started! Enemies: {enemiesRemainingInWave}");
-            
-            // Spawn enemies for each entry in the wave
             foreach (var data in waveData)
             {
                 EnemyData enemyData = GetEnemyData(data.EnemyId);
                 if (enemyData == null)
                 {
-                    Debug.LogError($"Enemy data not found for ID: {data.EnemyId}");
                     continue;
                 }
                 
@@ -167,7 +155,11 @@ namespace DefenceGame.Core
                         yield break;
                     }
                     
-                    SpawnEnemy(enemyData, data.HealthMultiplier);
+                    float totalHealthMultiplier = data.HealthMultiplier * (1f + (waveNumber - 1) * healthIncreasePerWave);
+                    
+                    bool isElite = waveNumber > maxWaveNumber && Random.value < eliteSpawnChance;
+                    
+                    SpawnEnemy(enemyData, totalHealthMultiplier, isElite);
                     totalEnemiesSpawned++;
                     
                     yield return new WaitForSeconds(data.SpawnInterval);
@@ -177,9 +169,8 @@ namespace DefenceGame.Core
             isWaveActive = false;
             OnWaveCompleted?.Invoke(waveNumber);
             
-            Debug.Log($"Wave {waveNumber} completed!");
+            GiveWaveClearGold(waveNumber);
             
-            // Auto-start next wave after a delay
             yield return new WaitForSeconds(3f);
             
             if (GameManager.Instance != null && !GameManager.Instance.IsGameOver)
@@ -188,34 +179,81 @@ namespace DefenceGame.Core
             }
         }
         
-        private void SpawnEnemy(EnemyData enemyData, float healthMultiplier)
+        private void SpawnEnemy(EnemyData enemyData, float healthMultiplier, bool isElite = false)
         {
-            // Get prefab for this enemy ID
             GameObject prefabToSpawn = GetEnemyPrefab(enemyData.Id);
             if (prefabToSpawn == null)
             {
-                Debug.LogError($"No prefab found for enemy ID: {enemyData.Id} ({enemyData.Name})");
                 return;
             }
             
             if (enemySpawnPoint == null)
             {
-                Debug.LogError("Enemy spawn point not assigned!");
                 return;
             }
             
             Vector3 spawnPosition = GetNonOverlappingSpawnPosition();
             GameObject enemy = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
             
-            // Initialize enemy with random target position around castle
             Enemy enemyComponent = enemy.GetComponent<Enemy>();
             if (enemyComponent != null)
             {
                 Vector3 randomTargetPos = GetRandomCastleTargetPosition();
+                
+                if (isElite)
+                {
+                    healthMultiplier *= eliteHealthMultiplier;
+                    
+                    enemy.transform.localScale *= eliteSizeMultiplier;
+                    
+                    SpriteRenderer sr = enemy.GetComponent<SpriteRenderer>();
+                    if (sr != null)
+                    {
+                        sr.color = new Color(0.6f, 0.2f, 0.8f, 1f);
+                    }
+                    
+                    enemyData = CreateEliteEnemyData(enemyData);
+                }
+                
                 enemyComponent.Initialize(enemyData, healthMultiplier, randomTargetPos);
+                
+                if (isElite)
+                {
+                    enemy.name = $"Elite_{enemyData.Name}";
+                }
+            }
+        }
+        
+        private EnemyData CreateEliteEnemyData(EnemyData baseData)
+        {
+            EnemyData eliteData = new EnemyData
+            {
+                Id = baseData.Id,
+                Name = $"Elite_{baseData.Name}",
+                Health = baseData.Health,
+                Speed = baseData.Speed,
+                RewardGold = baseData.RewardGold * eliteGoldMultiplier
+            };
+            return eliteData;
+        }
+        
+        private void GiveWaveClearGold(int waveNumber)
+        {
+            int goldReward = 0;
+            
+            if (waveNumber <= 6)
+            {
+                goldReward = 50 + (waveNumber - 1) * 10;
+            }
+            else
+            {
+                goldReward = 100 + (waveNumber - 6) * 5;
             }
             
-            Debug.Log($"Spawned enemy: {enemyData.Name} (ID: {enemyData.Id}) at {spawnPosition}");
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddGold(goldReward);
+            }
         }
         
         private GameObject GetEnemyPrefab(int enemyId)
@@ -238,82 +276,53 @@ namespace DefenceGame.Core
             enemyPrefabDict = new Dictionary<int, GameObject>();
             foreach (var mapping in enemyPrefabs)
             {
-                if (mapping.prefab != null)
+                if (!enemyPrefabDict.ContainsKey(mapping.enemyId))
                 {
                     enemyPrefabDict[mapping.enemyId] = mapping.prefab;
                 }
             }
         }
         
-        private Vector3 GetNonOverlappingSpawnPosition()
+        private EnemyData GetEnemyData(int enemyId)
         {
-            Vector3 basePosition = enemySpawnPoint.position;
-            float radius = 0.5f;
+            if (gameData == null) return null;
             
-            // Try to find a non-overlapping position
-            for (int i = 0; i < 10; i++)
+            foreach (var enemy in gameData.Enemies)
             {
-                Vector2 randomOffset = Random.insideUnitCircle * radius;
-                Vector3 spawnPos = basePosition + new Vector3(randomOffset.x, randomOffset.y, 0);
-                
-                // Check if position is clear
-                Collider2D[] colliders = Physics2D.OverlapCircleAll(spawnPos, 0.3f);
-                if (colliders.Length == 0)
+                if (enemy.Id == enemyId)
                 {
-                    return spawnPos;
+                    return enemy;
                 }
             }
             
-            // If all attempts failed, return base position with small offset
-            return basePosition + new Vector3(Random.Range(-0.2f, 0.2f), Random.Range(-0.2f, 0.2f), 0);
+            return null;
         }
         
-        private EnemyData GetEnemyData(int enemyId)
+        private Vector3 GetNonOverlappingSpawnPosition()
         {
-            if (gameData == null || gameData.Enemies == null)
-                return null;
+            Vector3 basePosition = enemySpawnPoint != null ? enemySpawnPoint.position : Vector3.zero;
+            float randomOffset = Random.Range(-1f, 1f);
+            return basePosition + new Vector3(randomOffset, 0, 0);
+        }
+        
+        private Vector3 GetRandomCastleTargetPosition()
+        {
+            if (castleTarget == null) return Vector3.zero;
             
-            return gameData.Enemies.Find(e => e.Id == enemyId);
+            Vector3 castlePos = castleTarget.position;
+            float randomX = Random.Range(-1.5f, 1.5f);
+            float randomY = Random.Range(-1.5f, 1.5f);
+            return castlePos + new Vector3(randomX, randomY, 0);
         }
         
         public void EnemyReachedCastle()
         {
             enemiesRemainingInWave--;
-            
-            if (enemiesRemainingInWave <= 0 && !isWaveActive)
-            {
-                Debug.Log($"All enemies in wave {currentWave} defeated or reached castle");
-            }
         }
         
-        public void StopWaves()
+        public void EnemyDefeated()
         {
-            if (currentWaveCoroutine != null)
-            {
-                StopCoroutine(currentWaveCoroutine);
-                currentWaveCoroutine = null;
-            }
-            isWaveActive = false;
-        }
-        
-        public void ResetWaves()
-        {
-            StopWaves();
-            currentWave = 0;
-            totalEnemiesSpawned = 0;
-            enemiesRemainingInWave = 0;
-        }
-        
-        private Vector3 GetRandomCastleTargetPosition()
-        {
-            if (castleTarget == null)
-            {
-                return Vector3.zero;
-            }
-            
-            // Random offset around castle (within 2 units radius)
-            Vector2 randomOffset = Random.insideUnitCircle * 2f;
-            return castleTarget.position + new Vector3(randomOffset.x, randomOffset.y, 0);
+            enemiesRemainingInWave--;
         }
     }
 }

@@ -27,12 +27,12 @@ namespace DefenceGame.Core
         
         private void InitializeAbilities()
         {
-            // Archer: 투사체 개수 증가 (MultiShot) + 공격속도 증가
+            // Archer: 투사체 개수 증가 (MultiShot) + 공격속도 증가 (30%로 조정)
             towerAbilities["Archer"] = new SpecialAbility[]
             {
                 new SpecialAbility(3, SpecialAbilityType.MultiShot, 2, "투사체 2개 발사"),
                 new SpecialAbility(5, SpecialAbilityType.MultiShot, 3, "투사체 3개 발사"),
-                new SpecialAbility(7, SpecialAbilityType.SpeedIncrease, 0.5f, "공격속도 50% 증가")
+                new SpecialAbility(7, SpecialAbilityType.SpeedIncrease, 0.3f, "공격속도 30% 증가")
             };
             
             // Wizard: 지속 피해 바닥 생성 (GroundEffect)

@@ -12,8 +12,15 @@ namespace DefenceGame.Core
         [SerializeField] private float maxHealth;
         [SerializeField] private float currentHealth;
         
+        [Header("Visual Effects")]
+        [SerializeField] private float hitFlashDuration = 0.1f;
+        [SerializeField] private Color hitFlashColor = new Color(1f, 1f, 1f, 0.5f); // 투명한 흰색
+        
         private HealthBar healthBar;
         private Unit lastAttacker;
+        private SpriteRenderer spriteRenderer;
+        private Color originalColor;
+        private bool isFlashing = false;
         
         public float MaxHealth => maxHealth;
         public float CurrentHealth => currentHealth;
@@ -32,6 +39,13 @@ namespace DefenceGame.Core
             if (healthBar != null)
             {
                 healthBar.Initialize(maxHealth);
+            }
+            
+            // SpriteRenderer 캐싱
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                originalColor = spriteRenderer.color;
             }
         }
         
@@ -53,12 +67,38 @@ namespace DefenceGame.Core
                 healthBar.UpdateHealth(currentHealth);
             }
             
+            // 피격 시각 효과
+            FlashOnHit();
+            
             OnHealthChanged?.Invoke(currentHealth);
             
             if (currentHealth <= 0)
             {
                 Die();
             }
+        }
+        
+        private void FlashOnHit()
+        {
+            if (spriteRenderer == null || isFlashing) return;
+            
+            isFlashing = true;
+            spriteRenderer.color = hitFlashColor;
+            
+            // 코루틴으로 원래 색상 복원
+            StartCoroutine(RestoreOriginalColor());
+        }
+        
+        private System.Collections.IEnumerator RestoreOriginalColor()
+        {
+            yield return new WaitForSeconds(hitFlashDuration);
+            
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = originalColor;
+            }
+            
+            isFlashing = false;
         }
         
         private void Die()

@@ -222,9 +222,9 @@ namespace DefenceGame.Core
             GroundEffect groundEffect = groundEffectObj.GetComponent<GroundEffect>();
             if (groundEffect != null)
             {
-                // 지속시간 5초로 늘리고, 데미지는 낮춤 (총 데미지 = attackPower)
+                // 지속시간 5초로 리고, 데미지는 낮춤 (총 데미지 = attackPower)
                 float damagePerSec = unit != null ? unit.attackPower * 0.2f : 10f;
-                groundEffect.Initialize(5f, damagePerSec, 1.5f);
+                groundEffect.Initialize(5f, damagePerSec, 1.5f, unit); // attacker 전달
             }
         }
         
