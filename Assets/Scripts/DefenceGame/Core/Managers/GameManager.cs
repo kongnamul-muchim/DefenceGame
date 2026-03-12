@@ -91,7 +91,7 @@ namespace DefenceGame.Core
             survivalTime = 0f;
             enemiesDefeated = 0;
             totalScore = 0;
-            currentGold = 0;
+            currentGold = 200;
             currentState = GameState.Playing;
             
             OnCastleHPChanged?.Invoke(currentCastleHP);
