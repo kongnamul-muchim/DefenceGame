@@ -1034,87 +1034,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9451b7bc21724344d9d79e1b79eab723, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.GachaManager
-  gachaCost: 0
+  baseGachaCost: 50
+  gachaCostIncrease: 10
+  freeGachaCount: 4
   gameData: {fileID: 11400000, guid: 097789387bff4504490692ee6bb2e041, type: 2}
   gachaKey: 32
   enableKeyboardInput: 1
   gachaCooldown: 0.3
---- !u!1 &467705515
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 467705516}
-  - component: {fileID: 467705517}
-  - component: {fileID: 467705518}
-  m_Layer: 0
-  m_Name: TestManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &467705516
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467705515}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.05587, y: -3.09628, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 850102410}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &467705517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467705515}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35d8e0f7c8bb36749885bffd39edcf8e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.GradeAbilityTestManager
-  enableTestMode: 1
-  autoSpawnOnLevel7: 1
-  spawnInterval: 0.5
-  spawnOffset: {x: 2, y: 0, z: 0}
-  showGradeColors: 1
---- !u!114 &467705518
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467705515}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44195fcf24cf18749a91283a0623bbca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.UnitAbility
-  multiShotCount: 1
-  groundEffectDuration: 0
-  rangeIncreaseValue: 0
-  attackIncreaseValue: 0
-  chainAttackCount: 0
-  speedIncreaseValue: 0
-  groundEffectProcChance: 0.1
-  groundEffectPrefab: {fileID: 0}
-  finalSpeedIncreaseValue: 0
-  finalGroundEffectChance: 0
-  finalAttackIncreaseValue: 0
-  currentTowerLevel: 0
-  currentTowerType: 
-  autoApplyCurrentLevel: 1
 --- !u!1 &471797332
 GameObject:
   m_ObjectHideFlags: 0
@@ -2623,6 +2549,12 @@ MonoBehaviour:
   isWaveActive: 0
   enemiesRemainingInWave: 0
   totalEnemiesSpawned: 0
+  maxWaveNumber: 6
+  healthIncreasePerWave: 0.1
+  eliteSpawnChance: 0.1
+  eliteHealthMultiplier: 2
+  eliteGoldMultiplier: 3
+  eliteSizeMultiplier: 1.2
 --- !u!1 &778291984
 GameObject:
   m_ObjectHideFlags: 0
@@ -2996,28 +2928,24 @@ MonoBehaviour:
     backgroundImage: {fileID: 399474848}
     fillImage: {fileID: 1709513918}
     panelImage: {fileID: 1510113174}
-    clickButton: {fileID: 1510113176}
   - towerType: Wizard
     levelText: {fileID: 690290119}
     expSlider: {fileID: 540986859}
     backgroundImage: {fileID: 788191016}
     fillImage: {fileID: 508682944}
     panelImage: {fileID: 1380199201}
-    clickButton: {fileID: 1380199203}
   - towerType: WizardTower
     levelText: {fileID: 1030046048}
     expSlider: {fileID: 608329737}
     backgroundImage: {fileID: 867870881}
     fillImage: {fileID: 471797334}
     panelImage: {fileID: 1337744127}
-    clickButton: {fileID: 1337744129}
   - towerType: Laser
     levelText: {fileID: 1064870645}
     expSlider: {fileID: 880978727}
     backgroundImage: {fileID: 1310193456}
     fillImage: {fileID: 672550314}
     panelImage: {fileID: 1278894450}
-    clickButton: {fileID: 1278894452}
   backgroundColor: {r: 1, g: 1, b: 1, a: 0.3}
   fillColor: {r: 0, g: 1, b: 0, a: 1}
   levelColors:
@@ -3337,7 +3265,6 @@ Transform:
   - {fileID: 2105147128}
   - {fileID: 1899287451}
   - {fileID: 116639279}
-  - {fileID: 467705516}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &867870879
