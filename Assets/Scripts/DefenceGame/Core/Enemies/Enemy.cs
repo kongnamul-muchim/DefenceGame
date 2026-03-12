@@ -1,5 +1,7 @@
 using UnityEngine;
 using DefenceGame.Data;
+using DefenceGame.Core.Systems.Defense;
+using DefenceGame.Core.Managers;
 
 namespace DefenceGame.Core
 {
@@ -121,9 +123,9 @@ namespace DefenceGame.Core
         
         private void CheckCastleReached()
         {
-            if (!hasReachedCastle && GameManager.Instance != null)
+            if (!hasReachedCastle && CastleManager.Instance != null)
             {
-                if (GameManager.Instance.IsInCastleBounds(transform.position))
+                if (CastleManager.Instance.IsInCastleBounds(transform.position))
                 {
                     ReachCastle();
                 }
@@ -136,15 +138,8 @@ namespace DefenceGame.Core
             
             hasReachedCastle = true;
             
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.DamageCastle(1);
-            }
-            
-            if (WaveManager.Instance != null)
-            {
-                WaveManager.Instance.EnemyReachedCastle();
-            }
+            CastleManager.Instance?.DamageCastle(1);
+            WaveManager.Instance?.EnemyReachedCastle();
             
             OnEnemyReachedCastle?.Invoke(this);
             Destroy(gameObject);
@@ -152,19 +147,16 @@ namespace DefenceGame.Core
         
         private void OnPathComplete()
         {
-            if (!hasReachedCastle && GameManager.Instance != null && GameManager.Instance.castleTransform != null)
+            if (!hasReachedCastle && CastleManager.Instance != null)
             {
-                pathAgent.SetDestination(GameManager.Instance.castleTransform.position);
+                pathAgent.SetDestination(CastleManager.Instance.GetCastlePosition());
             }
         }
         
         private void HandleDeath()
         {
             // Give reward
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.EnemyDefeated(rewardGold, rewardGold);
-            }
+            GameManager.Instance?.EnemyDefeated(rewardGold, rewardGold);
             
             // Give exp to last attacker
             if (healthComponent.LastAttacker != null && TowerLevelManager.Instance != null)

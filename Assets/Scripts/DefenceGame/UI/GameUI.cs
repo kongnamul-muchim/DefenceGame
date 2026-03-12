@@ -2,6 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DefenceGame.Core;
+using DefenceGame.Core.Managers;
+using DefenceGame.Core.Systems.Economy;
+using DefenceGame.Core.Systems.Progression;
+using DefenceGame.Core.Systems.Defense;
+using DefenceGame.Core.Systems.State;
 
 namespace DefenceGame.UI
 {
@@ -33,14 +38,27 @@ namespace DefenceGame.UI
             if (waveManager == null)
                 waveManager = WaveManager.Instance;
             
-            // Subscribe to events
-            if (gameManager != null)
+            // Subscribe to events from system managers
+            if (CastleManager.Instance != null)
             {
-                gameManager.OnCastleHPChanged += UpdateCastleHP;
-                gameManager.OnGoldChanged += UpdateGold;
-                gameManager.OnScoreChanged += UpdateScore;
-                gameManager.OnSurvivalTimeChanged += UpdateSurvivalTime;
-                gameManager.OnGameOver += ShowGameOver;
+                CastleManager.Instance.OnCastleHPChanged += UpdateCastleHP;
+            }
+            
+            if (GoldManager.Instance != null)
+            {
+                GoldManager.Instance.OnGoldChanged += UpdateGold;
+            }
+            
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.OnScoreChanged += UpdateScore;
+                ScoreManager.Instance.OnSurvivalTimeChanged += UpdateSurvivalTime;
+                ScoreManager.Instance.OnEnemiesDefeatedChanged += UpdateEnemiesDefeated;
+            }
+            
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.OnGameOver += ShowGameOver;
             }
             
             if (waveManager != null)
@@ -66,13 +84,26 @@ namespace DefenceGame.UI
         
         private void OnDestroy()
         {
-            if (gameManager != null)
+            if (CastleManager.Instance != null)
             {
-                gameManager.OnCastleHPChanged -= UpdateCastleHP;
-                gameManager.OnGoldChanged -= UpdateGold;
-                gameManager.OnScoreChanged -= UpdateScore;
-                gameManager.OnSurvivalTimeChanged -= UpdateSurvivalTime;
-                gameManager.OnGameOver -= ShowGameOver;
+                CastleManager.Instance.OnCastleHPChanged -= UpdateCastleHP;
+            }
+            
+            if (GoldManager.Instance != null)
+            {
+                GoldManager.Instance.OnGoldChanged -= UpdateGold;
+            }
+            
+            if (ScoreManager.Instance != null)
+            {
+                ScoreManager.Instance.OnScoreChanged -= UpdateScore;
+                ScoreManager.Instance.OnSurvivalTimeChanged -= UpdateSurvivalTime;
+                ScoreManager.Instance.OnEnemiesDefeatedChanged -= UpdateEnemiesDefeated;
+            }
+            
+            if (GameStateManager.Instance != null)
+            {
+                GameStateManager.Instance.OnGameOver -= ShowGameOver;
             }
             
             if (waveManager != null)
@@ -84,20 +115,32 @@ namespace DefenceGame.UI
         private void Update()
         {
             // Update time every frame
-            if (gameManager != null && !gameManager.IsGameOver)
+            if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameOver)
             {
-                UpdateSurvivalTime(gameManager.SurvivalTime);
+                if (ScoreManager.Instance != null)
+                {
+                    UpdateSurvivalTime(ScoreManager.Instance.SurvivalTime);
+                }
             }
         }
         
         private void UpdateAllUI()
         {
-            if (gameManager != null)
+            if (CastleManager.Instance != null)
             {
-                UpdateCastleHP(gameManager.CurrentCastleHP);
-                UpdateGold(gameManager.CurrentGold);
-                UpdateScore(gameManager.TotalScore);
-                UpdateSurvivalTime(gameManager.SurvivalTime);
+                UpdateCastleHP(CastleManager.Instance.CurrentCastleHP);
+            }
+            
+            if (GoldManager.Instance != null)
+            {
+                UpdateGold(GoldManager.Instance.CurrentGold);
+            }
+            
+            if (ScoreManager.Instance != null)
+            {
+                UpdateScore(ScoreManager.Instance.TotalScore);
+                UpdateSurvivalTime(ScoreManager.Instance.SurvivalTime);
+                UpdateEnemiesDefeated(ScoreManager.Instance.EnemiesDefeated);
             }
             
             if (waveManager != null)
@@ -136,10 +179,13 @@ namespace DefenceGame.UI
             {
                 scoreText.text = $"Score: {score}";
             }
-            
-            if (enemiesDefeatedText != null && gameManager != null)
+        }
+        
+        private void UpdateEnemiesDefeated(int count)
+        {
+            if (enemiesDefeatedText != null)
             {
-                enemiesDefeatedText.text = $"Enemies: {gameManager.EnemiesDefeated}";
+                enemiesDefeatedText.text = $"Enemies: {count}";
             }
         }
         
@@ -159,20 +205,20 @@ namespace DefenceGame.UI
             {
                 gameOverPanel.SetActive(true);
                 
-                if (gameManager != null)
+                if (ScoreManager.Instance != null)
                 {
-                    finalScoreText.text = $"Final Score: {gameManager.TotalScore}";
-                    finalSurvivalTimeText.text = $"Survival Time: {gameManager.SurvivalTime:F1}s";
-                    finalEnemiesDefeatedText.text = $"Enemies Defeated: {gameManager.EnemiesDefeated}";
+                    finalScoreText.text = $"Final Score: {ScoreManager.Instance.TotalScore}";
+                    finalSurvivalTimeText.text = $"Survival Time: {ScoreManager.Instance.SurvivalTime:F1}s";
+                    finalEnemiesDefeatedText.text = $"Enemies Defeated: {ScoreManager.Instance.EnemiesDefeated}";
                 }
             }
         }
         
         private void RestartGame()
         {
-            if (gameManager != null)
+            if (GameStateManager.Instance != null)
             {
-                gameManager.RestartGame();
+                GameStateManager.Instance.RestartGame();
             }
             
             if (gameOverPanel != null)

@@ -1,49 +1,31 @@
-using System;
 using UnityEngine;
-using BallShotGame.Core;
-using BallShotGame.Events;
+using DefenceGame.Core.Systems.Economy;
+using DefenceGame.Core.Systems.Progression;
+using DefenceGame.Core.Systems.Defense;
+using DefenceGame.Core.Systems.State;
 
 namespace DefenceGame.Core
 {
-    public enum GameState
-    {
-        Playing,
-        GameOver
-    }
-    
-    public class GameManager : MonoBehaviour, IService, IGameManagerService
+    /// <summary>
+    /// GameManager - Facade 패턴
+    /// 기존 코드와의 호환성을 위해 유지되며, 실제 로직은 각 시스템 매니저에 위임
+    /// </summary>
+    public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
         
-        [Header("Game Settings")]
-        public int maxCastleHP = 20;
+        [Header("References")]
         public Transform castleTransform;
         public Vector2 castleSize = new Vector2(3f, 3f);
         
-        [Header("Current State")]
-        [SerializeField] private GameState currentState = GameState.Playing;
-        [SerializeField] private int currentCastleHP;
-        [SerializeField] private float survivalTime;
-        [SerializeField] private int enemiesDefeated;
-        [SerializeField] private int totalScore;
-        [SerializeField] private int currentGold;
-        
-        // Events
-        public event Action<GameState> OnGameStateChanged;
-        public event Action<int> OnCastleHPChanged;
-        public event Action<int> OnScoreChanged;
-        public event Action<float> OnSurvivalTimeChanged;
-        public event Action<int> OnGoldChanged;
-        public event Action OnGameOver;
-        
-        // Properties
-        public GameState CurrentState => currentState;
-        public int CurrentCastleHP => currentCastleHP;
-        public float SurvivalTime => survivalTime;
-        public int EnemiesDefeated => enemiesDefeated;
-        public int TotalScore => totalScore;
-        public int CurrentGold => currentGold;
-        public bool IsGameOver => currentState == GameState.GameOver;
+        // Facade properties - delegate to system managers
+        public GameState CurrentState => GameStateManager.Instance?.CurrentState ?? GameState.Playing;
+        public int CurrentCastleHP => CastleManager.Instance?.CurrentCastleHP ?? 0;
+        public float SurvivalTime => ScoreManager.Instance?.SurvivalTime ?? 0f;
+        public int EnemiesDefeated => ScoreManager.Instance?.EnemiesDefeated ?? 0;
+        public int TotalScore => ScoreManager.Instance?.TotalScore ?? 0;
+        public int CurrentGold => GoldManager.Instance?.CurrentGold ?? 0;
+        public bool IsGameOver => GameStateManager.Instance?.IsGameOver ?? false;
         
         private void Awake()
         {
@@ -59,8 +41,12 @@ namespace DefenceGame.Core
         
         private void Start()
         {
-            // Register as service
-            GameService.Instance.Register<IGameManagerService>(this);
+            // Pass castle settings to CastleManager
+            if (CastleManager.Instance != null)
+            {
+                CastleManager.Instance.castleTransform = castleTransform;
+                CastleManager.Instance.castleSize = castleSize;
+            }
             
             InitializeGame();
         }
@@ -73,155 +59,46 @@ namespace DefenceGame.Core
             }
         }
         
-        private void Update()
-        {
-            if (currentState == GameState.Playing)
-            {
-                survivalTime += Time.deltaTime;
-                OnSurvivalTimeChanged?.Invoke(survivalTime);
-                
-                // Update score based on survival time and enemies defeated
-                CalculateScore();
-            }
-        }
-        
         public void InitializeGame()
         {
-            currentCastleHP = maxCastleHP;
-            survivalTime = 0f;
-            enemiesDefeated = 0;
-            totalScore = 0;
-            currentGold = 200;
-            currentState = GameState.Playing;
-            
-            OnCastleHPChanged?.Invoke(currentCastleHP);
-            OnScoreChanged?.Invoke(totalScore);
-            OnSurvivalTimeChanged?.Invoke(survivalTime);
-            OnGoldChanged?.Invoke(currentGold);
-            
-            Debug.Log("Game initialized!");
+            GameStateManager.Instance?.InitializeGame();
         }
         
+        // Facade methods - delegate to system managers
         public void AddGold(int amount)
         {
-            currentGold += amount;
-            OnGoldChanged?.Invoke(currentGold);
-            Debug.Log($"Gold added: {amount}, Total: {currentGold}");
+            GoldManager.Instance?.AddGold(amount);
         }
         
         public bool SpendGold(int amount)
         {
-            if (currentGold >= amount)
-            {
-                currentGold -= amount;
-                OnGoldChanged?.Invoke(currentGold);
-                Debug.Log($"Gold spent: {amount}, Remaining: {currentGold}");
-                return true;
-            }
-            return false;
+            return GoldManager.Instance?.SpendGold(amount) ?? false;
         }
         
         public void DamageCastle(int damage = 1)
         {
-            if (currentState != GameState.Playing) return;
-            
-            currentCastleHP -= damage;
-            OnCastleHPChanged?.Invoke(currentCastleHP);
-            
-            Debug.Log($"Castle damaged! HP: {currentCastleHP}/{maxCastleHP}");
-            
-            if (currentCastleHP <= 0)
-            {
-                GameOver();
-            }
+            CastleManager.Instance?.DamageCastle(damage);
         }
         
         public void EnemyDefeated(int rewardScore = 10, int rewardGold = 10)
         {
-            if (currentState != GameState.Playing) return;
-            
-            enemiesDefeated++;
-            AddGold(rewardGold);
-            CalculateScore();
-            
-            Debug.Log($"Enemy defeated! Total: {enemiesDefeated}, Gold: +{rewardGold}");
-        }
-        
-        private void CalculateScore()
-        {
-            // Score formula: survival time * 10 + enemies defeated * 100
-            totalScore = Mathf.FloorToInt(survivalTime * 10) + (enemiesDefeated * 100);
-            OnScoreChanged?.Invoke(totalScore);
+            ScoreManager.Instance?.RecordEnemyDefeated();
+            GoldManager.Instance?.AddGold(rewardGold);
         }
         
         public void GameOver()
         {
-            if (currentState == GameState.GameOver) return;
-            
-            currentState = GameState.GameOver;
-            OnGameStateChanged?.Invoke(currentState);
-            OnGameOver?.Invoke();
-            
-            Debug.Log($"Game Over! Survival Time: {survivalTime:F1}s, Score: {totalScore}");
-            
-            // Publish event
-            EventBus.Instance.Publish(new GameOverEvent
-            {
-                SurvivalTime = survivalTime,
-                TotalScore = totalScore,
-                EnemiesDefeated = enemiesDefeated
-            });
-        }
-        
-        public bool IsInCastleBounds(Vector3 position)
-        {
-            if (castleTransform == null) return false;
-            
-            Vector3 castlePos = castleTransform.position;
-            float halfWidth = castleSize.x / 2f;
-            float halfHeight = castleSize.y / 2f;
-            
-            return position.x >= castlePos.x - halfWidth &&
-                   position.x <= castlePos.x + halfWidth &&
-                   position.y >= castlePos.y - halfHeight &&
-                   position.y <= castlePos.y + halfHeight;
+            GameStateManager.Instance?.GameOver();
         }
         
         public void RestartGame()
         {
-            InitializeGame();
+            GameStateManager.Instance?.RestartGame();
         }
         
-        // IService Implementation
-        public void Initialize()
+        public bool IsInCastleBounds(Vector3 position)
         {
-            Debug.Log("GameManager initialized as service");
+            return CastleManager.Instance?.IsInCastleBounds(position) ?? false;
         }
-        
-        public void Dispose()
-        {
-            Debug.Log("GameManager disposed");
-        }
-    }
-    
-    public interface IGameManagerService : IService
-    {
-        GameState CurrentState { get; }
-        int CurrentCastleHP { get; }
-        float SurvivalTime { get; }
-        int TotalScore { get; }
-        int CurrentGold { get; }
-        void DamageCastle(int damage = 1);
-        void EnemyDefeated(int rewardScore = 10, int rewardGold = 10);
-        void GameOver();
-        void RestartGame();
-        bool IsInCastleBounds(Vector3 position);
-    }
-    
-    public struct GameOverEvent
-    {
-        public float SurvivalTime;
-        public int TotalScore;
-        public int EnemiesDefeated;
     }
 }

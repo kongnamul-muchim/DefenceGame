@@ -2,46 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DefenceGame.Data;
+using DefenceGame.Core.Systems.Spawning;
+using DefenceGame.Core.Systems.Economy;
 
-namespace DefenceGame.Core
+namespace DefenceGame.Core.Managers
 {
-    [System.Serializable]
-    public class EnemyPrefabMapping
-    {
-        public int enemyId;
-        public GameObject prefab;
-    }
-    
+    /// <summary>
+    /// 웨이브 관리자 - 단일 책임: 웨이브 타이밍 및 흐름 관리
+    /// 실제 스폰은 EnemySpawner에 위임
+    /// </summary>
     public class WaveManager : MonoBehaviour
     {
         public static WaveManager Instance { get; private set; }
         
-        [Header("Spawn Settings")]
-        public Transform enemySpawnPoint;
-        public Transform castleTarget;
-        
-        [Header("Enemy Prefabs")]
-        public List<EnemyPrefabMapping> enemyPrefabs = new List<EnemyPrefabMapping>();
-        private Dictionary<int, GameObject> enemyPrefabDict;
-        
         [Header("Wave Data")]
         public GameDataSO gameData;
+        
+        [Header("Wave Settings")]
+        [SerializeField] private int maxWaveNumber = 6;
+        [SerializeField] private float healthIncreasePerWave = 0.1f;
+        [SerializeField] private float eliteSpawnChance = 0.1f;
         
         [Header("Current State")]
         [SerializeField] private int currentWave = 0;
         [SerializeField] private bool isWaveActive = false;
         [SerializeField] private int enemiesRemainingInWave = 0;
-        [SerializeField] private int totalEnemiesSpawned = 0;
-        [SerializeField] private Enemy currentBoss = null; // 현재 보스 추적
-        [SerializeField] private bool isBossWave = false; // 보스 웨이브 여부
-        
-        [Header("Infinite Wave Settings")]
-        [SerializeField] private int maxWaveNumber = 6;
-        [SerializeField] private float healthIncreasePerWave = 0.1f;
-        [SerializeField] private float eliteSpawnChance = 0.1f;
-        [SerializeField] private float eliteHealthMultiplier = 2.0f;
-        [SerializeField] private int eliteGoldMultiplier = 3;
-        [SerializeField] private float eliteSizeMultiplier = 1.2f;
+        [SerializeField] private Enemy currentBoss = null;
+        [SerializeField] private bool isBossWave = false;
         
         private List<WaveData> waveDataList;
         private Dictionary<int, List<WaveData>> wavesByNumber;
@@ -54,7 +41,7 @@ namespace DefenceGame.Core
         public int CurrentWave => currentWave;
         public bool IsWaveActive => isWaveActive;
         public int EnemiesRemaining => enemiesRemainingInWave;
-        public int TotalEnemiesSpawned => totalEnemiesSpawned;
+        public int TotalEnemiesSpawned => EnemySpawner.Instance?.TotalEnemiesSpawned ?? 0;
         
         private void Awake()
         {
@@ -80,17 +67,10 @@ namespace DefenceGame.Core
         
         private void InitializeWaves()
         {
-            if (gameData == null)
-            {
-                return;
-            }
+            if (gameData == null) return;
             
             waveDataList = gameData.Waves;
-            
-            if (waveDataList == null || waveDataList.Count == 0)
-            {
-                return;
-            }
+            if (waveDataList == null || waveDataList.Count == 0) return;
             
             wavesByNumber = new Dictionary<int, List<WaveData>>();
             foreach (var wave in waveDataList)
@@ -106,7 +86,7 @@ namespace DefenceGame.Core
         public void StartGame()
         {
             currentWave = 0;
-            totalEnemiesSpawned = 0;
+            EnemySpawner.Instance?.Initialize();
             StartNextWave();
         }
         
@@ -118,7 +98,6 @@ namespace DefenceGame.Core
             }
             
             currentWave++;
-            
             int waveDataIndex = ((currentWave - 1) % maxWaveNumber) + 1;
             
             if (currentWaveCoroutine != null)
@@ -126,13 +105,13 @@ namespace DefenceGame.Core
                 StopCoroutine(currentWaveCoroutine);
             }
             
-            currentWaveCoroutine = StartCoroutine(SpawnWave(currentWave, waveDataIndex));
+            currentWaveCoroutine = StartCoroutine(RunWave(currentWave, waveDataIndex));
         }
         
-        private IEnumerator SpawnWave(int waveNumber, int waveDataIndex)
+        private IEnumerator RunWave(int waveNumber, int waveDataIndex)
         {
             isWaveActive = true;
-            isBossWave = (waveDataIndex == 6); // 6웨이브는 보스 웨이브
+            isBossWave = (waveDataIndex == 6);
             currentBoss = null;
             OnWaveStarted?.Invoke(waveNumber);
             
@@ -146,45 +125,54 @@ namespace DefenceGame.Core
             
             foreach (var data in waveData)
             {
-                EnemyData enemyData = GetEnemyData(data.EnemyId);
-                if (enemyData == null)
-                {
-                    continue;
-                }
-                
-                for (int i = 0; i < data.Count; i++)
-                {
-                    if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
-                    {
-                        yield break;
-                    }
-                    
-                    float totalHealthMultiplier = data.HealthMultiplier * (1f + (waveNumber - 1) * healthIncreasePerWave);
-                    
-                    bool isElite = waveNumber > maxWaveNumber && Random.value < eliteSpawnChance;
-                    
-                    Enemy spawnedEnemy = SpawnEnemy(enemyData, totalHealthMultiplier, isElite);
-                    totalEnemiesSpawned++;
-                    
-                    // 보스 추적
-                    if (isBossWave && spawnedEnemy != null)
-                    {
-                        currentBoss = spawnedEnemy;
-                    }
-                    
-                    yield return new WaitForSeconds(data.SpawnInterval);
-                }
+                yield return SpawnEnemyGroup(data, waveNumber);
             }
             
-            // 보스 웨이브인 경우 보스가 죽을 때까지 대기
+            // Wait for boss death if boss wave
             if (isBossWave && currentBoss != null)
             {
-                while (currentBoss != null && currentBoss.CurrentHealth > 0)
-                {
-                    yield return new WaitForSeconds(0.5f);
-                }
+                yield return WaitForBossDeath();
             }
             
+            CompleteWave(waveNumber);
+        }
+        
+        private IEnumerator SpawnEnemyGroup(WaveData data, int waveNumber)
+        {
+            EnemyData enemyData = GetEnemyData(data.EnemyId);
+            if (enemyData == null) yield break;
+            
+            for (int i = 0; i < data.Count; i++)
+            {
+                if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+                {
+                    yield break;
+                }
+                
+                float totalHealthMultiplier = data.HealthMultiplier * (1f + (waveNumber - 1) * healthIncreasePerWave);
+                bool isElite = waveNumber > maxWaveNumber && Random.value < eliteSpawnChance;
+                
+                Enemy spawnedEnemy = EnemySpawner.Instance?.SpawnEnemy(enemyData, totalHealthMultiplier, isElite);
+                
+                if (isBossWave && spawnedEnemy != null)
+                {
+                    currentBoss = spawnedEnemy;
+                }
+                
+                yield return new WaitForSeconds(data.SpawnInterval);
+            }
+        }
+        
+        private IEnumerator WaitForBossDeath()
+        {
+            while (currentBoss != null && currentBoss.CurrentHealth > 0)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+        }
+        
+        private void CompleteWave(int waveNumber)
+        {
             isWaveActive = false;
             isBossWave = false;
             currentBoss = null;
@@ -192,6 +180,11 @@ namespace DefenceGame.Core
             
             GiveWaveClearGold(waveNumber);
             
+            StartCoroutine(StartNextWaveDelayed());
+        }
+        
+        private IEnumerator StartNextWaveDelayed()
+        {
             yield return new WaitForSeconds(3f);
             
             if (GameManager.Instance != null && !GameManager.Instance.IsGameOver)
@@ -200,112 +193,13 @@ namespace DefenceGame.Core
             }
         }
         
-        private Enemy SpawnEnemy(EnemyData enemyData, float healthMultiplier, bool isElite = false)
-        {
-            GameObject prefabToSpawn = GetEnemyPrefab(enemyData.Id);
-            if (prefabToSpawn == null)
-            {
-                return null;
-            }
-            
-            if (enemySpawnPoint == null)
-            {
-                return null;
-            }
-            
-            Vector3 spawnPosition = GetNonOverlappingSpawnPosition();
-            GameObject enemy = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
-            
-            Enemy enemyComponent = enemy.GetComponent<Enemy>();
-            if (enemyComponent != null)
-            {
-                Vector3 randomTargetPos = GetRandomCastleTargetPosition();
-                
-                if (isElite)
-                {
-                    healthMultiplier *= eliteHealthMultiplier;
-                    
-                    enemy.transform.localScale *= eliteSizeMultiplier;
-                    
-                    SpriteRenderer sr = enemy.GetComponent<SpriteRenderer>();
-                    if (sr != null)
-                    {
-                        sr.color = new Color(0.6f, 0.2f, 0.8f, 1f);
-                    }
-                    
-                    enemyData = CreateEliteEnemyData(enemyData);
-                }
-                
-                enemyComponent.Initialize(enemyData, healthMultiplier, randomTargetPos);
-                
-                if (isElite)
-                {
-                    enemy.name = $"Elite_{enemyData.Name}";
-                }
-                
-                return enemyComponent;
-            }
-            
-            return null;
-        }
-        
-        private EnemyData CreateEliteEnemyData(EnemyData baseData)
-        {
-            EnemyData eliteData = new EnemyData
-            {
-                Id = baseData.Id,
-                Name = $"Elite_{baseData.Name}",
-                Health = baseData.Health,
-                Speed = baseData.Speed,
-                RewardGold = baseData.RewardGold * eliteGoldMultiplier
-            };
-            return eliteData;
-        }
-        
         private void GiveWaveClearGold(int waveNumber)
         {
-            int goldReward = 0;
+            int goldReward = waveNumber <= 6 
+                ? 50 + (waveNumber - 1) * 10 
+                : 100 + (waveNumber - 6) * 5;
             
-            if (waveNumber <= 6)
-            {
-                goldReward = 50 + (waveNumber - 1) * 10;
-            }
-            else
-            {
-                goldReward = 100 + (waveNumber - 6) * 5;
-            }
-            
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddGold(goldReward);
-            }
-        }
-        
-        private GameObject GetEnemyPrefab(int enemyId)
-        {
-            if (enemyPrefabDict == null)
-            {
-                InitializeEnemyPrefabDict();
-            }
-            
-            if (enemyPrefabDict.TryGetValue(enemyId, out GameObject prefab))
-            {
-                return prefab;
-            }
-            
-            return null;
-        }
-        
-        private void InitializeEnemyPrefabDict()
-        {
-            enemyPrefabDict = new Dictionary<int, GameObject>();
-            foreach (var mapping in enemyPrefabs)
-            {
-                if (!enemyPrefabDict.ContainsKey(mapping.enemyId))
-                {
-                    enemyPrefabDict[mapping.enemyId] = mapping.prefab;
-                }
-            }
+            GoldManager.Instance?.AddGold(goldReward);
         }
         
         private EnemyData GetEnemyData(int enemyId)
@@ -319,25 +213,7 @@ namespace DefenceGame.Core
                     return enemy;
                 }
             }
-            
             return null;
-        }
-        
-        private Vector3 GetNonOverlappingSpawnPosition()
-        {
-            Vector3 basePosition = enemySpawnPoint != null ? enemySpawnPoint.position : Vector3.zero;
-            float randomOffset = Random.Range(-1f, 1f);
-            return basePosition + new Vector3(randomOffset, 0, 0);
-        }
-        
-        private Vector3 GetRandomCastleTargetPosition()
-        {
-            if (castleTarget == null) return Vector3.zero;
-            
-            Vector3 castlePos = castleTarget.position;
-            float randomX = Random.Range(-1.5f, 1.5f);
-            float randomY = Random.Range(-1.5f, 1.5f);
-            return castlePos + new Vector3(randomX, randomY, 0);
         }
         
         public void EnemyReachedCastle()

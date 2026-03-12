@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DefenceGame.Core;
+using DefenceGame.Core.Managers;
 using DefenceGame.Data;
 
 namespace DefenceGame.UI
