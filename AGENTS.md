@@ -185,11 +185,16 @@ Core/
 - 적 피격 시 투명한 흰색으로 0.1초 플래시
 - EnemyHealth.cs에 구현
 
+#### 7. 보스 웨이브 개선
+- 보스가 죽을 때까지 다음 웨이브로 넘어가지 않음
+- WaveManager가 현재 보스를 추적 (currentBoss)
+- 보스 처치 후 3초 대기 후 다음 웨이브 시작
+
 ### 변경된 파일
 
 | 파일 | 변경 사항 |
 |------|----------|
-| **WaveManager.cs** | 무한 웨이브, Elite 시스템, 골드 보너스 |
+| **WaveManager.cs** | 무한 웨이브, Elite 시스템, 골드 보너스, 보스 체크 |
 | **SpecialAbilityManager.cs** | Archer 레벨7 50%→30% |
 | **Unit.cs** | 공격속도 등급 배율 적용 |
 | **GroundEffect.cs** | attacker 필드 추가, TakeDamage에 attacker 전달 |
