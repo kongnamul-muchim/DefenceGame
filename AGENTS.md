@@ -1,5 +1,85 @@
 # DefenceGame 작업 로그
 
+## 2026-03-12: SOLID 원칙 기반 아키텍처 리팩토링
+
+### 주요 변경사항
+
+#### 1. GameManager 분리 (SRP 적용)
+**기존:** GameManager가 모든 게임 상태를 관리 (227줄)
+**변경:** 4개의 전문 시스템 매니저로 분리
+
+| 새 시스템 | 단일 책임 | 파일 |
+|-----------|----------|------|
+| **GoldManager** | 골드 획득/소비 관리 | `Core/Systems/Economy/GoldManager.cs` |
+| **ScoreManager** | 점수/생존시간/처치수 관리 | `Core/Systems/Progression/ScoreManager.cs` |
+| **CastleManager** | 성 체력/방어 관리 | `Core/Systems/Defense/CastleManager.cs` |
+| **GameStateManager** | 게임 상태(Playing/GameOver) 관리 | `Core/Systems/State/GameStateManager.cs` |
+
+**GameManager:** Facade 패턴으로 변경 - 기존 API 유지하며 새 시스템에 위임
+
+#### 2. WaveManager 개선
+**기존:** 웨이브 관리 + 적 스폰 로직 혼재 (353줄)
+**변경:** EnemySpawner 분리
+
+| 구성요소 | 책임 | 파일 |
+|----------|------|------|
+| **WaveManager** | 웨이브 타이밍/흐름 관리 | `Core/Managers/WaveManager.cs` (187줄) |
+| **EnemySpawner** | 적 생성 및 초기화 | `Core/Systems/Spawning/EnemySpawner.cs` |
+
+#### 3. 새 폴더 구조
+```
+Core/
+├── Managers/          # 기존 매니저들
+├── Systems/           # 새로 추가 - 세분화된 시스템
+│   ├── Economy/       # GoldManager
+│   ├── Progression/   # ScoreManager
+│   ├── Defense/       # CastleManager
+│   ├── State/         # GameStateManager
+│   └── Spawning/      # EnemySpawner
+├── Units/
+├── Enemies/
+├── Projectiles/
+├── Grid/
+└── Interfaces/
+```
+
+#### 4. UI 파일 업데이트
+- **GameUI.cs:** 새 시스템 매니저들의 이벤트 구독으로 변경
+- **TowerLevelUI.cs:** Managers 네임스페이스 using 추가
+
+#### 5. Enemy.cs 개선
+- CastleManager 직접 참조로 변경 (의존성 역전)
+- GameManager Facade를 통한 간접 호출 제거
+
+### 적용된 SOLID 원칙
+
+| 원칙 | 적용 내용 |
+|------|----------|
+| **S (Single Responsibility)** | GameManager → 4개 시스템, WaveManager → EnemySpawner 분리 |
+| **O (Open/Closed)** | 새 시스템 추가 시 기존 코드 수정 없이 확장 가능 |
+| **I (Interface Segregation)** | 각 시스템이 독립적인 이벤트 제공 |
+| **D (Dependency Inversion)** | Enemy.cs가 CastleManager 직접 사용 |
+
+### 생성된 파일
+- `Core/Systems/Economy/GoldManager.cs` (55줄)
+- `Core/Systems/Progression/ScoreManager.cs` (76줄)
+- `Core/Systems/Defense/CastleManager.cs` (90줄)
+- `Core/Systems/State/GameStateManager.cs` (80줄)
+- `Core/Systems/Spawning/EnemySpawner.cs` (122줄)
+
+### 리팩토링된 파일
+- `Core/Managers/GameManager.cs` - Facade 패턴 (68줄, 기존 227줄)
+- `Core/Managers/WaveManager.cs` - 단순화 (187줄, 기존 353줄)
+- `Core/Enemies/Enemy.cs` - CastleManager 사용
+- `UI/GameUI.cs` - 새 시스템 이벤트 구독
+- `UI/TowerLevelUI.cs` - Managers 네임스페이스 추가
+
+### 커밋
+- Hash: `627afb0`
+- Message: `refactor: Apply SOLID principles - split GameManager into system managers`
+
+---
+
 ## 2024-03-11 ~ 2024-03-15: 특수능력 시스템 및 핵심 기능 구현
 
 ### 주요 변경사항 요약
