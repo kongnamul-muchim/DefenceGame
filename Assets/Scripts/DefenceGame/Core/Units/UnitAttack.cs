@@ -62,7 +62,7 @@ namespace DefenceGame.Core
             Enemy closestEnemy = null;
             float closestDistance = range;
             
-            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            Enemy[] allEnemies = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             foreach (Enemy enemy in allEnemies)
             {
                 if (enemy == null || enemy.currentHealth <= 0) continue;

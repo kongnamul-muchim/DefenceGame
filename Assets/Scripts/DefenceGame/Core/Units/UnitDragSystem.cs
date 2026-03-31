@@ -22,7 +22,6 @@ namespace DefenceGame.Core
         private Color originalColor;
         private bool isDragging = false;
         private Camera mainCamera;
-        private bool wasMouseDown = false;
         
         public bool IsDragging => isDragging;
         public Unit CurrentlyDraggedUnit => currentlyDraggedUnit;

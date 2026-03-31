@@ -39,7 +39,7 @@ namespace DefenceGame.Core
             {
                 rb = gameObject.AddComponent<Rigidbody2D>();
                 rb.gravityScale = 0;
-                rb.isKinematic = true;
+                rb.bodyType = RigidbodyType2D.Kinematic;
             }
             
             // Collider2D가 없으면 CircleCollider2D 추가
@@ -311,7 +311,7 @@ namespace DefenceGame.Core
             // Debug.Log($"[Area Damage] Center: {center}, Radius: {radius}, Damage: {damage}");
             
             // 범위 내 모든 적 찾기
-            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            Enemy[] allEnemies = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             int hitCount = 0;
             
             foreach (Enemy enemy in allEnemies)
@@ -334,7 +334,7 @@ namespace DefenceGame.Core
             Enemy closestEnemy = null;
             float closestDistance = 5f; // 주변 5유닛 내에서 검색
             
-            Enemy[] allEnemies = GameObject.FindObjectsOfType<Enemy>();
+            Enemy[] allEnemies = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             
             foreach (Enemy enemy in allEnemies)
             {

@@ -25,7 +25,6 @@ namespace DefenceGame.Core
         // Events
         public event Action<TowerData> OnGachaSuccess;
         public event Action<string> OnGachaFailed;
-        public event Action<int> OnGoldChanged;
         
         private Dictionary<GradeType, List<TowerData>> towersByGrade;
         private Dictionary<GradeType, float> gradeProbabilities;
