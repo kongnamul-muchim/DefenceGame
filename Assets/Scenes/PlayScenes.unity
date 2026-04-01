@@ -1038,7 +1038,7 @@ MonoBehaviour:
   gachaCostIncrease: 10
   freeGachaCount: 4
   gameData: {fileID: 11400000, guid: 097789387bff4504490692ee6bb2e041, type: 2}
-  gachaKey: 32
+  gachaKey: 103
   enableKeyboardInput: 1
   gachaCooldown: 0.3
 --- !u!1 &471797332
@@ -2531,30 +2531,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0239fe4dd9ca074e8508ed01a2608f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.WaveManager
-  enemySpawnPoint: {fileID: 1922054928}
-  castleTarget: {fileID: 194259637}
-  enemyPrefabs:
-  - enemyId: 1
-    prefab: {fileID: 6861923924840178436, guid: b9b591a744197234ab46c2b864523138, type: 3}
-  - enemyId: 2
-    prefab: {fileID: 3295187301443005011, guid: 04fd941ce13eff04db05bcc99949cf1a, type: 3}
-  - enemyId: 3
-    prefab: {fileID: 2828189218545821692, guid: 2eca4b57b48da424692e1200c3e0c3bf, type: 3}
-  - enemyId: 4
-    prefab: {fileID: 7740978068341364392, guid: e97cdd0919920d8489334efc00d511dd, type: 3}
-  - enemyId: 5
-    prefab: {fileID: 4004575872551783160, guid: 71e363955d7633c4196396eb381e1aac, type: 3}
   gameData: {fileID: 11400000, guid: 097789387bff4504490692ee6bb2e041, type: 2}
-  currentWave: 0
-  isWaveActive: 0
-  enemiesRemainingInWave: 0
-  totalEnemiesSpawned: 0
   maxWaveNumber: 6
   healthIncreasePerWave: 0.1
   eliteSpawnChance: 0.1
-  eliteHealthMultiplier: 2
-  eliteGoldMultiplier: 3
-  eliteSizeMultiplier: 1.2
+  currentWave: 0
+  isWaveActive: 0
+  enemiesRemainingInWave: 0
+  currentBoss: {fileID: 0}
+  isBossWave: 0
 --- !u!1 &778291984
 GameObject:
   m_ObjectHideFlags: 0
@@ -6773,15 +6758,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03cd41a7b4e617448668305173fe7d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.GameManager
-  maxCastleHP: 20
   castleTransform: {fileID: 194259637}
   castleSize: {x: 3, y: 3}
-  currentState: 0
-  currentCastleHP: 0
-  survivalTime: 0
-  enemiesDefeated: 0
-  totalScore: 0
-  currentGold: 0
 --- !u!1 &1148018064
 GameObject:
   m_ObjectHideFlags: 0
@@ -17190,6 +17168,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1922054928}
+  - component: {fileID: 1922054929}
   m_Layer: 0
   m_Name: EnemySpawnPoint
   m_TagString: Untagged
@@ -17212,6 +17191,34 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1922054929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922054927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a20e93ccedd29f949b884fc997f068a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Core.Systems.Spawning.EnemySpawner
+  enemySpawnPoint: {fileID: 1922054928}
+  castleTarget: {fileID: 194259637}
+  enemyPrefabs:
+  - enemyId: 0
+    prefab: {fileID: 6861923924840178436, guid: b9b591a744197234ab46c2b864523138, type: 3}
+  - enemyId: 1
+    prefab: {fileID: 3295187301443005011, guid: 04fd941ce13eff04db05bcc99949cf1a, type: 3}
+  - enemyId: 2
+    prefab: {fileID: 2828189218545821692, guid: 2eca4b57b48da424692e1200c3e0c3bf, type: 3}
+  - enemyId: 3
+    prefab: {fileID: 7740978068341364392, guid: e97cdd0919920d8489334efc00d511dd, type: 3}
+  - enemyId: 4
+    prefab: {fileID: 4004575872551783160, guid: 71e363955d7633c4196396eb381e1aac, type: 3}
+  eliteHealthMultiplier: 2
+  eliteGoldMultiplier: 3
+  eliteSizeMultiplier: 1.2
 --- !u!1 &2073784689
 GameObject:
   m_ObjectHideFlags: 0

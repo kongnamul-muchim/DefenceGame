@@ -1,0 +1,249 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa992a8afa1bdb54b92a51a513119c98, type: 3}
+  m_Name: GameData
+  m_EditorClassIdentifier: Assembly-CSharp::DefenceGame.Data.GameDataSO
+  Enemies:
+  - Id: 1
+    Name: BlackSlime
+    Health: 30
+    Speed: 1.5
+    RewardGold: 10
+  - Id: 2
+    Name: BlackWorm
+    Health: 50
+    Speed: 2
+    RewardGold: 20
+  - Id: 3
+    Name: BlackRat
+    Health: 20
+    Speed: 5
+    RewardGold: 10
+  - Id: 4
+    Name: BlackScorpion
+    Health: 100
+    Speed: 2
+    RewardGold: 50
+  - Id: 5
+    Name: BlackCerberus
+    Health: 1000
+    Speed: 1
+    RewardGold: 500
+  Towers:
+  - Id: 1
+    Name: Archer
+    AttackPower: 15
+    AttackSpeed: 2
+    Range: 3
+    Grade: 0
+    LevelBonusAttackPower: 0
+  - Id: 2
+    Name: Wizard
+    AttackPower: 30
+    AttackSpeed: 1
+    Range: 3
+    Grade: 0
+    LevelBonusAttackPower: 0
+  - Id: 3
+    Name: WizardTower
+    AttackPower: 50
+    AttackSpeed: 1
+    Range: 3
+    Grade: 0
+    LevelBonusAttackPower: 0
+  - Id: 4
+    Name: Laser
+    AttackPower: 30
+    AttackSpeed: 0.8
+    Range: 3
+    Grade: 0
+    LevelBonusAttackPower: 0
+  - Id: 5
+    Name: Archer
+    AttackPower: 15
+    AttackSpeed: 2
+    Range: 3
+    Grade: 1
+    LevelBonusAttackPower: 0
+  - Id: 6
+    Name: Wizard
+    AttackPower: 30
+    AttackSpeed: 1
+    Range: 3
+    Grade: 1
+    LevelBonusAttackPower: 0
+  - Id: 7
+    Name: WizardTower
+    AttackPower: 50
+    AttackSpeed: 1
+    Range: 3
+    Grade: 1
+    LevelBonusAttackPower: 0
+  - Id: 8
+    Name: Laser
+    AttackPower: 30
+    AttackSpeed: 0.8
+    Range: 3
+    Grade: 1
+    LevelBonusAttackPower: 0
+  - Id: 9
+    Name: Archer
+    AttackPower: 15
+    AttackSpeed: 2
+    Range: 3
+    Grade: 2
+    LevelBonusAttackPower: 0
+  - Id: 10
+    Name: Wizard
+    AttackPower: 30
+    AttackSpeed: 1
+    Range: 3
+    Grade: 2
+    LevelBonusAttackPower: 0
+  - Id: 11
+    Name: WizardTower
+    AttackPower: 50
+    AttackSpeed: 1
+    Range: 3
+    Grade: 2
+    LevelBonusAttackPower: 0
+  - Id: 12
+    Name: Laser
+    AttackPower: 30
+    AttackSpeed: 0.8
+    Range: 3
+    Grade: 2
+    LevelBonusAttackPower: 0
+  - Id: 13
+    Name: Archer
+    AttackPower: 15
+    AttackSpeed: 2
+    Range: 3
+    Grade: 3
+    LevelBonusAttackPower: 0
+  - Id: 14
+    Name: Wizard
+    AttackPower: 30
+    AttackSpeed: 1
+    Range: 3
+    Grade: 3
+    LevelBonusAttackPower: 0
+  - Id: 15
+    Name: WizardTower
+    AttackPower: 50
+    AttackSpeed: 1
+    Range: 3
+    Grade: 3
+    LevelBonusAttackPower: 0
+  - Id: 16
+    Name: Laser
+    AttackPower: 30
+    AttackSpeed: 0.8
+    Range: 3
+    Grade: 3
+    LevelBonusAttackPower: 0
+  - Id: 17
+    Name: Archer
+    AttackPower: 15
+    AttackSpeed: 2
+    Range: 3
+    Grade: 4
+    LevelBonusAttackPower: 0
+  - Id: 18
+    Name: Wizard
+    AttackPower: 30
+    AttackSpeed: 1
+    Range: 3
+    Grade: 4
+    LevelBonusAttackPower: 0
+  - Id: 19
+    Name: WizardTower
+    AttackPower: 50
+    AttackSpeed: 1
+    Range: 3
+    Grade: 4
+    LevelBonusAttackPower: 0
+  - Id: 20
+    Name: Laser
+    AttackPower: 30
+    AttackSpeed: 0.8
+    Range: 3
+    Grade: 4
+    LevelBonusAttackPower: 0
+  Waves:
+  - WaveNumber: 1
+    EnemyId: 1
+    Count: 15
+    SpawnInterval: 1
+    HealthMultiplier: 1
+  - WaveNumber: 2
+    EnemyId: 1
+    Count: 20
+    SpawnInterval: 1
+    HealthMultiplier: 1
+  - WaveNumber: 3
+    EnemyId: 2
+    Count: 20
+    SpawnInterval: 1
+    HealthMultiplier: 1
+  - WaveNumber: 4
+    EnemyId: 3
+    Count: 100
+    SpawnInterval: 0.1
+    HealthMultiplier: 1
+  - WaveNumber: 5
+    EnemyId: 4
+    Count: 10
+    SpawnInterval: 1
+    HealthMultiplier: 1
+  - WaveNumber: 6
+    EnemyId: 5
+    Count: 1
+    SpawnInterval: 1
+    HealthMultiplier: 1
+  GachaProbabilities:
+  - Grade: 0
+    Probability: 75
+    Cost: 0
+  - Grade: 1
+    Probability: 15
+    Cost: 0
+  - Grade: 2
+    Probability: 6
+    Cost: 0
+  - Grade: 3
+    Probability: 3
+    Cost: 0
+  - Grade: 4
+    Probability: 1
+    Cost: 0
+  UnitGrades:
+  - Grade: 0
+    DamageMultiplier: 1
+    RangeMultiplier: 0.8
+    AttackSpeedMultiplier: 1
+  - Grade: 1
+    DamageMultiplier: 1.1
+    RangeMultiplier: 0.9
+    AttackSpeedMultiplier: 1.1
+  - Grade: 2
+    DamageMultiplier: 1.2
+    RangeMultiplier: 1
+    AttackSpeedMultiplier: 1.2
+  - Grade: 3
+    DamageMultiplier: 1.5
+    RangeMultiplier: 1.1
+    AttackSpeedMultiplier: 1.3
+  - Grade: 4
+    DamageMultiplier: 2
+    RangeMultiplier: 1.2
+    AttackSpeedMultiplier: 1.5
