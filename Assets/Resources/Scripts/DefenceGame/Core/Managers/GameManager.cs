@@ -14,11 +14,11 @@ namespace DefenceGame.Core
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
-        
+
         [Header("References")]
         public Transform castleTransform;
         public Vector2 castleSize = new Vector2(3f, 3f);
-        
+
         // Facade properties - delegate to system managers
         public GameState CurrentState => GameStateManager.Instance?.CurrentState ?? GameState.Playing;
         public int CurrentCastleHP => CastleManager.Instance?.CurrentCastleHP ?? 0;
@@ -27,7 +27,7 @@ namespace DefenceGame.Core
         public int TotalScore => ScoreManager.Instance?.TotalScore ?? 0;
         public int CurrentGold => GoldManager.Instance?.CurrentGold ?? 0;
         public bool IsGameOver => GameStateManager.Instance?.IsGameOver ?? false;
-        
+
         private void Awake()
         {
             if (Instance == null)
@@ -39,7 +39,7 @@ namespace DefenceGame.Core
                 Destroy(gameObject);
             }
         }
-        
+
         private void Start()
         {
             // Check and create missing managers
@@ -48,23 +48,23 @@ namespace DefenceGame.Core
             CheckAndCreateManager<CastleManager>("CastleManager");
             CheckAndCreateManager<ScoreManager>("ScoreManager");
             CheckAndCreateManager<EnemySpawner>("EnemySpawner");
-            
+
             // Pass castle settings to CastleManager
             if (CastleManager.Instance != null)
             {
                 CastleManager.Instance.castleTransform = castleTransform;
                 CastleManager.Instance.castleSize = castleSize;
             }
-            
+
             // Initialize GoldManager with starting gold
             if (GoldManager.Instance != null)
             {
                 GoldManager.Instance.Initialize(200);
             }
-            
+
             InitializeGame();
         }
-        
+
         private void CheckAndCreateManager<T>(string name) where T : MonoBehaviour
         {
             if (FindObjectOfType<T>() == null)
@@ -74,7 +74,7 @@ namespace DefenceGame.Core
                 Debug.Log($"[GameManager] Created missing manager: {name}");
             }
         }
-        
+
         private void OnDestroy()
         {
             if (Instance == this)
@@ -82,44 +82,44 @@ namespace DefenceGame.Core
                 Instance = null;
             }
         }
-        
+
         public void InitializeGame()
         {
             GameStateManager.Instance?.InitializeGame();
         }
-        
+
         // Facade methods - delegate to system managers
         public void AddGold(int amount)
         {
             GoldManager.Instance?.AddGold(amount);
         }
-        
+
         public bool SpendGold(int amount)
         {
             return GoldManager.Instance?.SpendGold(amount) ?? false;
         }
-        
+
         public void DamageCastle(int damage = 1)
         {
             CastleManager.Instance?.DamageCastle(damage);
         }
-        
+
         public void EnemyDefeated(int rewardScore = 10, int rewardGold = 10)
         {
             ScoreManager.Instance?.RecordEnemyDefeated();
             GoldManager.Instance?.AddGold(rewardGold);
         }
-        
+
         public void GameOver()
         {
             GameStateManager.Instance?.GameOver();
         }
-        
+
         public void RestartGame()
         {
             GameStateManager.Instance?.RestartGame();
         }
-        
+
         public bool IsInCastleBounds(Vector3 position)
         {
             return CastleManager.Instance?.IsInCastleBounds(position) ?? false;

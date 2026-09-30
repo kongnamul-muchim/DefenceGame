@@ -19,10 +19,10 @@ namespace DefenceGame.UI
             public Image fillImage;
             public Image panelImage; // 슬롯 전체 Panel의 Image (색상 변경용)
         }
-        
+
         [Header("UI Settings")]
         public TowerSlot[] towerSlots = new TowerSlot[4];
-        
+
         [Header("Colors")]
         public Color backgroundColor = new Color(1, 1, 1, 0.3f); // 흰색, 투명도 30%
         public Color fillColor = Color.green;
@@ -33,11 +33,11 @@ namespace DefenceGame.UI
             new Color(0, 1, 0, 0.3f),            // Lv.5-6: 녹색, 투명
             new Color(1, 1, 0, 0.3f)             // Lv.7+: 노란색, 투명
         };
-        
+
         private void Start()
         {
             InitializeUI();
-            
+
             // Subscribe to events
             if (TowerLevelManager.Instance != null)
             {
@@ -45,7 +45,7 @@ namespace DefenceGame.UI
                 TowerLevelManager.Instance.OnTowerLevelUp += OnTowerLevelUp;
             }
         }
-        
+
         private void OnDestroy()
         {
             // Unsubscribe from events
@@ -55,7 +55,7 @@ namespace DefenceGame.UI
                 TowerLevelManager.Instance.OnTowerLevelUp -= OnTowerLevelUp;
             }
         }
-        
+
         private void InitializeUI()
         {
             // Initialize all tower slots
@@ -68,7 +68,7 @@ namespace DefenceGame.UI
                 }
             }
         }
-        
+
         private void OnTowerExpChanged(string towerType)
         {
             // Find the slot and update it
@@ -81,7 +81,7 @@ namespace DefenceGame.UI
                 }
             }
         }
-        
+
         private void OnTowerLevelUp(string towerType, int newLevel)
         {
             // Find the slot and update it
@@ -94,47 +94,47 @@ namespace DefenceGame.UI
                 }
             }
         }
-        
+
         private void UpdateSlotUI(int slotIndex)
         {
             if (slotIndex < 0 || slotIndex >= towerSlots.Length) return;
-            
+
             TowerSlot slot = towerSlots[slotIndex];
             if (TowerLevelManager.Instance == null) return;
-            
+
             TowerLevelData data = TowerLevelManager.Instance.GetTowerLevelData(slot.towerType);
-            
+
             // Update level text
             if (slot.levelText != null)
             {
                 slot.levelText.text = $"Lv.{data.level}";
             }
-            
+
             // Update exp slider
             if (slot.expSlider != null)
             {
                 slot.expSlider.value = data.GetExpPercentage();
             }
-            
+
             // Update colors based on level
             Color bgColor = GetLevelColor(data.level);
             if (slot.backgroundImage != null)
             {
                 slot.backgroundImage.color = bgColor;
             }
-            
+
             if (slot.fillImage != null)
             {
                 slot.fillImage.color = fillColor;
             }
-            
+
             // Update Panel color (슬롯 전체 배경)
             if (slot.panelImage != null)
             {
                 slot.panelImage.color = bgColor;
             }
         }
-        
+
         private Color GetLevelColor(int level)
         {
             if (level <= 2)
@@ -146,7 +146,7 @@ namespace DefenceGame.UI
             else
                 return levelColors[3]; // Yellow
         }
-        
+
         private void Update()
         {
             // Update all slots (for initialization and runtime updates)

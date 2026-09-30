@@ -1,10 +1,10 @@
 ﻿//--------------------------------------------------------------------------------------------------------------------------------
 // Cartoon FX
 // (c) 2012-2025 Jean Moreno
-//--------------------------------------------------------------------------------------------------------------------------------
 
 
-//--------------------------------------------------------------------------------------------------------------------------------
+
+
 
 // Use the defines below to globally disable features:
 
@@ -13,7 +13,7 @@
 // #define DISABLE_LIGHTS_LINEAR_REMAPPING
 // #define DISABLE_CLEAR_BEHAVIOR
 
-//--------------------------------------------------------------------------------------------------------------------------------
+
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -439,13 +439,13 @@ namespace CartoonFX
 
 		}
 
-		// ================================================================================================================================
+
 
 		// Globally disable features
 		public static bool GlobalDisableCameraShake;
 		public static bool GlobalDisableLights;
 
-		// ================================================================================================================================
+
 
 		[Tooltip("Defines an action to execute when the Particle System has completely finished playing and emitting particles.")]
 		public ClearBehavior clearBehavior = ClearBehavior.Destroy;
@@ -463,7 +463,7 @@ namespace CartoonFX
 		[System.NonSerialized] MaterialPropertyBlock materialPropertyBlock;
 		[System.NonSerialized] Renderer particleRenderer;
 
-		// ================================================================================================================================
+
 
 		public void ResetState()
 		{

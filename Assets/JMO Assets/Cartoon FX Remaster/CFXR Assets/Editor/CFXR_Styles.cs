@@ -1,7 +1,7 @@
 ﻿//--------------------------------------------------------------------------------------------------------------------------------
 // Cartoon FX
 // (c) 2012-2025 Jean Moreno
-//--------------------------------------------------------------------------------------------------------------------------------
+
 
 using UnityEngine;
 using UnityEditor;
@@ -12,11 +12,11 @@ namespace CartoonFX
 {
 	public static class Styles
 	{
-		//================================================================================================================================
-		// GUI Styles
-		//================================================================================================================================
 
-		//================================================================================================================================
+		// GUI Styles
+
+
+
 		// (x) close button
 		static GUIStyle _closeCrossButton;
 		public static GUIStyle CloseCrossButton
@@ -42,7 +42,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Shuriken Toggle with label alignment fix
 		static GUIStyle _shurikenToggle;
 		public static GUIStyle ShurikenToggle
@@ -71,7 +71,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Bold mini-label (the one from EditorStyles isn't actually "mini")
 		static GUIStyle _miniBoldLabel;
 		public static GUIStyle MiniBoldLabel
@@ -88,7 +88,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Bold mini-foldout
 		static GUIStyle _miniBoldFoldout;
 		public static GUIStyle MiniBoldFoldout
@@ -106,7 +106,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Gray right-aligned label for Orderable List (Material Animator)
 		static GUIStyle _PropertyTypeLabel;
 		public static GUIStyle PropertyTypeLabel
@@ -141,7 +141,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Rounded Box
 		static GUIStyle _roundedBox;
 		public static GUIStyle RoundedBox
@@ -156,7 +156,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Center White Label ("Editing Spline" label in Scene View)
 		static GUIStyle _CenteredWhiteLabel;
 		public static GUIStyle CenteredWhiteLabel
@@ -173,7 +173,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Used to draw lines for separators
 		static public GUIStyle _LineStyle;
 		static public GUIStyle LineStyle
@@ -191,7 +191,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// HelpBox with rich text formatting support
 		static GUIStyle _HelpBoxRichTextStyle;
 		static public GUIStyle HelpBoxRichTextStyle
@@ -207,7 +207,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Material Blue Header
 		static public GUIStyle _MaterialHeaderStyle;
 		static public GUIStyle MaterialHeaderStyle
@@ -229,7 +229,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Material Header emboss effect
 		static public GUIStyle _MaterialHeaderStyleHighlight;
 		static public GUIStyle MaterialHeaderStyleHighlight
@@ -247,7 +247,7 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Filled rectangle
 
 		static private GUIStyle _WhiteRectangleStyle;
@@ -273,9 +273,9 @@ namespace CartoonFX
 			}
 		}
 
-		//================================================================================================================================
+
 		// Methods
-		//================================================================================================================================
+
 
 		static public void DrawLine(float height = 2f)
 		{

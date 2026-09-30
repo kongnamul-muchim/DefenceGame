@@ -24,7 +24,7 @@ namespace DefenceGame.Data
         SpeedIncrease,  // [Deprecated] 공격속도 증가
         SlowEffect      // [Deprecated] 이동속도 감소
     }
-    
+
     [System.Serializable]
     public class SpecialAbility
     {
@@ -32,7 +32,7 @@ namespace DefenceGame.Data
         public SpecialAbilityType abilityType;
         public float value;
         public string description;
-        
+
         public SpecialAbility(int level, SpecialAbilityType type, float val, string desc)
         {
             unlockLevel = level;

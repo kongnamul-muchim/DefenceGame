@@ -9,21 +9,21 @@ namespace DefenceGame.Core.Systems.Progression
     public class ScoreManager : MonoBehaviour
     {
         public static ScoreManager Instance { get; private set; }
-        
+
         [SerializeField] private float survivalTime;
         [SerializeField] private int enemiesDefeated;
         [SerializeField] private int totalScore;
-        
+
         public event Action<int> OnScoreChanged;
         public event Action<float> OnSurvivalTimeChanged;
         public event Action<int> OnEnemiesDefeatedChanged;
-        
+
         public float SurvivalTime => survivalTime;
         public int EnemiesDefeated => enemiesDefeated;
         public int TotalScore => totalScore;
-        
+
         private bool isTracking = false;
-        
+
         private void Awake()
         {
             if (Instance == null)
@@ -35,7 +35,7 @@ namespace DefenceGame.Core.Systems.Progression
                 Destroy(gameObject);
             }
         }
-        
+
         private void Update()
         {
             if (isTracking)
@@ -45,7 +45,7 @@ namespace DefenceGame.Core.Systems.Progression
                 CalculateScore();
             }
         }
-        
+
         private void OnDestroy()
         {
             if (Instance == this)
@@ -53,31 +53,31 @@ namespace DefenceGame.Core.Systems.Progression
                 Instance = null;
             }
         }
-        
+
         public void Initialize()
         {
             survivalTime = 0f;
             enemiesDefeated = 0;
             totalScore = 0;
             isTracking = true;
-            
+
             OnScoreChanged?.Invoke(totalScore);
             OnSurvivalTimeChanged?.Invoke(survivalTime);
             OnEnemiesDefeatedChanged?.Invoke(enemiesDefeated);
         }
-        
+
         public void StopTracking()
         {
             isTracking = false;
         }
-        
+
         public void RecordEnemyDefeated()
         {
             enemiesDefeated++;
             OnEnemiesDefeatedChanged?.Invoke(enemiesDefeated);
             CalculateScore();
         }
-        
+
         private void CalculateScore()
         {
             // Score formula: survival time * 10 + enemies defeated * 100

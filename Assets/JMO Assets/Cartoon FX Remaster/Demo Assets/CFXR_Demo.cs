@@ -1,7 +1,7 @@
 ﻿//--------------------------------------------------------------------------------------------------------------------------------
 // Cartoon FX
 // (c) 2012-2025 Jean Moreno
-//--------------------------------------------------------------------------------------------------------------------------------
+
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +20,7 @@ namespace CartoonFX
 {
 	public class CFXR_Demo : MonoBehaviour
 	{
-		//----------------------------------------------------------------------------------------------------------------------------
+
 		// UI
 
 		public void NextEffect()
@@ -107,7 +107,7 @@ namespace CartoonFX
 			demoCamera.transform.rotation = camInitialRotation;
 		}
 
-		//----------------------------------------------------------------------------------------------------------------------------
+
 
 		public Image btnSlowMotion;
 		public Text lblSlowMotion;
@@ -138,7 +138,7 @@ namespace CartoonFX
 		bool rotateCamera = false;
 		bool showGround = true;
 
-		//----------------------------------------------------------------------------------------------------------------------------
+
 
 		[System.NonSerialized] public GameObject currentEffect;
 		GameObject[] effectsList;

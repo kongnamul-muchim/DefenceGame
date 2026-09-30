@@ -14,35 +14,35 @@ namespace DefenceGame.Core.Managers
     public class WaveManager : MonoBehaviour
     {
         public static WaveManager Instance { get; private set; }
-        
+
         [Header("Wave Data")]
         public GameDataSO gameData;
-        
+
         [Header("Wave Settings")]
         [SerializeField] private int maxWaveNumber = 6;
         [SerializeField] private float healthIncreasePerWave = 0.1f;
         [SerializeField] private float eliteSpawnChance = 0.1f;
-        
+
         [Header("Current State")]
         [SerializeField] private int currentWave = 0;
         [SerializeField] private bool isWaveActive = false;
         [SerializeField] private int enemiesRemainingInWave = 0;
         [SerializeField] private Enemy currentBoss = null;
         [SerializeField] private bool isBossWave = false;
-        
+
         private List<WaveData> waveDataList;
         private Dictionary<int, List<WaveData>> wavesByNumber;
         private Coroutine currentWaveCoroutine;
-        
+
         public System.Action<int> OnWaveStarted;
         public System.Action<int> OnWaveCompleted;
         public System.Action OnAllWavesCompleted;
-        
+
         public int CurrentWave => currentWave;
         public bool IsWaveActive => isWaveActive;
         public int EnemiesRemaining => enemiesRemainingInWave;
         public int TotalEnemiesSpawned => EnemySpawner.Instance?.TotalEnemiesSpawned ?? 0;
-        
+
         private void Awake()
         {
             if (Instance == null)
@@ -54,7 +54,7 @@ namespace DefenceGame.Core.Managers
                 Destroy(gameObject);
             }
         }
-        
+
         private void Start()
         {
             // Auto-assign gameData if not set in Inspector
@@ -67,22 +67,22 @@ namespace DefenceGame.Core.Managers
                     return;
                 }
             }
-            
+
             InitializeWaves();
-            
+
             if (wavesByNumber != null && wavesByNumber.Count > 0)
             {
                 StartGame();
             }
         }
-        
+
         private void InitializeWaves()
         {
             if (gameData == null) return;
-            
+
             waveDataList = gameData.Waves;
             if (waveDataList == null || waveDataList.Count == 0) return;
-            
+
             wavesByNumber = new Dictionary<int, List<WaveData>>();
             foreach (var wave in waveDataList)
             {
@@ -93,87 +93,87 @@ namespace DefenceGame.Core.Managers
                 wavesByNumber[wave.WaveNumber].Add(wave);
             }
         }
-        
+
         public void StartGame()
         {
             currentWave = 0;
             EnemySpawner.Instance?.Initialize();
             StartNextWave();
         }
-        
+
         public void StartNextWave()
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
             {
                 return;
             }
-            
+
             currentWave++;
             int waveDataIndex = ((currentWave - 1) % maxWaveNumber) + 1;
-            
+
             if (currentWaveCoroutine != null)
             {
                 StopCoroutine(currentWaveCoroutine);
             }
-            
+
             currentWaveCoroutine = StartCoroutine(RunWave(currentWave, waveDataIndex));
         }
-        
+
         private IEnumerator RunWave(int waveNumber, int waveDataIndex)
         {
             isWaveActive = true;
             isBossWave = (waveDataIndex == 6);
             currentBoss = null;
             OnWaveStarted?.Invoke(waveNumber);
-            
+
             List<WaveData> waveData = wavesByNumber[waveDataIndex];
             enemiesRemainingInWave = 0;
-            
+
             foreach (var data in waveData)
             {
                 enemiesRemainingInWave += data.Count;
             }
-            
+
             foreach (var data in waveData)
             {
                 yield return SpawnEnemyGroup(data, waveNumber);
             }
-            
+
             // Wait for boss death if boss wave
             if (isBossWave && currentBoss != null)
             {
                 yield return WaitForBossDeath();
             }
-            
+
             CompleteWave(waveNumber);
         }
-        
+
         private IEnumerator SpawnEnemyGroup(WaveData data, int waveNumber)
         {
             EnemyData enemyData = GetEnemyData(data.EnemyId);
             if (enemyData == null) yield break;
-            
+
             for (int i = 0; i < data.Count; i++)
             {
                 if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
                 {
                     yield break;
                 }
-                
+
                 float totalHealthMultiplier = data.HealthMultiplier * (1f + (waveNumber - 1) * healthIncreasePerWave);
                 bool isElite = waveNumber > maxWaveNumber && Random.value < eliteSpawnChance;
-                
+
                 Enemy spawnedEnemy = EnemySpawner.Instance?.SpawnEnemy(enemyData, totalHealthMultiplier, isElite);
-                
+
                 if (isBossWave && spawnedEnemy != null)
                 {
                     currentBoss = spawnedEnemy;
                 }
-                
+
                 yield return new WaitForSeconds(data.SpawnInterval);
             }
         }
-        
+
         private IEnumerator WaitForBossDeath()
         {
             while (currentBoss != null && currentBoss.CurrentHealth > 0)
@@ -181,42 +181,42 @@ namespace DefenceGame.Core.Managers
                 yield return new WaitForSeconds(0.5f);
             }
         }
-        
+
         private void CompleteWave(int waveNumber)
         {
             isWaveActive = false;
             isBossWave = false;
             currentBoss = null;
             OnWaveCompleted?.Invoke(waveNumber);
-            
+
             GiveWaveClearGold(waveNumber);
-            
+
             StartCoroutine(StartNextWaveDelayed());
         }
-        
+
         private IEnumerator StartNextWaveDelayed()
         {
             yield return new WaitForSeconds(3f);
-            
+
             if (GameManager.Instance != null && !GameManager.Instance.IsGameOver)
             {
                 StartNextWave();
             }
         }
-        
+
         private void GiveWaveClearGold(int waveNumber)
         {
-            int goldReward = waveNumber <= 6 
-                ? 50 + (waveNumber - 1) * 10 
+            int goldReward = waveNumber <= 6
+                ? 50 + (waveNumber - 1) * 10
                 : 100 + (waveNumber - 6) * 5;
-            
+
             GoldManager.Instance?.AddGold(goldReward);
         }
-        
+
         private EnemyData GetEnemyData(int enemyId)
         {
             if (gameData == null) return null;
-            
+
             foreach (var enemy in gameData.Enemies)
             {
                 if (enemy.Id == enemyId)
@@ -226,12 +226,12 @@ namespace DefenceGame.Core.Managers
             }
             return null;
         }
-        
+
         public void EnemyReachedCastle()
         {
             enemiesRemainingInWave--;
         }
-        
+
         public void EnemyDefeated()
         {
             enemiesRemainingInWave--;

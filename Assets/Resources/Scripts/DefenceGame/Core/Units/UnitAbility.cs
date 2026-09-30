@@ -13,31 +13,31 @@ namespace DefenceGame.Core
         public float attackIncreaseValue = 0f;
         public int chainAttackCount = 0;
         public float speedIncreaseValue = 0f;
-        
+
         [Header("Ability Settings")]
         public float groundEffectProcChance = 0.1f;
         public GameObject groundEffectPrefab;
-        
+
         // 등급 기반 계산된 최종 값들
         [Header("Grade-Based Final Values")]
         [SerializeField] private float finalSpeedIncreaseValue = 0f;
         [SerializeField] private float finalGroundEffectChance = 0f;
         [SerializeField] private float finalAttackIncreaseValue = 0f;
-        
+
         private string towerType = "";
         private Unit unit;
-        
+
         private void Awake()
         {
             unit = GetComponent<Unit>();
         }
-        
+
         public void Initialize(string type)
         {
             towerType = type;
             ApplySpecialAbilities();
         }
-        
+
         public void OnLevelUp(string type, int level)
         {
             if (type == towerType)
@@ -45,15 +45,15 @@ namespace DefenceGame.Core
                 ApplySpecialAbilities();
             }
         }
-        
+
         private void ApplySpecialAbilities()
         {
             if (string.IsNullOrEmpty(towerType)) return;
             if (SpecialAbilityManager.Instance == null) return;
             if (TowerLevelManager.Instance == null) return;
-            
+
             int currentLevel = TowerLevelManager.Instance.GetTowerLevel(towerType);
-            
+
             // Reset abilities
             multiShotCount = 1;
             groundEffectDuration = 0f;
@@ -61,9 +61,9 @@ namespace DefenceGame.Core
             attackIncreaseValue = 0f;
             chainAttackCount = 0;
             speedIncreaseValue = 0f;
-            
+
             var unlockedAbilities = SpecialAbilityManager.Instance.GetUnlockedAbilities(towerType, currentLevel);
-            
+
             foreach (var ability in unlockedAbilities)
             {
                 switch (ability.abilityType)
@@ -96,40 +96,40 @@ namespace DefenceGame.Core
                         break;
                 }
             }
-            
+
             // 등급 기반 최종 값 계산
             CalculateGradeBasedValues();
-            
+
             ApplyBuffs();
         }
-        
+
         /// <summary>
         /// 등급에 따라 능력 값 계산
         /// </summary>
         private void CalculateGradeBasedValues()
         {
             if (unit == null) return;
-            
+
             GradeType grade = unit.grade;
-            
+
             // Archer: 공격속도 증가폭 증가
             if (towerType == "Archer" && speedIncreaseValue > 0)
             {
                 finalSpeedIncreaseValue = GradeMultiplier.ApplyMultiplier(speedIncreaseValue, grade);
             }
-            
+
             // Wizard: GroundEffect 확률 증가
             if (towerType == "Wizard")
             {
                 finalGroundEffectChance = GradeMultiplier.ApplyMultiplier(groundEffectProcChance, grade);
             }
-            
+
             // Tower: 공격력 상승치 증가
             if (towerType == "WizardTower" && attackIncreaseValue > 0)
             {
                 finalAttackIncreaseValue = GradeMultiplier.ApplyMultiplier(attackIncreaseValue, grade);
             }
-            
+
             // Laser: 등급 기반 확산(ChainAttack) 설정
             if (towerType == "Laser")
             {
@@ -147,7 +147,7 @@ namespace DefenceGame.Core
                 }
             }
         }
-        
+
         /// <summary>
         /// Laser 등급별 확산 공격 횟수 반환
         /// Common: 0, Uncommon: 1, Rare: 1, Epic: 2, Legendary: 3
@@ -170,7 +170,7 @@ namespace DefenceGame.Core
                     return 0;
             }
         }
-        
+
         private void ApplyBuffs()
         {
             if (unit != null)
@@ -181,7 +181,7 @@ namespace DefenceGame.Core
                     float gradeRangeMultiplier = GetGradeRangeMultiplier(unit.grade);
                     unit.range += rangeIncreaseValue * gradeRangeMultiplier;
                 }
-                
+
                 // Tower는 등급 기반 공격력 증가 적용
                 if (towerType == "WizardTower" && finalAttackIncreaseValue > 0)
                 {
@@ -191,7 +191,7 @@ namespace DefenceGame.Core
                 {
                     unit.attackPower *= (1f + attackIncreaseValue);
                 }
-                
+
                 // Archer는 등급 기반 공격속도 증가 적용
                 if (towerType == "Archer" && finalSpeedIncreaseValue > 0)
                 {
@@ -203,21 +203,21 @@ namespace DefenceGame.Core
                 }
             }
         }
-        
+
         public bool ShouldTriggerGroundEffect()
         {
             // Wizard는 등급 기반 확률 적용
-            float chance = (towerType == "Wizard" && finalGroundEffectChance > 0) 
-                ? finalGroundEffectChance 
+            float chance = (towerType == "Wizard" && finalGroundEffectChance > 0)
+                ? finalGroundEffectChance
                 : groundEffectProcChance;
-            
+
             return towerType == "Wizard" && groundEffectDuration > 0 && Random.value <= chance;
         }
-        
+
         public void SpawnGroundEffect(Vector3 position)
         {
             if (groundEffectPrefab == null) return;
-            
+
             GameObject groundEffectObj = Instantiate(groundEffectPrefab, position, Quaternion.identity);
             GroundEffect groundEffect = groundEffectObj.GetComponent<GroundEffect>();
             if (groundEffect != null)
@@ -227,7 +227,7 @@ namespace DefenceGame.Core
                 groundEffect.Initialize(5f, damagePerSec, 1.5f, unit); // attacker 전달
             }
         }
-        
+
         /// <summary>
         /// Laser 연계 공격용 등급 기반 데미지 계산
         /// </summary>
@@ -236,7 +236,7 @@ namespace DefenceGame.Core
             if (unit == null) return 1.0f;
             return GradeMultiplier.GetWeakMultiplier(unit.grade);
         }
-        
+
         /// <summary>
         /// 사거리 증가 값 반환 (Range 계산용)
         /// </summary>
@@ -244,14 +244,14 @@ namespace DefenceGame.Core
         {
             return rangeIncreaseValue;
         }
-        
+
         /// <summary>
         /// UnitGrades 시트에서 해당 등급의 RangeMultiplier 값을 가져옴
         /// </summary>
         private float GetGradeRangeMultiplier(GradeType grade)
         {
             if (GameDataSO.Instance == null) return 1f;
-            
+
             foreach (var unitGrade in GameDataSO.Instance.UnitGrades)
             {
                 if (unitGrade.Grade == grade)
@@ -259,7 +259,7 @@ namespace DefenceGame.Core
                     return unitGrade.RangeMultiplier;
                 }
             }
-            
+
             return 1f;
         }
     }

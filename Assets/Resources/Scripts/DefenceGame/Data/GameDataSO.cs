@@ -24,7 +24,7 @@ namespace DefenceGame.Data
                 return _instance;
             }
         }
-        
+
         [Header("Enemies")]
         public List<EnemyData> Enemies = new List<EnemyData>();
 
@@ -39,7 +39,7 @@ namespace DefenceGame.Data
 
         [Header("Unit Grades")]
         public List<UnitGradeData> UnitGrades = new List<UnitGradeData>();
-        
+
         private void OnEnable()
         {
             if (_instance == null)
@@ -47,7 +47,7 @@ namespace DefenceGame.Data
                 _instance = this;
             }
         }
-        
+
         public void ClearAll()
         {
             Enemies.Clear();
@@ -56,7 +56,7 @@ namespace DefenceGame.Data
             GachaProbabilities.Clear();
             UnitGrades.Clear();
         }
-        
+
         /// <summary>
         /// 특정 등급의 타워 목록 반환
         /// </summary>

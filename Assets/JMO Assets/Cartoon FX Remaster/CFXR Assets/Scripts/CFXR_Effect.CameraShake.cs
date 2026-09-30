@@ -20,7 +20,7 @@ namespace CartoonFX
 
 			static public bool editorPreview = true;
 
-			//--------------------------------------------------------------------------------------------------------------------------------
+
 
 			public bool enabled = false;
 			[Space]
@@ -40,7 +40,7 @@ namespace CartoonFX
 			Vector3 shakeVector;
 			float delaysTimer;
 
-			//--------------------------------------------------------------------------------------------------------------------------------
+
 			// STATIC
 			// Use static methods to dispatch the Camera callbacks, to ensure that ScreenShake components are called in an order in PreRender,
 			// and in the _reverse_ order for PostRender, so that the final Camera position is the same as it is originally (allowing concurrent
@@ -144,7 +144,7 @@ namespace CartoonFX
 				}
 			}
 
-			//--------------------------------------------------------------------------------------------------------------------------------
+
 
 			void onPreRenderCamera(Camera cam)
 			{

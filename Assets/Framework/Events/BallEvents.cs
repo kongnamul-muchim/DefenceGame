@@ -10,7 +10,7 @@ namespace BallShotGame.Events
     {
         /// <summary>드래그 시작 위치 (월드 좌표)</summary>
         public Vector2 StartPosition;
-        
+
         /// <summary>공의 현재 위치</summary>
         public Vector2 BallPosition;
     }
@@ -23,13 +23,13 @@ namespace BallShotGame.Events
     {
         /// <summary>현재 마우스 위치 (월드 좌표)</summary>
         public Vector2 CurrentPosition;
-        
+
         /// <summary>드래그 시작 위치</summary>
         public Vector2 StartPosition;
-        
+
         /// <summary>드래그 벡터 (Start - Current)</summary>
         public Vector2 DragVector => StartPosition - CurrentPosition;
-        
+
         /// <summary>드래그 거리</summary>
         public float DragDistance => DragVector.magnitude;
     }
@@ -42,10 +42,10 @@ namespace BallShotGame.Events
     {
         /// <summary>발사 힘 (반대 방향)</summary>
         public Vector2 Force;
-        
+
         /// <summary>발사 방향 (정규화)</summary>
         public Vector2 Direction;
-        
+
         /// <summary>발사 세기</summary>
         public float Magnitude;
     }
@@ -58,7 +58,7 @@ namespace BallShotGame.Events
     {
         /// <summary>정지한 위치</summary>
         public Vector2 StopPosition;
-        
+
         /// <summary>정지 시 속도 (0에 가까운 값)</summary>
         public float FinalVelocity;
     }

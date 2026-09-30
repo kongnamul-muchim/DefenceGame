@@ -43,7 +43,7 @@ namespace BallShotGame.Core
         public void Register<T>(T service) where T : IService
         {
             Type type = typeof(T);
-            
+
             if (_services.ContainsKey(type))
             {
                 UnityEngine.Debug.LogWarning($"Service {type.Name} is already registered. Overwriting...");
@@ -52,7 +52,7 @@ namespace BallShotGame.Core
 
             _services[type] = service;
             service.Initialize();
-            
+
             UnityEngine.Debug.Log($"Service registered: {type.Name}");
         }
 
@@ -64,7 +64,7 @@ namespace BallShotGame.Core
         public T Get<T>() where T : IService
         {
             Type type = typeof(T);
-            
+
             if (_services.TryGetValue(type, out IService service))
             {
                 return (T)service;

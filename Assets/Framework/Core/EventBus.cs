@@ -43,7 +43,7 @@ namespace BallShotGame.Core
         public void Subscribe<T>(Action<T> handler)
         {
             Type eventType = typeof(T);
-            
+
             if (!_handlers.ContainsKey(eventType))
             {
                 _handlers[eventType] = new List<Action<T>>();
@@ -61,12 +61,12 @@ namespace BallShotGame.Core
         public void Unsubscribe<T>(Action<T> handler)
         {
             Type eventType = typeof(T);
-            
+
             if (_handlers.TryGetValue(eventType, out object handlersObj))
             {
                 var handlers = (List<Action<T>>)handlersObj;
                 handlers.Remove(handler);
-                
+
                 // 핸들러가 모두 제거되면 Dictionary에서도 제거
                 if (handlers.Count == 0)
                 {
@@ -83,14 +83,14 @@ namespace BallShotGame.Core
         public void Publish<T>(T eventData)
         {
             Type eventType = typeof(T);
-            
+
             if (_handlers.TryGetValue(eventType, out object handlersObj))
             {
                 var handlers = (List<Action<T>>)handlersObj;
-                
+
                 // 리스트 복사본으로 순회 (구독 해제 중에도 안전)
                 var handlersCopy = new List<Action<T>>(handlers);
-                
+
                 foreach (var handler in handlersCopy)
                 {
                     try
@@ -122,12 +122,12 @@ namespace BallShotGame.Core
         public int GetSubscriberCount<T>()
         {
             Type eventType = typeof(T);
-            
+
             if (_handlers.TryGetValue(eventType, out object handlersObj))
             {
                 return ((List<Action<T>>)handlersObj).Count;
             }
-            
+
             return 0;
         }
     }

@@ -1,7 +1,7 @@
-//--------------------------------------------------------------------------------------------------------------------------------
+
 // Cartoon FX
 // (c) 2012-2025 Jean Moreno
-//--------------------------------------------------------------------------------------------------------------------------------
+
 
 using UnityEngine;
 using UnityEditor;
@@ -32,7 +32,7 @@ namespace CartoonFX
 			ShowNextProperty = ShowStack.Pop();
 		}
 
-		//--------------------------------------------------------------------------------------------------
+
 
 		const string kGuiCommandPrefix = "//#";
 		const string kGC_IfKeyword = "IF_KEYWORD";
@@ -154,7 +154,7 @@ namespace CartoonFX
 										}
 										catch { }
 									}
-									
+
 									AddGUICommand(propertyCount, new GC_HelpBox()
 									{
 										message = message,
@@ -422,7 +422,7 @@ namespace CartoonFX
 	}
 
 
-	//================================================================================================================================================================================================
+
 	// GUI Commands System
 	//
 	// Workaround to Material Property Drawers limitations:

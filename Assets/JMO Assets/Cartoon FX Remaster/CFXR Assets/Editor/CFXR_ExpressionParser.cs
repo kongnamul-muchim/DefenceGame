@@ -1,7 +1,7 @@
-//--------------------------------------------------------------------------------------------------------------------------------
+
 // Cartoon FX
 // (c) 2012-2025 Jean Moreno
-//--------------------------------------------------------------------------------------------------------------------------------
+
 
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +14,7 @@ namespace CartoonFX
 	{
 		public delegate bool EvaluateFunction(string content);
 
-		//--------------------------------------------------------------------------------------------------------------------------------
+
 		// Main Function to use
 
 		static public bool EvaluateExpression(string expression, EvaluateFunction evalFunction)
@@ -50,7 +50,7 @@ namespace CartoonFX
 			return root.Evaluate();
 		}
 
-		//--------------------------------------------------------------------------------------------------------------------------------
+
 		// Expression Token
 
 		public class Token
@@ -158,7 +158,7 @@ namespace CartoonFX
 			}
 		}
 
-		//--------------------------------------------------------------------------------------------------------------------------------
+
 		// Boolean Expression Classes
 
 		public abstract class Expression

@@ -9,13 +9,13 @@ namespace DefenceGame.Core.Systems.Economy
     public class GoldManager : MonoBehaviour
     {
         public static GoldManager Instance { get; private set; }
-        
+
         [SerializeField] private int currentGold = 200;
-        
+
         public event Action<int> OnGoldChanged;
-        
+
         public int CurrentGold => currentGold;
-        
+
         private void Awake()
         {
             if (Instance == null)
@@ -28,7 +28,7 @@ namespace DefenceGame.Core.Systems.Economy
                 Destroy(gameObject);
             }
         }
-        
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void CreateInstanceIfNeeded()
         {
@@ -39,7 +39,7 @@ namespace DefenceGame.Core.Systems.Economy
                 go.AddComponent<GoldManager>();
             }
         }
-        
+
         private void OnDestroy()
         {
             if (Instance == this)
@@ -47,32 +47,32 @@ namespace DefenceGame.Core.Systems.Economy
                 Instance = null;
             }
         }
-        
+
         private void Start()
         {
             Initialize(currentGold > 0 ? currentGold : 200);
         }
-        
+
         public void Initialize(int startingGold = 200)
         {
             currentGold = startingGold;
             OnGoldChanged?.Invoke(currentGold);
             Debug.Log($"[GoldManager] Initialized with {currentGold} gold");
         }
-        
+
         public void AddGold(int amount)
         {
             if (amount <= 0) return;
-            
+
             currentGold += amount;
             OnGoldChanged?.Invoke(currentGold);
         }
-        
+
         public bool CanSpend(int amount)
         {
             return currentGold >= amount;
         }
-        
+
         public bool SpendGold(int amount)
         {
             if (CanSpend(amount))

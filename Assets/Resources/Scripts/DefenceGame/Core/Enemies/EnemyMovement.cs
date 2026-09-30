@@ -14,31 +14,31 @@ namespace DefenceGame.Core
         public float directionRandomness = 0.5f;
         public float wallCheckDistance = 0.5f;
         public LayerMask obstacleLayer;
-        
+
         private float baseSpeed;
         private float currentSpeed;
         private Vector3 targetPosition;
         private Vector3 currentDirection;
         private float directionChangeTimer;
-        
+
         private PathAgent pathAgent;
         private SpriteRenderer spriteRenderer;
-        
+
         public float CurrentSpeed => currentSpeed;
-        
+
         private void Awake()
         {
             pathAgent = GetComponent<PathAgent>() ?? gameObject.AddComponent<PathAgent>();
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
-        
+
         public void Initialize(float speed, Vector3 target, bool randomMovement = false)
         {
             baseSpeed = speed;
             currentSpeed = speed;
             targetPosition = target;
             useRandomMovement = randomMovement;
-            
+
             if (useRandomMovement)
             {
                 InitializeRandomMovement();
@@ -47,13 +47,13 @@ namespace DefenceGame.Core
             {
                 FindPathToTarget(targetPosition);
             }
-            
+
             if (pathAgent != null)
             {
                 pathAgent.speed = currentSpeed;
             }
         }
-        
+
         public void SetSpeed(float speed)
         {
             currentSpeed = speed;
@@ -62,7 +62,7 @@ namespace DefenceGame.Core
                 pathAgent.speed = currentSpeed;
             }
         }
-        
+
         public void UpdateMovement()
         {
             if (useRandomMovement)
@@ -70,37 +70,37 @@ namespace DefenceGame.Core
                 UpdateRandomMovement();
             }
         }
-        
+
         private void InitializeRandomMovement()
         {
             currentDirection = (targetPosition - transform.position).normalized;
             directionChangeTimer = directionChangeInterval;
         }
-        
+
         private void UpdateRandomMovement()
         {
             CheckAndAvoidObstacles();
-            
+
             directionChangeTimer -= Time.deltaTime;
             if (directionChangeTimer <= 0)
             {
                 ChangeDirectionWithRandomness();
                 directionChangeTimer = directionChangeInterval;
             }
-            
+
             transform.position += currentDirection * currentSpeed * Time.deltaTime;
             UpdateSpriteDirection(currentDirection);
         }
-        
+
         private void CheckAndAvoidObstacles()
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, currentDirection, wallCheckDistance, obstacleLayer);
-            
+
             if (hit.collider != null)
             {
                 currentDirection = FindClearDirection();
             }
-            
+
             Vector3 nextPosition = transform.position + currentDirection * wallCheckDistance;
             if (GridSystem.Instance != null)
             {
@@ -111,7 +111,7 @@ namespace DefenceGame.Core
                 }
             }
         }
-        
+
         private Vector3 FindClearDirection()
         {
             for (int i = 0; i < 8; i++)
@@ -119,33 +119,33 @@ namespace DefenceGame.Core
                 float angle = Random.Range(0f, 360f);
                 Vector3 testDirection = Quaternion.Euler(0, 0, angle) * Vector3.right;
                 Vector3 nextPos = transform.position + testDirection * wallCheckDistance;
-                
+
                 RaycastHit2D hit = Physics2D.Raycast(transform.position, testDirection, wallCheckDistance, obstacleLayer);
                 if (hit.collider != null) continue;
-                
+
                 if (GridSystem.Instance != null)
                 {
                     GridSystem.Node node = GridSystem.Instance.GetNodeFromWorldPosition(nextPos);
                     if (node == null || !node.isWalkable) continue;
                 }
-                
+
                 return testDirection;
             }
-            
+
             return (targetPosition - transform.position).normalized;
         }
-        
+
         private void ChangeDirectionWithRandomness()
         {
             Vector3 toCastle = (targetPosition - transform.position).normalized;
             float randomAngle = Random.Range(-directionRandomness * 90f, directionRandomness * 90f);
             currentDirection = Quaternion.Euler(0, 0, randomAngle) * toCastle;
         }
-        
+
         private void UpdateSpriteDirection(Vector3 direction)
         {
             if (spriteRenderer == null) return;
-            
+
             if (direction.x > 0.01f)
             {
                 spriteRenderer.flipX = true;
@@ -155,7 +155,7 @@ namespace DefenceGame.Core
                 spriteRenderer.flipX = false;
             }
         }
-        
+
         private void FindPathToTarget(Vector3 target)
         {
             if (pathAgent != null && Pathfinder.Instance != null)
@@ -163,7 +163,7 @@ namespace DefenceGame.Core
                 pathAgent.SetDestination(target);
             }
         }
-        
+
         public float GetDistanceToTarget()
         {
             return Vector3.Distance(transform.position, targetPosition);

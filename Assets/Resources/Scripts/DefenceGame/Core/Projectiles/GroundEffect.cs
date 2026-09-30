@@ -11,16 +11,16 @@ namespace DefenceGame.Core
         public float duration = 1.3f; // 지속 시간 (기본 1.3초)
         public float radius = 1.5f; // 영향 범위
         public float tickInterval = 0.3f; // 데미지 적용 간격
-        
+
         [Header("Particle System")]
         public ParticleSystem effectParticles; // 파티클 시스템
-        
+
         private float elapsedTime = 0f;
         private float tickTimer = 0f;
         private List<Enemy> enemiesInEffect = new List<Enemy>();
         private bool isDestroying = false;
         private Unit attacker; // 공격자 (Wizard) - 킬 크레딧용
-        
+
         private void Awake()
         {
             // Rigidbody2D 추가 (Trigger 감지를 위해 필요)
@@ -31,7 +31,7 @@ namespace DefenceGame.Core
                 rb.gravityScale = 0;
                 rb.bodyType = RigidbodyType2D.Kinematic;
             }
-            
+
             // Trigger Collider 추가
             CircleCollider2D col = GetComponent<CircleCollider2D>();
             if (col == null)
@@ -41,7 +41,7 @@ namespace DefenceGame.Core
             col.isTrigger = true;
             col.radius = radius;
         }
-        
+
         private void OnTriggerEnter2D(Collider2D other)
         {
             Enemy enemy = other.GetComponent<Enemy>();
@@ -51,7 +51,7 @@ namespace DefenceGame.Core
                 Debug.Log($"[GroundEffect] Enemy entered: {enemy.enemyName}");
             }
         }
-        
+
         private void OnTriggerExit2D(Collider2D other)
         {
             Enemy enemy = other.GetComponent<Enemy>();
@@ -61,20 +61,20 @@ namespace DefenceGame.Core
                 Debug.Log($"[GroundEffect] Enemy exited: {enemy.enemyName}");
             }
         }
-        
+
         public void Initialize(float customDuration, float customDamage, float customRadius, Unit attackerUnit = null)
         {
             duration = customDuration;
             damagePerSecond = customDamage;
             radius = customRadius;
             attacker = attackerUnit;
-            
+
             // 파티클 시스템 설정
             SetupParticleSystem();
-            
+
             Debug.Log($"[GroundEffect] Initialized - Duration: {duration}s, DPS: {damagePerSecond}, Radius: {radius}");
         }
-        
+
         private void SetupParticleSystem()
         {
             // 파티클 시스템 찾기 또는 생성
@@ -82,7 +82,7 @@ namespace DefenceGame.Core
             {
                 effectParticles = GetComponent<ParticleSystem>();
             }
-            
+
             if (effectParticles != null)
             {
                 // 파티클 설정
@@ -91,7 +91,7 @@ namespace DefenceGame.Core
                 main.startLifetime = duration;
                 main.startSize = radius * 2f;
                 main.loop = true; // Loop 활성화
-                
+
                 // 파티클 시작
                 effectParticles.Play();
             }
@@ -99,27 +99,27 @@ namespace DefenceGame.Core
             {
                 Debug.LogWarning("[GroundEffect] No ParticleSystem found!");
             }
-            
+
             // 지속시간 후 자동 제거
             StartCoroutine(DestroyAfterDuration());
         }
-        
+
         private IEnumerator DestroyAfterDuration()
         {
             yield return new WaitForSeconds(duration);
-            
+
             if (!isDestroying)
             {
                 isDestroying = true;
                 Destroy(gameObject);
             }
         }
-        
+
         private void Update()
         {
             elapsedTime += Time.deltaTime;
             tickTimer += Time.deltaTime;
-            
+
             // 틱 데미지 적용
             if (tickTimer >= tickInterval)
             {
@@ -127,11 +127,11 @@ namespace DefenceGame.Core
                 tickTimer = 0f;
             }
         }
-        
+
         private void ApplyTickDamage()
         {
             float damage = damagePerSecond * tickInterval;
-            
+
             // enemiesInEffect 리스트의 적들에게 데미지
             for (int i = enemiesInEffect.Count - 1; i >= 0; i--)
             {
@@ -147,7 +147,7 @@ namespace DefenceGame.Core
                 }
             }
         }
-        
+
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.3f);
